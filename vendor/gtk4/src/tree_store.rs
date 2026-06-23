@@ -3,7 +3,7 @@
 use glib::{translate::*, Type, Value};
 use libc::c_int;
 
-use crate::{ffi, prelude::*, TreeIter, TreeModel, TreeStore};
+use crate::{prelude::*, TreeIter, TreeModel, TreeStore};
 
 impl TreeStore {
     #[doc(alias = "gtk_tree_store_newv")]
@@ -36,9 +36,9 @@ impl TreeStore {
     ) -> TreeIter {
         unsafe {
             assert!(
-                position.unwrap_or(0) <= i32::MAX as u32,
+                position.unwrap_or(0) <= i32::max_value() as u32,
                 "can't have more than {} rows",
-                i32::MAX
+                i32::max_value()
             );
             let n_columns =
                 ffi::gtk_tree_model_get_n_columns(self.upcast_ref::<TreeModel>().to_glib_none().0)

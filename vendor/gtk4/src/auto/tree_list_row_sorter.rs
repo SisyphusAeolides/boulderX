@@ -2,7 +2,7 @@
 // from gir-files (https://github.com/gtk-rs/gir-files)
 // DO NOT EDIT
 
-use crate::{ffi, Sorter};
+use crate::Sorter;
 use glib::{
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
@@ -41,7 +41,6 @@ impl TreeListRowSorter {
     }
 
     #[doc(alias = "gtk_tree_list_row_sorter_set_sorter")]
-    #[doc(alias = "sorter")]
     pub fn set_sorter(&self, sorter: Option<&impl IsA<Sorter>>) {
         unsafe {
             ffi::gtk_tree_list_row_sorter_set_sorter(
@@ -66,7 +65,7 @@ impl TreeListRowSorter {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::sorter\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_sorter_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),

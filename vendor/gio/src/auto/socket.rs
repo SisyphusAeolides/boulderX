@@ -3,7 +3,7 @@
 // DO NOT EDIT
 
 use crate::{
-    ffi, Cancellable, Credentials, DatagramBased, InetAddress, Initable, SocketAddress,
+    Cancellable, Credentials, DatagramBased, InetAddress, Initable, SocketAddress,
     SocketConnection, SocketFamily, SocketProtocol, SocketType,
 };
 use glib::{
@@ -221,14 +221,12 @@ pub trait SocketExt: IsA<Socket> + sealed::Sealed + 'static {
 
     #[doc(alias = "g_socket_get_blocking")]
     #[doc(alias = "get_blocking")]
-    #[doc(alias = "blocking")]
     fn is_blocking(&self) -> bool {
         unsafe { from_glib(ffi::g_socket_get_blocking(self.as_ref().to_glib_none().0)) }
     }
 
     #[doc(alias = "g_socket_get_broadcast")]
     #[doc(alias = "get_broadcast")]
-    #[doc(alias = "broadcast")]
     fn is_broadcast(&self) -> bool {
         unsafe { from_glib(ffi::g_socket_get_broadcast(self.as_ref().to_glib_none().0)) }
     }
@@ -255,21 +253,18 @@ pub trait SocketExt: IsA<Socket> + sealed::Sealed + 'static {
 
     #[doc(alias = "g_socket_get_keepalive")]
     #[doc(alias = "get_keepalive")]
-    #[doc(alias = "keepalive")]
     fn is_keepalive(&self) -> bool {
         unsafe { from_glib(ffi::g_socket_get_keepalive(self.as_ref().to_glib_none().0)) }
     }
 
     #[doc(alias = "g_socket_get_listen_backlog")]
     #[doc(alias = "get_listen_backlog")]
-    #[doc(alias = "listen-backlog")]
     fn listen_backlog(&self) -> i32 {
         unsafe { ffi::g_socket_get_listen_backlog(self.as_ref().to_glib_none().0) }
     }
 
     #[doc(alias = "g_socket_get_local_address")]
     #[doc(alias = "get_local_address")]
-    #[doc(alias = "local-address")]
     fn local_address(&self) -> Result<SocketAddress, glib::Error> {
         unsafe {
             let mut error = std::ptr::null_mut();
@@ -284,7 +279,6 @@ pub trait SocketExt: IsA<Socket> + sealed::Sealed + 'static {
 
     #[doc(alias = "g_socket_get_multicast_loopback")]
     #[doc(alias = "get_multicast_loopback")]
-    #[doc(alias = "multicast-loopback")]
     fn is_multicast_loopback(&self) -> bool {
         unsafe {
             from_glib(ffi::g_socket_get_multicast_loopback(
@@ -295,7 +289,6 @@ pub trait SocketExt: IsA<Socket> + sealed::Sealed + 'static {
 
     #[doc(alias = "g_socket_get_multicast_ttl")]
     #[doc(alias = "get_multicast_ttl")]
-    #[doc(alias = "multicast-ttl")]
     fn multicast_ttl(&self) -> u32 {
         unsafe { ffi::g_socket_get_multicast_ttl(self.as_ref().to_glib_none().0) }
     }
@@ -330,7 +323,6 @@ pub trait SocketExt: IsA<Socket> + sealed::Sealed + 'static {
 
     #[doc(alias = "g_socket_get_remote_address")]
     #[doc(alias = "get_remote_address")]
-    #[doc(alias = "remote-address")]
     fn remote_address(&self) -> Result<SocketAddress, glib::Error> {
         unsafe {
             let mut error = std::ptr::null_mut();
@@ -490,7 +482,6 @@ pub trait SocketExt: IsA<Socket> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "g_socket_set_blocking")]
-    #[doc(alias = "blocking")]
     fn set_blocking(&self, blocking: bool) {
         unsafe {
             ffi::g_socket_set_blocking(self.as_ref().to_glib_none().0, blocking.into_glib());
@@ -498,7 +489,6 @@ pub trait SocketExt: IsA<Socket> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "g_socket_set_broadcast")]
-    #[doc(alias = "broadcast")]
     fn set_broadcast(&self, broadcast: bool) {
         unsafe {
             ffi::g_socket_set_broadcast(self.as_ref().to_glib_none().0, broadcast.into_glib());
@@ -506,7 +496,6 @@ pub trait SocketExt: IsA<Socket> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "g_socket_set_keepalive")]
-    #[doc(alias = "keepalive")]
     fn set_keepalive(&self, keepalive: bool) {
         unsafe {
             ffi::g_socket_set_keepalive(self.as_ref().to_glib_none().0, keepalive.into_glib());
@@ -514,7 +503,6 @@ pub trait SocketExt: IsA<Socket> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "g_socket_set_listen_backlog")]
-    #[doc(alias = "listen-backlog")]
     fn set_listen_backlog(&self, backlog: i32) {
         unsafe {
             ffi::g_socket_set_listen_backlog(self.as_ref().to_glib_none().0, backlog);
@@ -522,7 +510,6 @@ pub trait SocketExt: IsA<Socket> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "g_socket_set_multicast_loopback")]
-    #[doc(alias = "multicast-loopback")]
     fn set_multicast_loopback(&self, loopback: bool) {
         unsafe {
             ffi::g_socket_set_multicast_loopback(
@@ -533,7 +520,6 @@ pub trait SocketExt: IsA<Socket> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "g_socket_set_multicast_ttl")]
-    #[doc(alias = "multicast-ttl")]
     fn set_multicast_ttl(&self, ttl: u32) {
         unsafe {
             ffi::g_socket_set_multicast_ttl(self.as_ref().to_glib_none().0, ttl);
@@ -561,7 +547,6 @@ pub trait SocketExt: IsA<Socket> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "g_socket_set_timeout")]
-    #[doc(alias = "timeout")]
     fn set_timeout(&self, timeout: u32) {
         unsafe {
             ffi::g_socket_set_timeout(self.as_ref().to_glib_none().0, timeout);
@@ -569,7 +554,6 @@ pub trait SocketExt: IsA<Socket> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "g_socket_set_ttl")]
-    #[doc(alias = "ttl")]
     fn set_ttl(&self, ttl: u32) {
         unsafe {
             ffi::g_socket_set_ttl(self.as_ref().to_glib_none().0, ttl);

@@ -4,7 +4,7 @@ use crate::{RenderNodeType, RepeatingLinearGradientNode};
 
 define_render_node!(
     RepeatingLinearGradientNode,
-    crate::ffi::GskRepeatingLinearGradientNode,
+    ffi::GskRepeatingLinearGradientNode,
     RenderNodeType::RepeatingLinearGradientNode
 );
 

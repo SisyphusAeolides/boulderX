@@ -2,7 +2,7 @@
 // from gir-files (https://github.com/gtk-rs/gir-files)
 // DO NOT EDIT
 
-use crate::{ffi, SocketConnectable, SocketFamily};
+use crate::{SocketConnectable, SocketFamily};
 use glib::{
     prelude::*,
     signal::{connect_raw, SignalHandlerId},

@@ -3,11 +3,10 @@
 // DO NOT EDIT
 
 use crate::{
-    ffi, AsyncResult, Cancellable, Drive, File, Icon, Mount, MountMountFlags, MountOperation,
+    AsyncResult, Cancellable, Drive, File, Icon, Mount, MountMountFlags, MountOperation,
     MountUnmountFlags,
 };
 use glib::{
-    object::ObjectType as _,
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
     translate::*,
@@ -71,7 +70,11 @@ pub trait VolumeExt: IsA<Volume> + sealed::Sealed + 'static {
             user_data: glib::ffi::gpointer,
         ) {
             let mut error = std::ptr::null_mut();
-            ffi::g_volume_eject_with_operation_finish(_source_object as *mut _, res, &mut error);
+            let _ = ffi::g_volume_eject_with_operation_finish(
+                _source_object as *mut _,
+                res,
+                &mut error,
+            );
             let result = if error.is_null() {
                 Ok(())
             } else {
@@ -217,7 +220,7 @@ pub trait VolumeExt: IsA<Volume> + sealed::Sealed + 'static {
             user_data: glib::ffi::gpointer,
         ) {
             let mut error = std::ptr::null_mut();
-            ffi::g_volume_mount_finish(_source_object as *mut _, res, &mut error);
+            let _ = ffi::g_volume_mount_finish(_source_object as *mut _, res, &mut error);
             let result = if error.is_null() {
                 Ok(())
             } else {

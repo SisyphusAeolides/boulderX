@@ -4,7 +4,7 @@ use std::{future::Future, panic, ptr};
 
 use futures_channel::oneshot;
 
-use crate::{ffi, translate::*};
+use crate::translate::*;
 
 #[derive(Debug)]
 #[doc(alias = "GThreadPool")]

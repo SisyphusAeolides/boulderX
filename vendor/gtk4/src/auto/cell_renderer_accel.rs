@@ -3,11 +3,8 @@
 // DO NOT EDIT
 #![allow(deprecated)]
 
-use crate::{
-    ffi, CellRenderer, CellRendererAccelMode, CellRendererMode, CellRendererText, TreePath,
-};
+use crate::{CellRenderer, CellRendererAccelMode, CellRendererMode, CellRendererText, TreePath};
 use glib::{
-    object::ObjectType as _,
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
     translate::*,
@@ -84,7 +81,7 @@ impl CellRendererAccel {
             F: Fn(&CellRendererAccel, TreePath) + 'static,
         >(
             this: *mut ffi::GtkCellRendererAccel,
-            path_string: *mut std::ffi::c_char,
+            path_string: *mut libc::c_char,
             f: glib::ffi::gpointer,
         ) {
             let f: &F = &*(f as *const F);
@@ -96,7 +93,7 @@ impl CellRendererAccel {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"accel-cleared\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     accel_cleared_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -113,10 +110,10 @@ impl CellRendererAccel {
             F: Fn(&CellRendererAccel, TreePath, u32, gdk::ModifierType, u32) + 'static,
         >(
             this: *mut ffi::GtkCellRendererAccel,
-            path_string: *mut std::ffi::c_char,
-            accel_key: std::ffi::c_uint,
+            path_string: *mut libc::c_char,
+            accel_key: libc::c_uint,
             accel_mods: gdk::ffi::GdkModifierType,
-            hardware_keycode: std::ffi::c_uint,
+            hardware_keycode: libc::c_uint,
             f: glib::ffi::gpointer,
         ) {
             let f: &F = &*(f as *const F);
@@ -134,7 +131,7 @@ impl CellRendererAccel {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"accel-edited\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     accel_edited_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -157,7 +154,7 @@ impl CellRendererAccel {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::accel-key\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_accel_key_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -180,7 +177,7 @@ impl CellRendererAccel {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::accel-mode\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_accel_mode_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -203,7 +200,7 @@ impl CellRendererAccel {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::accel-mods\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_accel_mods_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -226,7 +223,7 @@ impl CellRendererAccel {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::keycode\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_keycode_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -657,7 +654,6 @@ impl CellRendererAccelBuilder {
     /// Build the [`CellRendererAccel`].
     #[must_use = "Building the object from the builder is usually expensive and is not expected to have side effects"]
     pub fn build(self) -> CellRendererAccel {
-        assert_initialized_main_thread!();
         self.builder.build()
     }
 }

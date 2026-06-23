@@ -1,6 +1,6 @@
 // Take a look at the license at the top of the repository in the LICENSE file.
 
-use crate::{ffi, prelude::*, translate::*, GStr, Regex};
+use crate::{prelude::*, translate::*, GStr, Regex};
 use std::{marker::PhantomData, mem, ptr};
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -34,26 +34,21 @@ impl MatchInfo<'_> {
     #[doc = "Return the inner pointer to the underlying C value."]
     #[inline]
     pub fn as_ptr(&self) -> *mut ffi::GMatchInfo {
-        self.inner.as_ptr()
+        unsafe { *(self as *const Self as *const *const ffi::GMatchInfo) as *mut ffi::GMatchInfo }
     }
     #[doc = "Borrows the underlying C value."]
     #[inline]
-    pub unsafe fn from_glib_ptr_borrow(ptr: &*mut ffi::GMatchInfo) -> &Self {
-        debug_assert_eq!(
-            std::mem::size_of::<Self>(),
-            std::mem::size_of::<crate::ffi::gpointer>()
-        );
-        debug_assert!(!ptr.is_null());
-        &*(ptr as *const *mut ffi::GMatchInfo as *const Self)
+    pub unsafe fn from_glib_ptr_borrow<'a>(ptr: *const *const ffi::GMatchInfo) -> &'a Self {
+        &*(ptr as *const Self)
     }
 }
 
 #[doc(hidden)]
-impl GlibPtrDefault for MatchInfo<'_> {
+impl<'input> GlibPtrDefault for MatchInfo<'input> {
     type GlibType = *mut ffi::GMatchInfo;
 }
 #[doc(hidden)]
-unsafe impl TransparentPtrType for MatchInfo<'_> {}
+unsafe impl<'input> TransparentPtrType for MatchInfo<'input> {}
 
 #[doc(hidden)]
 impl<'a, 'input> ToGlibPtr<'a, *mut ffi::GMatchInfo> for MatchInfo<'input>
@@ -95,7 +90,7 @@ where
 }
 
 #[doc(hidden)]
-impl FromGlibPtrNone<*mut ffi::GMatchInfo> for MatchInfo<'_> {
+impl<'input> FromGlibPtrNone<*mut ffi::GMatchInfo> for MatchInfo<'input> {
     #[inline]
     unsafe fn from_glib_none(ptr: *mut ffi::GMatchInfo) -> Self {
         debug_assert!(!ptr.is_null());
@@ -109,14 +104,14 @@ impl FromGlibPtrNone<*mut ffi::GMatchInfo> for MatchInfo<'_> {
     }
 }
 #[doc(hidden)]
-impl FromGlibPtrNone<*const ffi::GMatchInfo> for MatchInfo<'_> {
+impl<'input> FromGlibPtrNone<*const ffi::GMatchInfo> for MatchInfo<'input> {
     #[inline]
     unsafe fn from_glib_none(ptr: *const ffi::GMatchInfo) -> Self {
         Self::from_glib_none(ptr.cast_mut())
     }
 }
 #[doc(hidden)]
-impl FromGlibPtrFull<*mut ffi::GMatchInfo> for MatchInfo<'_> {
+impl<'input> FromGlibPtrFull<*mut ffi::GMatchInfo> for MatchInfo<'input> {
     #[inline]
     unsafe fn from_glib_full(ptr: *mut ffi::GMatchInfo) -> Self {
         debug_assert!(!ptr.is_null());
@@ -129,7 +124,7 @@ impl FromGlibPtrFull<*mut ffi::GMatchInfo> for MatchInfo<'_> {
     }
 }
 #[doc(hidden)]
-impl FromGlibPtrBorrow<*mut ffi::GMatchInfo> for MatchInfo<'_> {
+impl<'input> FromGlibPtrBorrow<*mut ffi::GMatchInfo> for MatchInfo<'input> {
     #[inline]
     unsafe fn from_glib_borrow(ptr: *mut ffi::GMatchInfo) -> Borrowed<Self> {
         debug_assert!(!ptr.is_null());
@@ -142,7 +137,7 @@ impl FromGlibPtrBorrow<*mut ffi::GMatchInfo> for MatchInfo<'_> {
     }
 }
 #[doc(hidden)]
-impl FromGlibPtrBorrow<*const ffi::GMatchInfo> for MatchInfo<'_> {
+impl<'input> FromGlibPtrBorrow<*const ffi::GMatchInfo> for MatchInfo<'input> {
     #[inline]
     unsafe fn from_glib_borrow(ptr: *const ffi::GMatchInfo) -> Borrowed<Self> {
         from_glib_borrow::<_, Self>(ptr.cast_mut())
@@ -150,7 +145,7 @@ impl FromGlibPtrBorrow<*const ffi::GMatchInfo> for MatchInfo<'_> {
 }
 
 #[doc(hidden)]
-impl IntoGlibPtr<*mut ffi::GMatchInfo> for MatchInfo<'_> {
+impl<'input> IntoGlibPtr<*mut ffi::GMatchInfo> for MatchInfo<'input> {
     #[inline]
     unsafe fn into_glib_ptr(self) -> *mut ffi::GMatchInfo {
         let s = std::mem::ManuallyDrop::new(self);
@@ -158,14 +153,14 @@ impl IntoGlibPtr<*mut ffi::GMatchInfo> for MatchInfo<'_> {
     }
 }
 #[doc(hidden)]
-impl IntoGlibPtr<*const ffi::GMatchInfo> for MatchInfo<'_> {
+impl<'input> IntoGlibPtr<*const ffi::GMatchInfo> for MatchInfo<'input> {
     #[inline]
     unsafe fn into_glib_ptr(self) -> *const ffi::GMatchInfo {
         let s = std::mem::ManuallyDrop::new(self);
         ToGlibPtr::<*const ffi::GMatchInfo>::to_glib_none(&*s).0 as *const _
     }
 }
-impl StaticType for MatchInfo<'_> {
+impl<'input> StaticType for MatchInfo<'input> {
     #[inline]
     fn static_type() -> crate::types::Type {
         unsafe { from_glib(ffi::g_match_info_get_type()) }
@@ -199,10 +194,15 @@ unsafe impl<'a, 'input: 'a> crate::value::FromValue<'a> for &'a MatchInfo<'input
 
     #[inline]
     unsafe fn from_value(value: &'a crate::Value) -> Self {
+        debug_assert_eq!(
+            std::mem::size_of::<Self>(),
+            std::mem::size_of::<crate::ffi::gpointer>()
+        );
         let value = &*(value as *const crate::Value as *const crate::gobject_ffi::GValue);
+        debug_assert!(!value.data[0].v_pointer.is_null());
         <MatchInfo<'input>>::from_glib_ptr_borrow(
-            &*(&value.data[0].v_pointer as *const crate::ffi::gpointer
-                as *const *mut ffi::GMatchInfo),
+            &value.data[0].v_pointer as *const crate::ffi::gpointer
+                as *const *const ffi::GMatchInfo,
         )
     }
 }
@@ -328,14 +328,15 @@ impl<'input> MatchInfo<'input> {
     }
 
     #[doc(alias = "g_match_info_next")]
-    pub fn next(&self) -> Result<bool, crate::Error> {
+    pub fn next(&self) -> Result<(), crate::Error> {
         unsafe {
             let mut error = std::ptr::null_mut();
             let is_ok = ffi::g_match_info_next(self.to_glib_none().0, &mut error);
-            if !error.is_null() {
-                Err(from_glib_full(error))
+            debug_assert_eq!(is_ok == crate::ffi::GFALSE, !error.is_null());
+            if error.is_null() {
+                Ok(())
             } else {
-                Ok(from_glib(is_ok))
+                Err(from_glib_full(error))
             }
         }
     }

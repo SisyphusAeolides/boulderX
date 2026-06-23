@@ -13,7 +13,7 @@ use glib::{translate::*, GString};
 
 #[cfg(all(feature = "v2_58", unix))]
 use crate::AppLaunchContext;
-use crate::{ffi, DesktopAppInfo};
+use crate::DesktopAppInfo;
 
 impl DesktopAppInfo {
     #[doc(alias = "g_desktop_app_info_search")]

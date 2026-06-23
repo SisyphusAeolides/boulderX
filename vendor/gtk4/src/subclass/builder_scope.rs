@@ -7,8 +7,7 @@
 use glib::{translate::*, GString};
 
 use crate::{
-    ffi, prelude::*, subclass::prelude::*, Builder, BuilderCScope, BuilderClosureFlags,
-    BuilderScope,
+    prelude::*, subclass::prelude::*, Builder, BuilderCScope, BuilderClosureFlags, BuilderScope,
 };
 
 pub trait BuilderCScopeImpl: BuilderScopeImpl {}

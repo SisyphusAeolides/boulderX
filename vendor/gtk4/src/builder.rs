@@ -4,7 +4,7 @@ use std::path::Path;
 
 use glib::{translate::*, Object};
 
-use crate::{ffi, prelude::*, Builder};
+use crate::{prelude::*, Builder};
 
 impl Builder {
     #[doc(alias = "gtk_builder_new_from_file")]

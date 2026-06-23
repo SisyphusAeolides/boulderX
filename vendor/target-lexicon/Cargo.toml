@@ -12,22 +12,14 @@
 [package]
 edition = "2018"
 name = "target-lexicon"
-version = "0.13.5"
+version = "0.12.16"
 authors = ["Dan Gohman <sunfish@mozilla.com>"]
 build = "build.rs"
-include = [
-    "Cargo.toml",
-    "README.md",
-    "LICENSE",
-    "build.rs",
-    "src/**/*.rs",
-]
-autolib = false
 autobins = false
 autoexamples = false
 autotests = false
 autobenches = false
-description = "LLVM target triple types"
+description = "Targeting utilities for compilers and related tools"
 documentation = "https://docs.rs/target-lexicon/"
 readme = "README.md"
 keywords = [
@@ -41,22 +33,17 @@ categories = ["no-std"]
 license = "Apache-2.0 WITH LLVM-exception"
 repository = "https://github.com/bytecodealliance/target-lexicon"
 
-[badges.maintenance]
-status = "passively-maintained"
-
-[features]
-arch_z80 = []
-arch_zkasm = []
-default = []
-serde_support = [
-    "serde",
-    "std",
-]
-std = []
-
 [lib]
 name = "target_lexicon"
 path = "src/lib.rs"
+
+[[example]]
+name = "host"
+path = "examples/host.rs"
+
+[[example]]
+name = "misc"
+path = "examples/misc.rs"
 
 [dependencies.serde]
 version = "1.0"
@@ -65,7 +52,14 @@ optional = true
 [dev-dependencies.serde_json]
 version = "1.0"
 
-[lints.rust.unexpected_cfgs]
-level = "warn"
-priority = 0
-check-cfg = ['cfg(feature, values("rust_1_40", "cargo-clippy"))']
+[features]
+arch_zkasm = []
+default = []
+serde_support = [
+    "serde",
+    "std",
+]
+std = []
+
+[badges.maintenance]
+status = "passively-maintained"

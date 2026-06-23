@@ -8,7 +8,7 @@ use std::sync::OnceLock;
 use glib::{translate::*, Quark};
 
 use crate::{
-    ffi, prelude::*, subclass::prelude::*, CellArea, CellLayout, CellRenderer, TreeIter, TreeModel,
+    prelude::*, subclass::prelude::*, CellArea, CellLayout, CellRenderer, TreeIter, TreeModel,
 };
 
 #[derive(Debug)]

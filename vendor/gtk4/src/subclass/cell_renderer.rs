@@ -9,7 +9,7 @@ use glib::{translate::*, GString};
 use libc::{c_char, c_int};
 
 use crate::{
-    ffi, prelude::*, subclass::prelude::*, CellEditable, CellRenderer, CellRendererState,
+    prelude::*, subclass::prelude::*, CellEditable, CellRenderer, CellRendererState,
     SizeRequestMode, Snapshot, Widget,
 };
 

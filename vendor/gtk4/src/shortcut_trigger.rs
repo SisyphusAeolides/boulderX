@@ -2,7 +2,7 @@
 
 use glib::translate::*;
 
-use crate::{ffi, prelude::*, ShortcutTrigger};
+use crate::{prelude::*, ShortcutTrigger};
 
 mod sealed {
     pub trait Sealed {}

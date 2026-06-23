@@ -2,7 +2,7 @@
 // from gir-files (https://github.com/gtk-rs/gir-files)
 // DO NOT EDIT
 
-use crate::{ffi, TlsPasswordFlags};
+use crate::TlsPasswordFlags;
 use glib::{
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
@@ -70,7 +70,6 @@ pub trait TlsPasswordExt: IsA<TlsPassword> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "g_tls_password_set_description")]
-    #[doc(alias = "description")]
     fn set_description(&self, description: &str) {
         unsafe {
             ffi::g_tls_password_set_description(
@@ -81,7 +80,6 @@ pub trait TlsPasswordExt: IsA<TlsPassword> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "g_tls_password_set_flags")]
-    #[doc(alias = "flags")]
     fn set_flags(&self, flags: TlsPasswordFlags) {
         unsafe {
             ffi::g_tls_password_set_flags(self.as_ref().to_glib_none().0, flags.into_glib());
@@ -94,7 +92,6 @@ pub trait TlsPasswordExt: IsA<TlsPassword> + sealed::Sealed + 'static {
     //}
 
     #[doc(alias = "g_tls_password_set_warning")]
-    #[doc(alias = "warning")]
     fn set_warning(&self, warning: &str) {
         unsafe {
             ffi::g_tls_password_set_warning(

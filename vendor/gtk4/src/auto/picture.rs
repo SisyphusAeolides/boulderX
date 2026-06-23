@@ -7,8 +7,7 @@
 #[cfg_attr(docsrs, doc(cfg(feature = "v4_8")))]
 use crate::ContentFit;
 use crate::{
-    ffi, Accessible, AccessibleRole, Align, Buildable, ConstraintTarget, LayoutManager, Overflow,
-    Widget,
+    Accessible, AccessibleRole, Align, Buildable, ConstraintTarget, LayoutManager, Overflow, Widget,
 };
 use glib::{
     prelude::*,
@@ -103,14 +102,12 @@ impl Picture {
 
     #[doc(alias = "gtk_picture_get_alternative_text")]
     #[doc(alias = "get_alternative_text")]
-    #[doc(alias = "alternative-text")]
     pub fn alternative_text(&self) -> Option<glib::GString> {
         unsafe { from_glib_none(ffi::gtk_picture_get_alternative_text(self.to_glib_none().0)) }
     }
 
     #[doc(alias = "gtk_picture_get_can_shrink")]
     #[doc(alias = "get_can_shrink")]
-    #[doc(alias = "can-shrink")]
     pub fn can_shrink(&self) -> bool {
         unsafe { from_glib(ffi::gtk_picture_get_can_shrink(self.to_glib_none().0)) }
     }
@@ -119,7 +116,6 @@ impl Picture {
     #[cfg_attr(docsrs, doc(cfg(feature = "v4_8")))]
     #[doc(alias = "gtk_picture_get_content_fit")]
     #[doc(alias = "get_content_fit")]
-    #[doc(alias = "content-fit")]
     pub fn content_fit(&self) -> ContentFit {
         unsafe { from_glib(ffi::gtk_picture_get_content_fit(self.to_glib_none().0)) }
     }
@@ -134,7 +130,6 @@ impl Picture {
     #[allow(deprecated)]
     #[doc(alias = "gtk_picture_get_keep_aspect_ratio")]
     #[doc(alias = "get_keep_aspect_ratio")]
-    #[doc(alias = "keep-aspect-ratio")]
     pub fn is_keep_aspect_ratio(&self) -> bool {
         unsafe {
             from_glib(ffi::gtk_picture_get_keep_aspect_ratio(
@@ -150,7 +145,6 @@ impl Picture {
     }
 
     #[doc(alias = "gtk_picture_set_alternative_text")]
-    #[doc(alias = "alternative-text")]
     pub fn set_alternative_text(&self, alternative_text: Option<&str>) {
         unsafe {
             ffi::gtk_picture_set_alternative_text(
@@ -161,7 +155,6 @@ impl Picture {
     }
 
     #[doc(alias = "gtk_picture_set_can_shrink")]
-    #[doc(alias = "can-shrink")]
     pub fn set_can_shrink(&self, can_shrink: bool) {
         unsafe {
             ffi::gtk_picture_set_can_shrink(self.to_glib_none().0, can_shrink.into_glib());
@@ -171,7 +164,6 @@ impl Picture {
     #[cfg(feature = "v4_8")]
     #[cfg_attr(docsrs, doc(cfg(feature = "v4_8")))]
     #[doc(alias = "gtk_picture_set_content_fit")]
-    #[doc(alias = "content-fit")]
     pub fn set_content_fit(&self, content_fit: ContentFit) {
         unsafe {
             ffi::gtk_picture_set_content_fit(self.to_glib_none().0, content_fit.into_glib());
@@ -179,7 +171,6 @@ impl Picture {
     }
 
     #[doc(alias = "gtk_picture_set_file")]
-    #[doc(alias = "file")]
     pub fn set_file(&self, file: Option<&impl IsA<gio::File>>) {
         unsafe {
             ffi::gtk_picture_set_file(
@@ -202,7 +193,6 @@ impl Picture {
     #[cfg_attr(feature = "v4_8", deprecated = "Since 4.8")]
     #[allow(deprecated)]
     #[doc(alias = "gtk_picture_set_keep_aspect_ratio")]
-    #[doc(alias = "keep-aspect-ratio")]
     pub fn set_keep_aspect_ratio(&self, keep_aspect_ratio: bool) {
         unsafe {
             ffi::gtk_picture_set_keep_aspect_ratio(
@@ -213,7 +203,6 @@ impl Picture {
     }
 
     #[doc(alias = "gtk_picture_set_paintable")]
-    #[doc(alias = "paintable")]
     pub fn set_paintable(&self, paintable: Option<&impl IsA<gdk::Paintable>>) {
         unsafe {
             ffi::gtk_picture_set_paintable(
@@ -254,7 +243,7 @@ impl Picture {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::alternative-text\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_alternative_text_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -277,7 +266,7 @@ impl Picture {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::can-shrink\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_can_shrink_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -302,7 +291,7 @@ impl Picture {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::content-fit\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_content_fit_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -325,7 +314,7 @@ impl Picture {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::file\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_file_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -352,7 +341,7 @@ impl Picture {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::keep-aspect-ratio\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_keep_aspect_ratio_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -375,7 +364,7 @@ impl Picture {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::paintable\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_paintable_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -531,14 +520,6 @@ impl PictureBuilder {
         }
     }
 
-    #[cfg(feature = "v4_18")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "v4_18")))]
-    pub fn limit_events(self, limit_events: bool) -> Self {
-        Self {
-            builder: self.builder.property("limit-events", limit_events),
-        }
-    }
-
     pub fn margin_bottom(self, margin_bottom: i32) -> Self {
         Self {
             builder: self.builder.property("margin-bottom", margin_bottom),
@@ -647,7 +628,6 @@ impl PictureBuilder {
     /// Build the [`Picture`].
     #[must_use = "Building the object from the builder is usually expensive and is not expected to have side effects"]
     pub fn build(self) -> Picture {
-        assert_initialized_main_thread!();
         self.builder.build()
     }
 }

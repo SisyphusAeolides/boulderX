@@ -3,8 +3,7 @@
 use std::{fmt, num::NonZeroU32, ptr, sync::Mutex};
 
 use crate::{
-    ffi, gobject_ffi, prelude::*, translate::*, utils::is_canonical_pspec_name, Closure,
-    SignalFlags, Type, Value,
+    prelude::*, translate::*, utils::is_canonical_pspec_name, Closure, SignalFlags, Type, Value,
 };
 
 // rustdoc-stripper-ignore-next

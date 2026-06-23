@@ -4,7 +4,7 @@ use std::{mem, ptr};
 
 use glib::translate::*;
 
-use crate::{ffi, CoverageLevel};
+use crate::CoverageLevel;
 
 #[cfg(feature = "v1_44")]
 glib::wrapper! {

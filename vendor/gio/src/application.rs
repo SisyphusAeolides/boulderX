@@ -9,7 +9,7 @@ use glib::{
     ExitCode, GString,
 };
 
-use crate::{ffi, Application, File};
+use crate::{Application, File};
 
 mod sealed {
     pub trait Sealed {}

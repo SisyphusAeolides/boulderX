@@ -2,7 +2,7 @@
 // from gir-files (https://github.com/gtk-rs/gir-files)
 // DO NOT EDIT
 
-use crate::{ffi, Widget};
+use crate::Widget;
 use glib::{
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
@@ -40,7 +40,6 @@ impl ListHeader {
 
     #[doc(alias = "gtk_list_header_get_n_items")]
     #[doc(alias = "get_n_items")]
-    #[doc(alias = "n-items")]
     pub fn n_items(&self) -> u32 {
         unsafe { ffi::gtk_list_header_get_n_items(self.to_glib_none().0) }
     }
@@ -52,7 +51,6 @@ impl ListHeader {
     }
 
     #[doc(alias = "gtk_list_header_set_child")]
-    #[doc(alias = "child")]
     pub fn set_child(&self, child: Option<&impl IsA<Widget>>) {
         unsafe {
             ffi::gtk_list_header_set_child(
@@ -79,7 +77,7 @@ impl ListHeader {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::child\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_child_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -104,7 +102,7 @@ impl ListHeader {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::end\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_end_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -129,7 +127,7 @@ impl ListHeader {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::item\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_item_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -154,7 +152,7 @@ impl ListHeader {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::n-items\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_n_items_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -179,7 +177,7 @@ impl ListHeader {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::start\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_start_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),

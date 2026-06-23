@@ -3,8 +3,7 @@
 // DO NOT EDIT
 
 use crate::{
-    ffi, Accessible, AccessibleRole, Align, Buildable, ConstraintTarget, LayoutManager, Overflow,
-    Widget,
+    Accessible, AccessibleRole, Align, Buildable, ConstraintTarget, LayoutManager, Overflow, Widget,
 };
 use glib::{prelude::*, translate::*};
 
@@ -137,14 +136,6 @@ impl FixedBuilder {
         }
     }
 
-    #[cfg(feature = "v4_18")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "v4_18")))]
-    pub fn limit_events(self, limit_events: bool) -> Self {
-        Self {
-            builder: self.builder.property("limit-events", limit_events),
-        }
-    }
-
     pub fn margin_bottom(self, margin_bottom: i32) -> Self {
         Self {
             builder: self.builder.property("margin-bottom", margin_bottom),
@@ -253,7 +244,6 @@ impl FixedBuilder {
     /// Build the [`Fixed`].
     #[must_use = "Building the object from the builder is usually expensive and is not expected to have side effects"]
     pub fn build(self) -> Fixed {
-        assert_initialized_main_thread!();
         self.builder.build()
     }
 }

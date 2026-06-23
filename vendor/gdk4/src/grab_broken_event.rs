@@ -6,7 +6,7 @@ use crate::{EventType, GrabBrokenEvent};
 
 define_event! {
     GrabBrokenEvent,
-    crate::ffi::GdkGrabBrokenEvent,
+    ffi::GdkGrabBrokenEvent,
     &[EventType::GrabBroken]
 }
 

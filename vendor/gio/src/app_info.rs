@@ -7,7 +7,9 @@ use std::ptr;
 use glib::prelude::*;
 use glib::translate::*;
 
-use crate::{ffi, AppInfo, AppLaunchContext, Cancellable};
+use crate::AppInfo;
+use crate::AppLaunchContext;
+use crate::Cancellable;
 
 mod sealed {
     pub trait Sealed {}

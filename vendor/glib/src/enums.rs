@@ -2,10 +2,7 @@
 
 use std::{cmp, ffi::CStr, fmt, ops::Deref, ptr};
 
-use crate::{
-    ffi, gobject_ffi, prelude::*, translate::*, ParamSpecEnum, ParamSpecFlags, Type, TypeInfo,
-    Value,
-};
+use crate::{prelude::*, translate::*, ParamSpecEnum, ParamSpecFlags, Type, TypeInfo, Value};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 pub enum UserDirectory {
@@ -338,7 +335,7 @@ impl UnsafeFrom<gobject_ffi::GEnumValue> for EnumValue {
     }
 }
 
-unsafe impl<'a> crate::value::FromValue<'a> for &EnumValue {
+unsafe impl<'a, 'b> crate::value::FromValue<'a> for &'b EnumValue {
     type Checker = EnumTypeChecker;
 
     unsafe fn from_value(value: &'a Value) -> Self {
@@ -748,14 +745,14 @@ impl FlagsClass {
     // rustdoc-stripper-ignore-next
     /// Returns a new `FlagsBuilder` for conveniently setting/unsetting flags
     /// and building a `Value`.
-    pub fn builder(&self) -> FlagsBuilder<'_> {
+    pub fn builder(&self) -> FlagsBuilder {
         FlagsBuilder::new(self)
     }
 
     // rustdoc-stripper-ignore-next
     /// Returns a new `FlagsBuilder` for conveniently setting/unsetting flags
     /// and building a `Value`. The `Value` is initialized with `value`.
-    pub fn builder_with_value(&self, value: Value) -> Option<FlagsBuilder<'_>> {
+    pub fn builder_with_value(&self, value: Value) -> Option<FlagsBuilder> {
         if self.type_() != value.type_() {
             return None;
         }
@@ -965,13 +962,13 @@ pub type FlagsValues = EnumerationValues<FlagsValue>;
 /// If setting/unsetting any value fails, `build()` returns `None`.
 #[must_use = "The builder must be built to be used"]
 pub struct FlagsBuilder<'a>(&'a FlagsClass, Option<Value>);
-impl FlagsBuilder<'_> {
-    fn new(flags_class: &FlagsClass) -> FlagsBuilder<'_> {
+impl<'a> FlagsBuilder<'a> {
+    fn new(flags_class: &FlagsClass) -> FlagsBuilder {
         let value = unsafe { Value::from_type_unchecked(flags_class.type_()) };
         FlagsBuilder(flags_class, Some(value))
     }
 
-    fn with_value(flags_class: &FlagsClass, value: Value) -> FlagsBuilder<'_> {
+    fn with_value(flags_class: &FlagsClass, value: Value) -> FlagsBuilder {
         FlagsBuilder(flags_class, Some(value))
     }
 
@@ -1043,7 +1040,7 @@ impl FlagsBuilder<'_> {
     }
 }
 
-unsafe impl<'a> crate::value::FromValue<'a> for Vec<&FlagsValue> {
+unsafe impl<'a, 'b> crate::value::FromValue<'a> for Vec<&'b FlagsValue> {
     type Checker = FlagsTypeChecker;
 
     unsafe fn from_value(value: &'a Value) -> Self {

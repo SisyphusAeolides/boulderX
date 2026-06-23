@@ -3,7 +3,6 @@
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, FromRawFd, RawFd};
 
-use crate::ffi;
 use glib::{prelude::*, translate::*};
 #[cfg(all(not(unix), docsrs))]
 use socket::{AsRawFd, FromRawFd, IntoRawFd, RawFd};

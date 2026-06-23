@@ -4,7 +4,7 @@ use std::{ptr, time::SystemTime};
 
 use glib::{prelude::*, translate::*};
 
-use crate::{ffi, PixbufAnimation, PixbufAnimationIter};
+use crate::{PixbufAnimation, PixbufAnimationIter};
 
 mod sealed {
     pub trait Sealed {}

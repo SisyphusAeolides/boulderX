@@ -2,9 +2,8 @@
 // from gir-files (https://github.com/gtk-rs/gir-files)
 // DO NOT EDIT
 
-use crate::{ffi, EventController, IMContext, PropagationLimit, PropagationPhase, Widget};
+use crate::{EventController, IMContext, PropagationLimit, PropagationPhase, Widget};
 use glib::{
-    object::ObjectType as _,
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
     translate::*,
@@ -87,7 +86,7 @@ impl EventControllerKey {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"im-update\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     im_update_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -115,7 +114,7 @@ impl EventControllerKey {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"modifiers\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     modifiers_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -172,7 +171,6 @@ impl EventControllerKeyBuilder {
     /// Build the [`EventControllerKey`].
     #[must_use = "Building the object from the builder is usually expensive and is not expected to have side effects"]
     pub fn build(self) -> EventControllerKey {
-        assert_initialized_main_thread!();
         self.builder.build()
     }
 }

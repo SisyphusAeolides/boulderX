@@ -106,13 +106,11 @@ pub fn impl_shared_boxed(input: &syn::DeriveInput) -> syn::Result<proc_macro2::T
         .required()
         .value_required();
     let mut nullable = NestedMetaItem::<syn::LitBool>::new("nullable").value_optional();
-    let mut allow_name_conflict =
-        NestedMetaItem::<syn::LitBool>::new("allow_name_conflict").value_optional();
 
     let found = parse_nested_meta_items(
         &input.attrs,
         "shared_boxed_type",
-        &mut [&mut gtype_name, &mut nullable, &mut allow_name_conflict],
+        &mut [&mut gtype_name, &mut nullable],
     )?;
 
     if found.is_none() {
@@ -123,11 +121,6 @@ pub fn impl_shared_boxed(input: &syn::DeriveInput) -> syn::Result<proc_macro2::T
 
     let gtype_name = gtype_name.value.unwrap();
     let nullable = nullable.found || nullable.value.map(|b| b.value()).unwrap_or(false);
-    let allow_name_conflict = allow_name_conflict.found
-        || allow_name_conflict
-            .value
-            .map(|b| b.value())
-            .unwrap_or(false);
 
     let crate_ident = crate_ident_new();
     let refcounted_type_prefix = refcounted_type_prefix(name, &crate_ident);
@@ -147,7 +140,6 @@ pub fn impl_shared_boxed(input: &syn::DeriveInput) -> syn::Result<proc_macro2::T
     Ok(quote! {
         impl #crate_ident::subclass::shared::SharedType for #name {
             const NAME: &'static ::core::primitive::str = #gtype_name;
-            const ALLOW_NAME_CONFLICT: bool = #allow_name_conflict;
 
             type RefCountedType = #refcounted_type;
 

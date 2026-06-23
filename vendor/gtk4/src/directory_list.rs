@@ -2,7 +2,7 @@
 
 use glib::translate::*;
 
-use crate::{ffi, prelude::*, DirectoryList};
+use crate::{prelude::*, DirectoryList};
 
 impl DirectoryList {
     #[doc(alias = "gtk_directory_list_get_io_priority")]

@@ -888,14 +888,29 @@ status = "generate"
 name = "GLib.UnicodeScript"
 status = "generate"
     [[object.member]]
-    pattern = "cypro_minoan|old_uyghur|tangsa|toto|vithkuqi|math"
+    name = "cypro_minoan"
     version = "2.72"
     [[object.member]]
-    pattern = "kawi|nag_mundari"
+    name = "old_uyghur"
+    version = "2.72"
+    [[object.member]]
+    name = "tangsa"
+    version = "2.72"
+    [[object.member]]
+    name = "toto"
+    version = "2.72"
+    [[object.member]]
+    name = "vithkuqi"
+    version = "2.72"
+    [[object.member]]
+    name = "math"
+    version = "2.72"
+    [[object.member]]
+    name = "kawi"
     version = "2.74"
     [[object.member]]
-    pattern = "todhri|garay|tulu_tigalari|sunuwar|gurung_khema|kirat_rai|ol_onal"
-    version = "2.84"
+    name = "nag_mundari"
+    version = "2.74"
 
 [[object]]
 name = "GLib.Uri"

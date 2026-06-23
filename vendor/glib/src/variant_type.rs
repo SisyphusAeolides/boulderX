@@ -11,7 +11,7 @@ use std::{
     str::FromStr,
 };
 
-use crate::{ffi, gobject_ffi, prelude::*, translate::*, BoolError, Type};
+use crate::{prelude::*, translate::*, BoolError, Type};
 
 // rustdoc-stripper-ignore-next
 /// Describes `Variant` types.
@@ -588,7 +588,7 @@ impl VariantTy {
     /// # Panics
     ///
     /// This function panics if not called with a tuple or dictionary entry type.
-    pub fn tuple_types(&self) -> VariantTyIterator<'_> {
+    pub fn tuple_types(&self) -> VariantTyIterator {
         VariantTyIterator::new(self).expect("VariantTy does not represent a tuple")
     }
 
@@ -967,7 +967,7 @@ impl<'a> Iterator for VariantTyIterator<'a> {
     }
 }
 
-impl iter::FusedIterator for VariantTyIterator<'_> {}
+impl<'a> iter::FusedIterator for VariantTyIterator<'a> {}
 
 #[cfg(test)]
 mod tests {

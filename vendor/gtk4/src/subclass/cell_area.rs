@@ -8,8 +8,8 @@ use std::mem;
 use glib::{translate::*, ParamSpec, Value};
 
 use crate::{
-    ffi, prelude::*, subclass::prelude::*, CellArea, CellAreaContext, CellRenderer,
-    CellRendererState, DirectionType, SizeRequestMode, Snapshot, TreeIter, TreeModel, Widget,
+    prelude::*, subclass::prelude::*, CellArea, CellAreaContext, CellRenderer, CellRendererState,
+    DirectionType, SizeRequestMode, Snapshot, TreeIter, TreeModel, Widget,
 };
 
 #[derive(Debug)]

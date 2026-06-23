@@ -6,7 +6,7 @@ use crate::{DNDEvent, EventType};
 
 define_event! {
     DNDEvent,
-    crate::ffi::GdkDNDEvent,
+    ffi::GdkDNDEvent,
     &[EventType::DragEnter, EventType::DragLeave, EventType::DragMotion, EventType::DropStart]
 }
 

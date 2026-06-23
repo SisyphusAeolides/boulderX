@@ -4,7 +4,7 @@ use crate::{RenderNodeType, RoundedClipNode};
 
 define_render_node!(
     RoundedClipNode,
-    crate::ffi::GskRoundedClipNode,
+    ffi::GskRoundedClipNode,
     RenderNodeType::RoundedClipNode
 );
 

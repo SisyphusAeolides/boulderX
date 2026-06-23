@@ -4,7 +4,7 @@ use crate::{RenderNodeType, TransformNode};
 
 define_render_node!(
     TransformNode,
-    crate::ffi::GskTransformNode,
+    ffi::GskTransformNode,
     RenderNodeType::TransformNode
 );
 

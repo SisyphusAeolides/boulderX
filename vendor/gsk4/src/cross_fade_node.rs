@@ -4,7 +4,7 @@ use crate::{CrossFadeNode, RenderNodeType};
 
 define_render_node!(
     CrossFadeNode,
-    crate::ffi::GskCrossFadeNode,
+    ffi::GskCrossFadeNode,
     RenderNodeType::CrossFadeNode
 );
 

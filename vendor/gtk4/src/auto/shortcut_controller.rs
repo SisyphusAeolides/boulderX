@@ -2,7 +2,7 @@
 // from gir-files (https://github.com/gtk-rs/gir-files)
 // DO NOT EDIT
 
-use crate::{ffi, Buildable, EventController, Shortcut, ShortcutScope};
+use crate::{Buildable, EventController, Shortcut, ShortcutScope};
 use glib::{
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
@@ -50,7 +50,6 @@ impl ShortcutController {
 
     #[doc(alias = "gtk_shortcut_controller_get_mnemonics_modifiers")]
     #[doc(alias = "get_mnemonics_modifiers")]
-    #[doc(alias = "mnemonic-modifiers")]
     pub fn mnemonics_modifiers(&self) -> gdk::ModifierType {
         unsafe {
             from_glib(ffi::gtk_shortcut_controller_get_mnemonics_modifiers(
@@ -80,7 +79,6 @@ impl ShortcutController {
     }
 
     #[doc(alias = "gtk_shortcut_controller_set_mnemonics_modifiers")]
-    #[doc(alias = "mnemonic-modifiers")]
     pub fn set_mnemonics_modifiers(&self, modifiers: gdk::ModifierType) {
         unsafe {
             ffi::gtk_shortcut_controller_set_mnemonics_modifiers(
@@ -91,11 +89,20 @@ impl ShortcutController {
     }
 
     #[doc(alias = "gtk_shortcut_controller_set_scope")]
-    #[doc(alias = "scope")]
     pub fn set_scope(&self, scope: ShortcutScope) {
         unsafe {
             ffi::gtk_shortcut_controller_set_scope(self.to_glib_none().0, scope.into_glib());
         }
+    }
+
+    #[doc(alias = "mnemonic-modifiers")]
+    pub fn mnemonic_modifiers(&self) -> gdk::ModifierType {
+        ObjectExt::property(self, "mnemonic-modifiers")
+    }
+
+    #[doc(alias = "mnemonic-modifiers")]
+    pub fn set_mnemonic_modifiers(&self, mnemonic_modifiers: gdk::ModifierType) {
+        ObjectExt::set_property(self, "mnemonic-modifiers", mnemonic_modifiers)
     }
 
     #[doc(alias = "mnemonic-modifiers")]
@@ -118,7 +125,7 @@ impl ShortcutController {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::mnemonic-modifiers\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_mnemonic_modifiers_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -141,7 +148,7 @@ impl ShortcutController {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::scope\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_scope_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),

@@ -3,7 +3,6 @@
 use std::mem::MaybeUninit;
 
 use crate::{
-    ffi,
     translate::{from_glib, IntoGlib, UnsafeFrom},
     UnicodeBreakType, UnicodeScript, UnicodeType,
 };

@@ -4,7 +4,7 @@ use std::mem;
 
 use glib::translate::*;
 
-use crate::{ffi, UnixMountPoint};
+use crate::UnixMountPoint;
 
 impl UnixMountPoint {
     #[cfg(unix)]

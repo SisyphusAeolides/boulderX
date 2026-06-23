@@ -1,6 +1,6 @@
 // Take a look at the license at the top of the repository in the LICENSE file.
 
-use crate::{ffi, prelude::*, translate::*};
+use crate::{prelude::*, translate::*};
 
 // rustdoc-stripper-ignore-next
 /// Continue calling the closure in the future iterations or drop it.

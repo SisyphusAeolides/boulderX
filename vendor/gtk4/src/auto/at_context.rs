@@ -2,9 +2,8 @@
 // from gir-files (https://github.com/gtk-rs/gir-files)
 // DO NOT EDIT
 
-use crate::{ffi, Accessible, AccessibleRole};
+use crate::{Accessible, AccessibleRole};
 use glib::{
-    object::ObjectType as _,
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
     translate::*,
@@ -45,7 +44,6 @@ impl ATContext {
 
     #[doc(alias = "gtk_at_context_get_accessible_role")]
     #[doc(alias = "get_accessible_role")]
-    #[doc(alias = "accessible-role")]
     pub fn accessible_role(&self) -> AccessibleRole {
         unsafe {
             from_glib(ffi::gtk_at_context_get_accessible_role(
@@ -81,7 +79,7 @@ impl ATContext {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"state-change\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     state_change_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -104,7 +102,7 @@ impl ATContext {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::accessible-role\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_accessible_role_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -127,7 +125,7 @@ impl ATContext {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::display\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_display_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),

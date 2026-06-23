@@ -1,12 +1,12 @@
 // Take a look at the license at the top of the repository in the LICENSE file.
 
-use std::{future::IntoFuture, num::NonZeroU64};
+use std::num::NonZeroU64;
 
 use futures_channel::oneshot;
 use futures_core::Future;
 use glib::{prelude::*, translate::*};
 
-use crate::{ffi, Cancellable};
+use crate::Cancellable;
 
 // rustdoc-stripper-ignore-next
 /// The id of a cancelled handler that is returned by `CancellableExtManual::connect`. This type is
@@ -150,26 +150,6 @@ pub trait CancellableExtManual: sealed::Sealed + IsA<Cancellable> {
 }
 
 impl<O: IsA<Cancellable>> CancellableExtManual for O {}
-
-impl IntoFuture for Cancellable {
-    type Output = ();
-
-    type IntoFuture = std::pin::Pin<Box<dyn Future<Output = ()> + Send + Sync + 'static>>;
-
-    fn into_future(self) -> Self::IntoFuture {
-        self.future()
-    }
-}
-
-impl IntoFuture for &Cancellable {
-    type Output = ();
-
-    type IntoFuture = std::pin::Pin<Box<dyn Future<Output = ()> + Send + Sync + 'static>>;
-
-    fn into_future(self) -> Self::IntoFuture {
-        self.future()
-    }
-}
 
 #[cfg(test)]
 mod tests {

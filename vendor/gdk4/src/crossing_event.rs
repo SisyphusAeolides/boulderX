@@ -6,7 +6,7 @@ use crate::{CrossingEvent, EventType};
 
 define_event! {
     CrossingEvent,
-    crate::ffi::GdkCrossingEvent,
+    ffi::GdkCrossingEvent,
     &[EventType::EnterNotify, EventType::LeaveNotify]
 }
 

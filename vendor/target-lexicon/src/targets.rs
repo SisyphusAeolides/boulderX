@@ -33,8 +33,6 @@ pub enum Architecture {
     Nvptx64,
     Pulley32,
     Pulley64,
-    Pulley32be,
-    Pulley64be,
     Powerpc,
     Powerpc64,
     Powerpc64le,
@@ -56,8 +54,6 @@ pub enum Architecture {
     /// See https://wiki.polygon.technology/docs/category/zk-assembly/
     #[cfg(feature = "arch_zkasm")]
     ZkAsm,
-    #[cfg(feature = "arch_z80")]
-    Z80(Z80Architecture),
 }
 
 #[cfg_attr(feature = "rust_1_40", non_exhaustive)]
@@ -450,7 +446,6 @@ pub enum Riscv64Architecture {
     Riscv64,
     Riscv64gc,
     Riscv64imac,
-    Riscv64a23,
 }
 
 impl Riscv64Architecture {
@@ -462,7 +457,6 @@ impl Riscv64Architecture {
             Riscv64 => Cow::Borrowed("riscv64"),
             Riscv64gc => Cow::Borrowed("riscv64gc"),
             Riscv64imac => Cow::Borrowed("riscv64imac"),
-            Riscv64a23 => Cow::Borrowed("riscv64a23"),
         }
     }
 }
@@ -536,43 +530,6 @@ impl Mips64Architecture {
             Mips64el => Cow::Borrowed("mips64el"),
             Mipsisa64r6 => Cow::Borrowed("mipsisa64r6"),
             Mipsisa64r6el => Cow::Borrowed("mipsisa64r6el"),
-        }
-    }
-}
-
-#[cfg(feature = "arch_z80")]
-#[cfg_attr(feature = "rust_1_40", non_exhaustive)]
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
-#[allow(missing_docs)]
-pub enum Z80Architecture {
-    Z80,
-    Z180,
-    Ez80,
-    Sm83,
-    Rabbit2000,
-    Rabbit2000A,
-    Rabbit3000,
-    Rabbit3000A,
-    Tlcs90,
-    R800,
-}
-
-#[cfg(feature = "arch_z80")]
-impl Z80Architecture {
-    pub fn into_str(self) -> Cow<'static, str> {
-        use Z80Architecture::*;
-
-        match self {
-            Z80 => Cow::Borrowed("z80"),
-            Z180 => Cow::Borrowed("z180"),
-            Ez80 => Cow::Borrowed("ez80"),
-            Sm83 => Cow::Borrowed("sm83"),
-            Rabbit2000 => Cow::Borrowed("rabbit2000"),
-            Rabbit2000A => Cow::Borrowed("rabbit2000a"),
-            Rabbit3000 => Cow::Borrowed("rabbit3000"),
-            Rabbit3000A => Cow::Borrowed("rabbit3000a"),
-            Tlcs90 => Cow::Borrowed("tlcs90"),
-            R800 => Cow::Borrowed("r800"),
         }
     }
 }
@@ -668,25 +625,8 @@ impl Vendor {
     }
 }
 
-/// The minimum OS version that we're compiling for.
-///
-/// This is formatted as `"major.minor.patch"`.
-///
-/// The size of the parts here are limited by Mach-O's `LC_BUILD_VERSION`.
-#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
-#[allow(missing_docs)]
-pub struct DeploymentTarget {
-    pub major: u16,
-    pub minor: u8,
-    pub patch: u8,
-}
-
 /// The "operating system" field, which sometimes implies an environment, and
 /// sometimes isn't an actual operating system.
-///
-/// LLVM's Apple triples may optionally include the [deployment target].
-///
-/// [deployment target]: DeploymentTarget
 #[cfg_attr(feature = "rust_1_40", non_exhaustive)]
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 #[allow(missing_docs)]
@@ -697,18 +637,7 @@ pub enum OperatingSystem {
     Bitrig,
     Cloudabi,
     Cuda,
-    Cygwin,
-    /// The general [Darwin][darwin-wiki] core OS.
-    ///
-    /// Generally, `-mmacosx-version-min=...` or similar flags are required by
-    /// Clang to determine the actual OS (either macOS, iOS, tvOS, watchOS or
-    /// visionOS).
-    ///
-    /// WARNING: When parsing `rustc` target triples, this matches the macOS
-    /// target triples as well.
-    ///
-    /// [darwin-wiki]: https://en.wikipedia.org/wiki/Darwin_(operating_system)
-    Darwin(Option<DeploymentTarget>),
+    Darwin,
     Dragonfly,
     Emscripten,
     Espidf,
@@ -719,14 +648,10 @@ pub enum OperatingSystem {
     Horizon,
     Hurd,
     Illumos,
-    IOS(Option<DeploymentTarget>),
+    Ios,
     L4re,
     Linux,
-    /// macOS.
-    ///
-    /// WARNING: This does _not_ match the macOS triples when parsing `rustc`
-    /// target triples, for that see the [`darwin`](Self::Darwin) OS name.
-    MacOSX(Option<DeploymentTarget>),
+    MacOSX { major: u16, minor: u16, patch: u16 },
     Nebulet,
     Netbsd,
     None_,
@@ -735,36 +660,21 @@ pub enum OperatingSystem {
     Redox,
     Solaris,
     SolidAsp3,
-    TvOS(Option<DeploymentTarget>),
+    Tvos,
     Uefi,
-    VisionOS(Option<DeploymentTarget>),
+    Visionos,
     VxWorks,
     Wasi,
     WasiP1,
     WasiP2,
-    WatchOS(Option<DeploymentTarget>),
+    Watchos,
     Windows,
-    /// An alternate name for [visionOS][Self::VisionOS].
-    XROS(Option<DeploymentTarget>),
 }
 
 impl OperatingSystem {
     /// Convert into a string
     pub fn into_str(self) -> Cow<'static, str> {
         use OperatingSystem::*;
-
-        let darwin_version = |name, deployment_target| {
-            if let Some(DeploymentTarget {
-                major,
-                minor,
-                patch,
-            }) = deployment_target
-            {
-                Cow::Owned(format!("{}{}.{}.{}", name, major, minor, patch))
-            } else {
-                Cow::Borrowed(name)
-            }
-        };
 
         match self {
             Unknown => Cow::Borrowed("unknown"),
@@ -773,8 +683,7 @@ impl OperatingSystem {
             Bitrig => Cow::Borrowed("bitrig"),
             Cloudabi => Cow::Borrowed("cloudabi"),
             Cuda => Cow::Borrowed("cuda"),
-            Cygwin => Cow::Borrowed("cygwin"),
-            Darwin(deployment_target) => darwin_version("darwin", deployment_target),
+            Darwin => Cow::Borrowed("darwin"),
             Dragonfly => Cow::Borrowed("dragonfly"),
             Emscripten => Cow::Borrowed("emscripten"),
             Espidf => Cow::Borrowed("espidf"),
@@ -785,10 +694,14 @@ impl OperatingSystem {
             Horizon => Cow::Borrowed("horizon"),
             Hurd => Cow::Borrowed("hurd"),
             Illumos => Cow::Borrowed("illumos"),
-            IOS(deployment_target) => darwin_version("ios", deployment_target),
+            Ios => Cow::Borrowed("ios"),
             L4re => Cow::Borrowed("l4re"),
             Linux => Cow::Borrowed("linux"),
-            MacOSX(deployment_target) => darwin_version("macosx", deployment_target),
+            MacOSX {
+                major,
+                minor,
+                patch,
+            } => Cow::Owned(format!("macosx{}.{}.{}", major, minor, patch)),
             Nebulet => Cow::Borrowed("nebulet"),
             Netbsd => Cow::Borrowed("netbsd"),
             None_ => Cow::Borrowed("none"),
@@ -797,35 +710,15 @@ impl OperatingSystem {
             Redox => Cow::Borrowed("redox"),
             Solaris => Cow::Borrowed("solaris"),
             SolidAsp3 => Cow::Borrowed("solid_asp3"),
-            TvOS(deployment_target) => darwin_version("tvos", deployment_target),
+            Tvos => Cow::Borrowed("tvos"),
             Uefi => Cow::Borrowed("uefi"),
             VxWorks => Cow::Borrowed("vxworks"),
-            VisionOS(deployment_target) => darwin_version("visionos", deployment_target),
+            Visionos => Cow::Borrowed("visionos"),
             Wasi => Cow::Borrowed("wasi"),
             WasiP1 => Cow::Borrowed("wasip1"),
             WasiP2 => Cow::Borrowed("wasip2"),
-            WatchOS(deployment_target) => darwin_version("watchos", deployment_target),
+            Watchos => Cow::Borrowed("watchos"),
             Windows => Cow::Borrowed("windows"),
-            XROS(deployment_target) => darwin_version("xros", deployment_target),
-        }
-    }
-
-    /// Whether the OS is similar to Darwin.
-    ///
-    /// This matches on any of:
-    /// - [Darwin](Self::Darwin)
-    /// - [iOS](Self::IOS)
-    /// - [macOS](Self::MacOSX)
-    /// - [tvOS](Self::TvOS)
-    /// - [visionOS](Self::VisionOS)
-    /// - [watchOS](Self::WatchOS)
-    /// - [xrOS](Self::XROS)
-    pub fn is_like_darwin(&self) -> bool {
-        use OperatingSystem::*;
-
-        match self {
-            Darwin(_) | IOS(_) | MacOSX(_) | TvOS(_) | VisionOS(_) | WatchOS(_) | XROS(_) => true,
-            _ => false,
         }
     }
 }
@@ -991,16 +884,12 @@ impl Architecture {
             | Mips64(Mips64Architecture::Mipsisa64r6)
             | Powerpc
             | Powerpc64
-            | Pulley32be
-            | Pulley64be
             | S390x
             | Sparc
             | Sparc64
             | Sparcv9 => Ok(Endianness::Big),
             #[cfg(feature="arch_zkasm")]
             ZkAsm => Ok(Endianness::Big),
-            #[cfg(feature = "arch_z80")]
-            Z80(_) => Ok(Endianness::Little),
         }
     }
 
@@ -1026,7 +915,6 @@ impl Architecture {
             | M68k
             | Mips32(_)
             | Pulley32
-            | Pulley32be
             | Powerpc
             | XTensa => Ok(PointerWidth::U32),
             AmdGcn
@@ -1039,7 +927,6 @@ impl Architecture {
             | Mips64(_)
             | Nvptx64
             | Pulley64
-            | Pulley64be
             | Powerpc64
             | S390x
             | Sparc64
@@ -1049,8 +936,6 @@ impl Architecture {
             | Clever(_) => Ok(PointerWidth::U64),
             #[cfg(feature="arch_zkasm")]
             ZkAsm => Ok(PointerWidth::U64),
-            #[cfg(feature = "arch_z80")]
-            Z80(_) => Ok(PointerWidth::U16),
         }
     }
 
@@ -1085,8 +970,6 @@ impl Architecture {
             Nvptx64 => Cow::Borrowed("nvptx64"),
             Pulley32 => Cow::Borrowed("pulley32"),
             Pulley64 => Cow::Borrowed("pulley64"),
-            Pulley32be => Cow::Borrowed("pulley32be"),
-            Pulley64be => Cow::Borrowed("pulley64be"),
             Powerpc => Cow::Borrowed("powerpc"),
             Powerpc64 => Cow::Borrowed("powerpc64"),
             Powerpc64le => Cow::Borrowed("powerpc64le"),
@@ -1104,8 +987,6 @@ impl Architecture {
             Clever(ver) => ver.into_str(),
             #[cfg(feature = "arch_zkasm")]
             ZkAsm => Cow::Borrowed("zkasm"),
-            #[cfg(feature = "arch_z80")]
-            Z80(z80) => z80.into_str(),
         }
     }
 }
@@ -1119,7 +1000,12 @@ pub(crate) fn default_binary_format(triple: &Triple) -> BinaryFormat {
             _ => BinaryFormat::Unknown,
         },
         OperatingSystem::Aix => BinaryFormat::Xcoff,
-        os if os.is_like_darwin() => BinaryFormat::Macho,
+        OperatingSystem::Darwin
+        | OperatingSystem::Ios
+        | OperatingSystem::MacOSX { .. }
+        | OperatingSystem::Visionos
+        | OperatingSystem::Watchos
+        | OperatingSystem::Tvos => BinaryFormat::Macho,
         OperatingSystem::Windows => BinaryFormat::Coff,
         OperatingSystem::Nebulet
         | OperatingSystem::Emscripten
@@ -1178,13 +1064,6 @@ impl fmt::Display for Mips32Architecture {
 }
 
 impl fmt::Display for Mips64Architecture {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.write_str(&self.into_str())
-    }
-}
-
-#[cfg(feature = "arch_z80")]
-impl fmt::Display for Z80Architecture {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.write_str(&self.into_str())
     }
@@ -1306,7 +1185,6 @@ impl FromStr for Riscv64Architecture {
             "riscv64" => Riscv64,
             "riscv64gc" => Riscv64gc,
             "riscv64imac" => Riscv64imac,
-            "riscv64a23" => Riscv64a23,
             _ => return Err(()),
         })
     }
@@ -1359,29 +1237,6 @@ impl FromStr for Mips64Architecture {
     }
 }
 
-#[cfg(feature = "arch_z80")]
-impl FromStr for Z80Architecture {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, ()> {
-        use Z80Architecture::*;
-
-        Ok(match s {
-            "z80" => Z80,
-            "z180" => Z180,
-            "ez80" => Ez80,
-            "sm83" => Sm83,
-            "rabbit2000" => Rabbit2000,
-            "rabbit2000a" => Rabbit2000A,
-            "rabbit3000" => Rabbit3000,
-            "rabbit3000a" => Rabbit3000A,
-            "tlcs90" => Tlcs90,
-            "r800" => R800,
-            _ => return Err(()),
-        })
-    }
-}
-
 impl FromStr for Architecture {
     type Err = ();
 
@@ -1402,8 +1257,6 @@ impl FromStr for Architecture {
             "nvptx64" => Nvptx64,
             "pulley32" => Pulley32,
             "pulley64" => Pulley64,
-            "pulley32be" => Pulley32be,
-            "pulley64be" => Pulley64be,
             "powerpc" => Powerpc,
             "powerpc64" => Powerpc64,
             "powerpc64le" => Powerpc64le,
@@ -1436,12 +1289,6 @@ impl FromStr for Architecture {
                 } else if let Ok(clever) = CleverArchitecture::from_str(s) {
                     Clever(clever)
                 } else {
-                    #[cfg(feature = "arch_z80")]
-                    {
-                        if let Ok(z80) = Z80Architecture::from_str(s) {
-                            return Ok(Architecture::Z80(z80));
-                        }
-                    }
                     return Err(());
                 }
             }
@@ -1525,27 +1372,12 @@ impl fmt::Display for OperatingSystem {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         use OperatingSystem::*;
 
-        let mut with_version = |name, deployment_target| {
-            if let Some(DeploymentTarget {
+        match *self {
+            MacOSX {
                 major,
                 minor,
                 patch,
-            }) = deployment_target
-            {
-                write!(f, "{}{}.{}.{}", name, major, minor, patch)
-            } else {
-                write!(f, "{}", name)
-            }
-        };
-
-        match *self {
-            Darwin(deployment_target) => with_version("darwin", deployment_target),
-            IOS(deployment_target) => with_version("ios", deployment_target),
-            MacOSX(deployment_target) => with_version("macosx", deployment_target),
-            TvOS(deployment_target) => with_version("tvos", deployment_target),
-            VisionOS(deployment_target) => with_version("visionos", deployment_target),
-            WatchOS(deployment_target) => with_version("watchos", deployment_target),
-            XROS(deployment_target) => with_version("xros", deployment_target),
+            } => write!(f, "macosx{}.{}.{}", major, minor, patch),
             os => f.write_str(&os.into_str()),
         }
     }
@@ -1557,68 +1389,35 @@ impl FromStr for OperatingSystem {
     fn from_str(s: &str) -> Result<Self, ()> {
         use OperatingSystem::*;
 
-        let parse_darwin = |name: &str| {
-            let s = &s[name.len()..];
-            let mut parts = s.split('.');
+        // TODO also parse version number for darwin and ios OSes
+        if s.starts_with("macosx") {
+            // Parse operating system names like `macosx10.7.0`.
+            let s = &s["macosx".len()..];
+            let mut parts = s.split('.').map(|num| num.parse::<u16>());
 
-            if s.is_empty() {
-                // Not specifying a version is allowed!
-                return Ok(None);
+            macro_rules! get_part {
+                () => {
+                    if let Some(Ok(part)) = parts.next() {
+                        part
+                    } else {
+                        return Err(());
+                    }
+                };
             }
 
-            let major = if let Some(part) = parts.next() {
-                part.parse().map_err(|_| ())?
-            } else {
-                // If the string was just `.`, with no major version, that's
-                // clearly an error.
-                return Err(());
-            };
-            let minor = if let Some(part) = parts.next() {
-                part.parse().map_err(|_| ())?
-            } else {
-                // Fall back to 0 if no minor version was set
-                0
-            };
-            let patch = if let Some(part) = parts.next() {
-                part.parse().map_err(|_| ())?
-            } else {
-                // Fall back to 0 if no patch version was set
-                0
-            };
+            let major = get_part!();
+            let minor = get_part!();
+            let patch = get_part!();
 
             if parts.next().is_some() {
-                // Too many parts
                 return Err(());
             }
 
-            Ok(Some(DeploymentTarget {
+            return Ok(MacOSX {
                 major,
                 minor,
                 patch,
-            }))
-        };
-
-        // Parse operating system names that contain a version, like `macosx10.7.0`.
-        if s.starts_with("darwin") {
-            return Ok(Darwin(parse_darwin("darwin")?));
-        }
-        if s.starts_with("ios") {
-            return Ok(IOS(parse_darwin("ios")?));
-        }
-        if s.starts_with("macosx") {
-            return Ok(MacOSX(parse_darwin("macosx")?));
-        }
-        if s.starts_with("tvos") {
-            return Ok(TvOS(parse_darwin("tvos")?));
-        }
-        if s.starts_with("visionos") {
-            return Ok(VisionOS(parse_darwin("visionos")?));
-        }
-        if s.starts_with("watchos") {
-            return Ok(WatchOS(parse_darwin("watchos")?));
-        }
-        if s.starts_with("xros") {
-            return Ok(XROS(parse_darwin("xros")?));
+            });
         }
 
         Ok(match s {
@@ -1628,7 +1427,7 @@ impl FromStr for OperatingSystem {
             "bitrig" => Bitrig,
             "cloudabi" => Cloudabi,
             "cuda" => Cuda,
-            "cygwin" => Cygwin,
+            "darwin" => Darwin,
             "dragonfly" => Dragonfly,
             "emscripten" => Emscripten,
             "freebsd" => Freebsd,
@@ -1638,6 +1437,7 @@ impl FromStr for OperatingSystem {
             "horizon" => Horizon,
             "hurd" => Hurd,
             "illumos" => Illumos,
+            "ios" => Ios,
             "l4re" => L4re,
             "linux" => Linux,
             "nebulet" => Nebulet,
@@ -1648,11 +1448,14 @@ impl FromStr for OperatingSystem {
             "redox" => Redox,
             "solaris" => Solaris,
             "solid_asp3" => SolidAsp3,
+            "tvos" => Tvos,
             "uefi" => Uefi,
+            "visionos" => Visionos,
             "vxworks" => VxWorks,
             "wasi" => Wasi,
             "wasip1" => WasiP1,
             "wasip2" => WasiP2,
+            "watchos" => Watchos,
             "windows" => Windows,
             "espidf" => Espidf,
             _ => return Err(()),
@@ -1929,7 +1732,6 @@ mod tests {
             "riscv64gc-unknown-fuchsia",
             "riscv64gc-unknown-hermit",
             "riscv64gc-unknown-linux-gnu",
-            "riscv64a23-unknown-linux-gnu",
             "riscv64gc-unknown-linux-musl",
             "riscv64gc-unknown-netbsd",
             "riscv64gc-unknown-none-elf",
@@ -1968,7 +1770,6 @@ mod tests {
             "wasm64-unknown-unknown",
             "wasm64-wasi",
             "x86_64-apple-darwin",
-            "x86_64-apple-darwin23.6.0",
             "x86_64-apple-ios",
             "x86_64-apple-ios-macabi",
             "x86_64-apple-tvos",
@@ -1978,9 +1779,7 @@ mod tests {
             "x86_64-linux-android",
             //"x86_64-pc-nto-qnx710", // TODO
             "x86_64-linux-kernel", // Changed to x86_64-unknown-none-linuxkernel in 1.53.0
-            "x86_64-apple-macosx",
             "x86_64-apple-macosx10.7.0",
-            "x86_64-pc-cygwin",
             "x86_64-pc-solaris",
             "x86_64-pc-windows-gnu",
             "x86_64-pc-windows-gnullvm",
@@ -2023,12 +1822,6 @@ mod tests {
             "xtensa-esp32s3-none-elf",
             #[cfg(feature = "arch_zkasm")]
             "zkasm-unknown-unknown",
-            #[cfg(feature = "arch_z80")]
-            "z80-zilog-none",
-            #[cfg(feature = "arch_z80")]
-            "sm83-nintendo-none",
-            #[cfg(feature = "arch_z80")]
-            "tlcs90-toshiba-none",
         ];
 
         for target in targets.iter() {
@@ -2158,58 +1951,5 @@ mod tests {
                 binary_format: BinaryFormat::Unknown,
             })
         );
-    }
-
-    #[test]
-    fn deployment_version_parsing() {
-        assert_eq!(
-            Triple::from_str("aarch64-apple-macosx"),
-            Ok(Triple {
-                architecture: Architecture::Aarch64(Aarch64Architecture::Aarch64),
-                vendor: Vendor::Apple,
-                operating_system: OperatingSystem::MacOSX(None),
-                environment: Environment::Unknown,
-                binary_format: BinaryFormat::Macho,
-            })
-        );
-
-        assert_eq!(
-            Triple::from_str("aarch64-apple-macosx10.14.6"),
-            Ok(Triple {
-                architecture: Architecture::Aarch64(Aarch64Architecture::Aarch64),
-                vendor: Vendor::Apple,
-                operating_system: OperatingSystem::MacOSX(Some(DeploymentTarget {
-                    major: 10,
-                    minor: 14,
-                    patch: 6,
-                })),
-                environment: Environment::Unknown,
-                binary_format: BinaryFormat::Macho,
-            })
-        );
-
-        let expected = Triple {
-            architecture: Architecture::X86_64,
-            vendor: Vendor::Apple,
-            operating_system: OperatingSystem::Darwin(Some(DeploymentTarget {
-                major: 23,
-                minor: 0,
-                patch: 0,
-            })),
-            environment: Environment::Unknown,
-            binary_format: BinaryFormat::Macho,
-        };
-        assert_eq!(
-            Triple::from_str("x86_64-apple-darwin23"),
-            Ok(expected.clone())
-        );
-        assert_eq!(
-            Triple::from_str("x86_64-apple-darwin23.0"),
-            Ok(expected.clone())
-        );
-        assert_eq!(Triple::from_str("x86_64-apple-darwin23.0.0"), Ok(expected));
-
-        assert!(Triple::from_str("x86_64-apple-darwin.").is_err());
-        assert!(Triple::from_str("x86_64-apple-darwin23.0.0.0").is_err());
     }
 }

@@ -4,7 +4,7 @@ use std::ptr;
 
 use glib::translate::*;
 
-use crate::{ffi, CustomFilter};
+use crate::CustomFilter;
 
 impl CustomFilter {
     #[doc(alias = "gtk_custom_filter_new")]

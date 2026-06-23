@@ -12,7 +12,7 @@ use std::{
     ptr,
 };
 
-use crate::{ffi, gobject_ffi, prelude::*, translate::*, Slice, TypeFlags, TypePlugin};
+use crate::{prelude::*, translate::*, Slice, TypeFlags, TypePlugin};
 
 // rustdoc-stripper-ignore-next
 /// A GLib or GLib-based library type
@@ -355,14 +355,14 @@ impl From<Type> for crate::Value {
     }
 }
 
-impl<T: ?Sized + StaticType> StaticType for &'_ T {
+impl<'a, T: ?Sized + StaticType> StaticType for &'a T {
     #[inline]
     fn static_type() -> Type {
         T::static_type()
     }
 }
 
-impl<T: ?Sized + StaticType> StaticType for &'_ mut T {
+impl<'a, T: ?Sized + StaticType> StaticType for &'a mut T {
     #[inline]
     fn static_type() -> Type {
         T::static_type()
@@ -555,7 +555,7 @@ builtin!(PathBuf, STRING);
 builtin!(Path, STRING);
 builtin!(Pointer, POINTER);
 
-impl StaticType for [&'_ str] {
+impl<'a> StaticType for [&'a str] {
     #[inline]
     fn static_type() -> Type {
         unsafe { from_glib(ffi::g_strv_get_type()) }

@@ -2,9 +2,8 @@
 // from gir-files (https://github.com/gtk-rs/gir-files)
 // DO NOT EDIT
 
-use crate::{ffi, EventController, PropagationLimit, PropagationPhase};
+use crate::{EventController, PropagationLimit, PropagationPhase};
 use glib::{
-    object::ObjectType as _,
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
     translate::*,
@@ -38,7 +37,6 @@ impl EventControllerFocus {
     }
 
     #[doc(alias = "gtk_event_controller_focus_contains_focus")]
-    #[doc(alias = "contains-focus")]
     pub fn contains_focus(&self) -> bool {
         unsafe {
             from_glib(ffi::gtk_event_controller_focus_contains_focus(
@@ -48,7 +46,6 @@ impl EventControllerFocus {
     }
 
     #[doc(alias = "gtk_event_controller_focus_is_focus")]
-    #[doc(alias = "is-focus")]
     pub fn is_focus(&self) -> bool {
         unsafe {
             from_glib(ffi::gtk_event_controller_focus_is_focus(
@@ -71,7 +68,7 @@ impl EventControllerFocus {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"enter\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     enter_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -93,7 +90,7 @@ impl EventControllerFocus {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"leave\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     leave_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -118,7 +115,7 @@ impl EventControllerFocus {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::contains-focus\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_contains_focus_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -141,7 +138,7 @@ impl EventControllerFocus {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::is-focus\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_is_focus_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -198,7 +195,6 @@ impl EventControllerFocusBuilder {
     /// Build the [`EventControllerFocus`].
     #[must_use = "Building the object from the builder is usually expensive and is not expected to have side effects"]
     pub fn build(self) -> EventControllerFocus {
-        assert_initialized_main_thread!();
         self.builder.build()
     }
 }

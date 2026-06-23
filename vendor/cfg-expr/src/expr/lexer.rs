@@ -10,11 +10,11 @@ pub enum Token<'a> {
     Value(&'a str),
     /// A '=', joining a key and a value
     Equals,
-    /// Beginning of an `all()` predicate list
+    /// Beginning of an all() predicate list
     All,
-    /// Beginning of an `any()` predicate list
+    /// Beginning of an any() predicate list
     Any,
-    /// Beginning of a `not()` predicate
+    /// Beginning of a not() predicate
     Not,
     /// A `(` for starting a predicate list
     OpenParen,
@@ -24,14 +24,13 @@ pub enum Token<'a> {
     Comma,
 }
 
-impl std::fmt::Display for Token<'_> {
+impl<'a> std::fmt::Display for Token<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Debug::fmt(self, f)
     }
 }
 
-impl Token<'_> {
-    #[inline]
+impl<'a> Token<'a> {
     fn len(&self) -> usize {
         match self {
             Token::Key(s) => s.len(),

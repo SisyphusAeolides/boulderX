@@ -4,9 +4,7 @@ use std::ptr;
 
 use glib::translate::*;
 
-use crate::{
-    ffi, prelude::*, ButtonsType, DialogFlags, MessageDialog, MessageType, Widget, Window,
-};
+use crate::{prelude::*, ButtonsType, DialogFlags, MessageDialog, MessageType, Widget, Window};
 
 impl MessageDialog {
     #[doc(alias = "gtk_message_dialog_new")]

@@ -6,7 +6,7 @@ use crate::{EventType, MotionEvent};
 
 define_event! {
     MotionEvent,
-    crate::ffi::GdkMotionEvent,
+    ffi::GdkMotionEvent,
     &[EventType::MotionNotify]
 }
 

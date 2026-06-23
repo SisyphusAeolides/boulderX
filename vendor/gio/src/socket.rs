@@ -13,7 +13,7 @@ use glib::{prelude::*, translate::*, Slice};
 
 #[cfg(feature = "v2_60")]
 use crate::PollableReturn;
-use crate::{ffi, Cancellable, Socket, SocketAddress, SocketControlMessage};
+use crate::{Cancellable, Socket, SocketAddress, SocketControlMessage};
 
 impl Socket {
     #[cfg(unix)]
@@ -81,10 +81,10 @@ impl<'v> InputVector<'v> {
     }
 }
 
-unsafe impl Send for InputVector<'_> {}
-unsafe impl Sync for InputVector<'_> {}
+unsafe impl<'v> Send for InputVector<'v> {}
+unsafe impl<'v> Sync for InputVector<'v> {}
 
-impl std::ops::Deref for InputVector<'_> {
+impl<'v> std::ops::Deref for InputVector<'v> {
     type Target = [u8];
 
     #[inline]
@@ -93,7 +93,7 @@ impl std::ops::Deref for InputVector<'_> {
     }
 }
 
-impl std::ops::DerefMut for InputVector<'_> {
+impl<'v> std::ops::DerefMut for InputVector<'v> {
     #[inline]
     fn deref_mut(&mut self) -> &mut Self::Target {
         unsafe { std::slice::from_raw_parts_mut(self.vector.buffer as *mut _, self.vector.size) }
@@ -230,10 +230,10 @@ impl<'v> OutputVector<'v> {
     }
 }
 
-unsafe impl Send for OutputVector<'_> {}
-unsafe impl Sync for OutputVector<'_> {}
+unsafe impl<'v> Send for OutputVector<'v> {}
+unsafe impl<'v> Sync for OutputVector<'v> {}
 
-impl std::ops::Deref for OutputVector<'_> {
+impl<'v> std::ops::Deref for OutputVector<'v> {
     type Target = [u8];
 
     #[inline]

@@ -2,7 +2,7 @@
 
 use glib::translate::*;
 
-use crate::{ffi, prelude::*, ComboBox};
+use crate::{prelude::*, ComboBox};
 
 mod sealed {
     pub trait Sealed {}

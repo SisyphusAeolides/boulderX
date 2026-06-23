@@ -4,7 +4,7 @@ use std::{future, pin::Pin, ptr};
 
 use glib::{translate::*, GString};
 
-use crate::{ffi, prelude::*, Clipboard};
+use crate::{prelude::*, Clipboard};
 
 impl Clipboard {
     #[doc(alias = "gdk_clipboard_read_async")]

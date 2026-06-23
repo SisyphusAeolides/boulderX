@@ -4,7 +4,7 @@ use std::marker::PhantomData;
 
 use glib::translate::*;
 
-use crate::{ffi, Bitset};
+use crate::Bitset;
 
 #[derive(Copy, Clone)]
 #[doc(alias = "GtkBitsetIter")]
@@ -108,7 +108,7 @@ impl<'a> BitsetIter<'a> {
     }
 }
 
-impl Iterator for BitsetIter<'_> {
+impl<'a> Iterator for BitsetIter<'a> {
     type Item = u32;
 
     #[doc(alias = "gtk_bitset_iter_next")]
@@ -129,14 +129,14 @@ impl Iterator for BitsetIter<'_> {
     }
 }
 
-impl std::iter::FusedIterator for BitsetIter<'_> {}
+impl<'a> std::iter::FusedIterator for BitsetIter<'a> {}
 
 #[doc(hidden)]
 impl<'a> ToGlibPtr<'a, *const ffi::GtkBitsetIter> for BitsetIter<'a> {
     type Storage = &'a Self;
 
     #[inline]
-    fn to_glib_none(&'a self) -> Stash<'a, *const ffi::GtkBitsetIter, Self> {
+    fn to_glib_none(&'a self) -> Stash<*const ffi::GtkBitsetIter, Self> {
         Stash(&self.0 as *const ffi::GtkBitsetIter, self)
     }
 }

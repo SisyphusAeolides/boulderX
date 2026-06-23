@@ -2,7 +2,7 @@
 
 use std::{ffi::CStr, fmt};
 
-use crate::{ffi, Error};
+use crate::Error;
 
 // rustdoc-stripper-ignore-next
 /// Resets all static data within cairo to its original state (i.e. identical to the state at program

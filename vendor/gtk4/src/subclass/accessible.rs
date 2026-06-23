@@ -8,9 +8,7 @@ use std::mem::MaybeUninit;
 
 use glib::translate::*;
 
-use crate::{
-    ffi, prelude::*, subclass::prelude::*, ATContext, Accessible, AccessiblePlatformState,
-};
+use crate::{prelude::*, subclass::prelude::*, ATContext, Accessible, AccessiblePlatformState};
 
 pub trait AccessibleImpl: ObjectImpl {
     #[doc(alias = "get_platform_state")]

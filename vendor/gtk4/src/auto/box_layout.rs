@@ -2,7 +2,7 @@
 // from gir-files (https://github.com/gtk-rs/gir-files)
 // DO NOT EDIT
 
-use crate::{ffi, BaselinePosition, LayoutManager, Orientable, Orientation};
+use crate::{BaselinePosition, LayoutManager, Orientable, Orientation};
 use glib::{
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
@@ -41,14 +41,12 @@ impl BoxLayout {
     #[cfg_attr(docsrs, doc(cfg(feature = "v4_12")))]
     #[doc(alias = "gtk_box_layout_get_baseline_child")]
     #[doc(alias = "get_baseline_child")]
-    #[doc(alias = "baseline-child")]
     pub fn baseline_child(&self) -> i32 {
         unsafe { ffi::gtk_box_layout_get_baseline_child(self.to_glib_none().0) }
     }
 
     #[doc(alias = "gtk_box_layout_get_baseline_position")]
     #[doc(alias = "get_baseline_position")]
-    #[doc(alias = "baseline-position")]
     pub fn baseline_position(&self) -> BaselinePosition {
         unsafe {
             from_glib(ffi::gtk_box_layout_get_baseline_position(
@@ -59,7 +57,6 @@ impl BoxLayout {
 
     #[doc(alias = "gtk_box_layout_get_homogeneous")]
     #[doc(alias = "get_homogeneous")]
-    #[doc(alias = "homogeneous")]
     pub fn is_homogeneous(&self) -> bool {
         unsafe { from_glib(ffi::gtk_box_layout_get_homogeneous(self.to_glib_none().0)) }
     }
@@ -73,7 +70,6 @@ impl BoxLayout {
     #[cfg(feature = "v4_12")]
     #[cfg_attr(docsrs, doc(cfg(feature = "v4_12")))]
     #[doc(alias = "gtk_box_layout_set_baseline_child")]
-    #[doc(alias = "baseline-child")]
     pub fn set_baseline_child(&self, child: i32) {
         unsafe {
             ffi::gtk_box_layout_set_baseline_child(self.to_glib_none().0, child);
@@ -81,7 +77,6 @@ impl BoxLayout {
     }
 
     #[doc(alias = "gtk_box_layout_set_baseline_position")]
-    #[doc(alias = "baseline-position")]
     pub fn set_baseline_position(&self, position: BaselinePosition) {
         unsafe {
             ffi::gtk_box_layout_set_baseline_position(self.to_glib_none().0, position.into_glib());
@@ -89,7 +84,6 @@ impl BoxLayout {
     }
 
     #[doc(alias = "gtk_box_layout_set_homogeneous")]
-    #[doc(alias = "homogeneous")]
     pub fn set_homogeneous(&self, homogeneous: bool) {
         unsafe {
             ffi::gtk_box_layout_set_homogeneous(self.to_glib_none().0, homogeneous.into_glib());
@@ -97,7 +91,6 @@ impl BoxLayout {
     }
 
     #[doc(alias = "gtk_box_layout_set_spacing")]
-    #[doc(alias = "spacing")]
     pub fn set_spacing(&self, spacing: u32) {
         unsafe {
             ffi::gtk_box_layout_set_spacing(self.to_glib_none().0, spacing);
@@ -121,7 +114,7 @@ impl BoxLayout {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::baseline-child\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_baseline_child_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -147,7 +140,7 @@ impl BoxLayout {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::baseline-position\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_baseline_position_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -170,7 +163,7 @@ impl BoxLayout {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::homogeneous\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_homogeneous_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -193,7 +186,7 @@ impl BoxLayout {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::spacing\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_spacing_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -262,7 +255,6 @@ impl BoxLayoutBuilder {
     /// Build the [`BoxLayout`].
     #[must_use = "Building the object from the builder is usually expensive and is not expected to have side effects"]
     pub fn build(self) -> BoxLayout {
-        assert_initialized_main_thread!();
         self.builder.build()
     }
 }

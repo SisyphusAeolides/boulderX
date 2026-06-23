@@ -2,9 +2,7 @@
 // from gir-files (https://github.com/gtk-rs/gir-files)
 // DO NOT EDIT
 
-use crate::ffi;
 use glib::{
-    object::ObjectType as _,
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
     translate::*,
@@ -79,9 +77,9 @@ pub trait ListModelExt: IsA<ListModel> + sealed::Sealed + 'static {
             F: Fn(&P, u32, u32, u32) + 'static,
         >(
             this: *mut ffi::GListModel,
-            position: std::ffi::c_uint,
-            removed: std::ffi::c_uint,
-            added: std::ffi::c_uint,
+            position: libc::c_uint,
+            removed: libc::c_uint,
+            added: libc::c_uint,
             f: glib::ffi::gpointer,
         ) {
             let f: &F = &*(f as *const F);

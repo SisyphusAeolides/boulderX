@@ -4,7 +4,7 @@ use std::{collections::HashMap, sync::OnceLock};
 
 use glib::{prelude::*, subclass::prelude::*, translate::*, GString, Quark};
 
-use crate::{ffi, Action, ActionMap};
+use crate::{Action, ActionMap};
 
 pub trait ActionMapImpl: ObjectImpl {
     fn lookup_action(&self, action_name: &str) -> Option<Action>;

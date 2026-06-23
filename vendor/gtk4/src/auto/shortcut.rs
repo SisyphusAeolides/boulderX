@@ -2,7 +2,7 @@
 // from gir-files (https://github.com/gtk-rs/gir-files)
 // DO NOT EDIT
 
-use crate::{ffi, ShortcutAction, ShortcutTrigger};
+use crate::{ShortcutAction, ShortcutTrigger};
 use glib::{
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
@@ -61,7 +61,6 @@ impl Shortcut {
     }
 
     #[doc(alias = "gtk_shortcut_set_action")]
-    #[doc(alias = "action")]
     pub fn set_action(&self, action: Option<impl IsA<ShortcutAction>>) {
         unsafe {
             ffi::gtk_shortcut_set_action(
@@ -72,7 +71,6 @@ impl Shortcut {
     }
 
     #[doc(alias = "gtk_shortcut_set_arguments")]
-    #[doc(alias = "arguments")]
     pub fn set_arguments(&self, args: Option<&glib::Variant>) {
         unsafe {
             ffi::gtk_shortcut_set_arguments(self.to_glib_none().0, args.to_glib_none().0);
@@ -80,7 +78,6 @@ impl Shortcut {
     }
 
     #[doc(alias = "gtk_shortcut_set_trigger")]
-    #[doc(alias = "trigger")]
     pub fn set_trigger(&self, trigger: Option<impl IsA<ShortcutTrigger>>) {
         unsafe {
             ffi::gtk_shortcut_set_trigger(
@@ -105,7 +102,7 @@ impl Shortcut {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::action\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_action_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -128,7 +125,7 @@ impl Shortcut {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::arguments\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_arguments_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -151,7 +148,7 @@ impl Shortcut {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::trigger\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_trigger_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -204,7 +201,6 @@ impl ShortcutBuilder {
     /// Build the [`Shortcut`].
     #[must_use = "Building the object from the builder is usually expensive and is not expected to have side effects"]
     pub fn build(self) -> Shortcut {
-        assert_initialized_main_thread!();
         self.builder.build()
     }
 }

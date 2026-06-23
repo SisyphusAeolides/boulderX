@@ -3,10 +3,9 @@
 // DO NOT EDIT
 
 use crate::{
-    ffi, ContentFormats, ContentProvider, Device, Display, DragAction, DragCancelReason, Surface,
+    ContentFormats, ContentProvider, Device, Display, DragAction, DragCancelReason, Surface,
 };
 use glib::{
-    object::ObjectType as _,
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
     translate::*,
@@ -103,7 +102,6 @@ pub trait DragExt: IsA<Drag> + sealed::Sealed + 'static {
 
     #[doc(alias = "gdk_drag_get_selected_action")]
     #[doc(alias = "get_selected_action")]
-    #[doc(alias = "selected-action")]
     fn selected_action(&self) -> DragAction {
         unsafe {
             from_glib(ffi::gdk_drag_get_selected_action(
@@ -155,7 +153,7 @@ pub trait DragExt: IsA<Drag> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"cancel\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     cancel_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -177,7 +175,7 @@ pub trait DragExt: IsA<Drag> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"dnd-finished\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     dnd_finished_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -199,7 +197,7 @@ pub trait DragExt: IsA<Drag> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"drop-performed\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     drop_performed_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -222,7 +220,7 @@ pub trait DragExt: IsA<Drag> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::actions\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_actions_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -245,7 +243,7 @@ pub trait DragExt: IsA<Drag> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::display\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_display_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -271,7 +269,7 @@ pub trait DragExt: IsA<Drag> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::selected-action\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_selected_action_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),

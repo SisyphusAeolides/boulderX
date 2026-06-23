@@ -20,9 +20,6 @@ pub mod accessible;
 #[cfg(feature = "v4_10")]
 #[cfg_attr(docsrs, doc(cfg(feature = "v4_10")))]
 pub mod accessible_range;
-#[cfg(feature = "v4_14")]
-#[cfg_attr(docsrs, doc(cfg(feature = "v4_14")))]
-pub mod accessible_text;
 pub mod actionable;
 pub mod adjustment;
 pub mod application;
@@ -101,9 +98,6 @@ pub mod prelude {
     #[cfg(feature = "v4_10")]
     #[cfg_attr(docsrs, doc(cfg(feature = "v4_10")))]
     pub use super::accessible_range::{AccessibleRangeImpl, AccessibleRangeImplExt};
-    #[cfg(feature = "v4_14")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "v4_14")))]
-    pub use super::accessible_text::{AccessibleTextImpl, AccessibleTextImplExt};
     #[cfg(feature = "v4_12")]
     #[cfg_attr(docsrs, doc(cfg(feature = "v4_12")))]
     pub use super::section_model::{SectionModelImpl, SectionModelImplExt};

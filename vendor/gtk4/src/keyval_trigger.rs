@@ -5,7 +5,7 @@ use std::fmt;
 use gdk::Key;
 use glib::translate::*;
 
-use crate::{ffi, prelude::*, ShortcutTrigger};
+use crate::{prelude::*, ShortcutTrigger};
 
 glib::wrapper! {
     pub struct KeyvalTrigger(Object<ffi::GtkKeyvalTrigger, ffi::GtkKeyvalTriggerClass>) @extends ShortcutTrigger;

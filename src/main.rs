@@ -5,13 +5,25 @@ use std::thread;
 use irc::client::prelude::*;
 use futures::prelude::*;
 
-// --- Gruvbox Dark CSS ---
+const DEFAULT_SERVER: &str = "irc.libera.chat";
+const DEFAULT_NICKNAME: &str = "SisyphusCode";
+const DEFAULT_PORT: u16 = 6697;
+const SERVER_TAB: &str = "Server";
+
+/// Rocky Linux community channels on Libera.Chat (see wiki.rockylinux.org/irc).
+const DEFAULT_CHANNELS: &[&str] = &[
+    "#rockylinux",
+    "#rockylinux-devel",
+    "#rockylinux-social",
+];
+
+// --- Gruvbox Dark + Rocky green accents ---
 const GRUVBOX_CSS: &str = "
     window { background-color: #282828; }
     label { color: #ebdbb2; font-family: monospace; }
     
     .sidebar { background-color: #1d2021; }
-    .sidebar-title { font-weight: bold; color: #fe8019; }
+    .sidebar-title { font-weight: bold; color: #10B981; }
     .sidebar-subtitle { font-weight: bold; color: #b8bb26; font-size: 0.9em; }
 
     button { 
@@ -234,7 +246,7 @@ impl SimpleComponent for AppModel {
 
     view! {
         gtk::Window {
-            set_title: Some("Rawhide Relay"),
+            set_title: Some("Boulder Relay — Rocky Linux IRC"),
             set_default_size: (1200, 700),
 
             gtk::Paned {
@@ -246,7 +258,8 @@ impl SimpleComponent for AppModel {
                     set_orientation: gtk::Orientation::Vertical, set_spacing: 12, set_width_request: 200,
                     add_css_class: "sidebar", set_margin_all: 0,
 
-                    gtk::Label { set_label: "RAWHIDE RELAY", add_css_class: "sidebar-title", set_margin_top: 16 },
+                    gtk::Label { set_label: "BOULDER RELAY", add_css_class: "sidebar-title", set_margin_top: 16 },
+                    gtk::Label { set_label: "Rocky Linux on Libera", set_margin_start: 12, set_margin_end: 12 },
                     gtk::Separator { set_orientation: gtk::Orientation::Horizontal },
                     
                     gtk::Label { set_label: "Network Configuration", add_css_class: "sidebar-subtitle", set_halign: gtk::Align::Start, set_margin_start: 12 },
@@ -338,34 +351,35 @@ impl SimpleComponent for AppModel {
     }
 
     fn init(_init: Self::Init, root: Self::Root, sender: ComponentSender<Self>) -> ComponentParts<Self> {
-        let server_tab = String::from("Server");
-        let dev_channel = String::from("#fedora-devel");
-        let rust_channel = String::from("##rust");
+        let server_tab = String::from(SERVER_TAB);
+        let rocky_channels: Vec<String> = DEFAULT_CHANNELS.iter().map(|c| c.to_string()).collect();
 
         let mut chat_histories = HashMap::new();
         chat_histories.insert(
             server_tab.clone(),
-            String::from("[System]: Ready. Enter password if registered and connect.\n"),
+            String::from(
+                "[System]: Ready for Libera.Chat. Register with NickServ and connect.\n\
+                 [System]: Rocky channels require a registered nick (wiki.rockylinux.org/irc).\n",
+            ),
         );
 
         let channel_box = gtk::Box::new(gtk::Orientation::Vertical, 6);
         let user_box = gtk::Box::new(gtk::Orientation::Vertical, 0);
 
+        let mut channels = vec![server_tab.clone()];
+        channels.extend(rocky_channels.clone());
+
         let model = AppModel {
             status: String::from("Offline"),
             active_channel: server_tab.clone(),
-            channels: vec![server_tab.clone(), dev_channel, rust_channel],
-            favorite_channels: vec![
-                server_tab.clone(),
-                String::from("#fedora-devel"),
-                String::from("##rust"),
-            ],
+            channels,
+            favorite_channels: vec![server_tab.clone(), rocky_channels[0].clone(), rocky_channels[1].clone()],
             muted_users: HashMap::new(),
             chat_histories,
             channel_users: HashMap::new(),
             irc_sender: None,
-            nickname: String::from("SisyphusCode"),
-            server: String::from("irc.libera.chat"),
+            nickname: String::from(DEFAULT_NICKNAME),
+            server: String::from(DEFAULT_SERVER),
             password: String::new(),
             channel_box: channel_box.clone(),
             user_box: user_box.clone(),
@@ -411,7 +425,7 @@ impl SimpleComponent for AppModel {
                             nickname: Some(nickname.clone()),
                             server: Some(server_addr),
                             channels: channels_to_join,
-                            port: Some(6697),
+                            port: Some(DEFAULT_PORT),
                             use_tls: Some(true),
                             nick_password: if pwd.is_empty() { None } else { Some(pwd) },
                             ..Config::default()
@@ -419,14 +433,14 @@ impl SimpleComponent for AppModel {
 
                         let mut client = match Client::from_config(config).await {
                             Ok(c) => c,
-                            Err(_) => {
-                                sender_clone.input(AppInput::NetworkStatus(String::from("Connection Failed.")));
+                            Err(e) => {
+                                sender_clone.input(AppInput::NetworkStatus(format!("Connection failed: {e}")));
                                 return;
                             }
                         };
 
-                        if client.identify().is_err() {
-                            sender_clone.input(AppInput::NetworkStatus(String::from("Auth Failed.")));
+                        if let Err(e) = client.identify() {
+                            sender_clone.input(AppInput::NetworkStatus(format!("NickServ auth failed: {e}")));
                             return;
                         }
 
@@ -437,7 +451,16 @@ impl SimpleComponent for AppModel {
                             Err(_) => return,
                         };
 
-                        while let Some(Ok(message)) = stream.next().await {
+                        while let Some(result) = stream.next().await {
+                            let message = match result {
+                                Ok(m) => m,
+                                Err(e) => {
+                                    sender_clone.input(AppInput::ReceiveServerMessage(format!(
+                                        "[Error]: {e}"
+                                    )));
+                                    continue;
+                                }
+                            };
                             let user = message.source_nickname().unwrap_or("Unknown").to_string();
 
                             match message.command {
@@ -503,12 +526,20 @@ impl SimpleComponent for AppModel {
                                 _ => {}
                             }
                         }
+
+                        sender_clone.input(AppInput::NetworkStatus(String::from("Disconnected")));
+                        sender_clone.input(AppInput::ReceiveServerMessage(
+                            String::from("[System]: Connection closed."),
+                        ));
                     });
                 });
             }
 
             AppInput::NetworkStatus(new_status) => {
-                self.status = new_status;
+                self.status = new_status.clone();
+                if new_status == "Disconnected" {
+                    self.irc_sender = None;
+                }
             }
 
             AppInput::NetworkConnected(irc_tx) => {
@@ -583,7 +614,7 @@ impl SimpleComponent for AppModel {
             }
 
             AppInput::ReceiveServerMessage(body) => {
-                let log = self.chat_histories.entry(String::from("Server")).or_insert_with(String::new);
+                let log = self.chat_histories.entry(String::from(SERVER_TAB)).or_insert_with(String::new);
                 log.push_str(&format!("{}\n", body));
             }
 
@@ -628,7 +659,7 @@ impl SimpleComponent for AppModel {
             }
 
             AppInput::SendMessage(text) => {
-                if self.active_channel == "Server" {
+                if self.active_channel == SERVER_TAB {
                     return;
                 }
 
@@ -647,7 +678,7 @@ impl SimpleComponent for AppModel {
 }
 
 fn main() {
-    let app = RelmApp::new("org.Sisyphus.RawhideRelay");
+    let app = RelmApp::new("org.Sisyphus.BoulderRelay");
     
     let provider = gtk::CssProvider::new();
     provider.load_from_data(GRUVBOX_CSS);

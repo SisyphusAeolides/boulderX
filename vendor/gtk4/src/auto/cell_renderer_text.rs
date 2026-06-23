@@ -3,9 +3,8 @@
 // DO NOT EDIT
 #![allow(deprecated)]
 
-use crate::{ffi, CellRenderer, CellRendererMode, TreePath};
+use crate::{CellRenderer, CellRendererMode, TreePath};
 use glib::{
-    object::ObjectType as _,
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
     translate::*,
@@ -439,7 +438,6 @@ impl CellRendererTextBuilder {
     /// Build the [`CellRendererText`].
     #[must_use = "Building the object from the builder is usually expensive and is not expected to have side effects"]
     pub fn build(self) -> CellRendererText {
-        assert_initialized_main_thread!();
         self.builder.build()
     }
 }
@@ -801,8 +799,8 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             F: Fn(&P, TreePath, &str) + 'static,
         >(
             this: *mut ffi::GtkCellRendererText,
-            path: *mut std::ffi::c_char,
-            new_text: *mut std::ffi::c_char,
+            path: *mut libc::c_char,
+            new_text: *mut libc::c_char,
             f: glib::ffi::gpointer,
         ) {
             let f: &F = &*(f as *const F);
@@ -818,7 +816,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"edited\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     edited_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -844,7 +842,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::align-set\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_align_set_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -870,7 +868,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::alignment\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_alignment_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -896,7 +894,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::attributes\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_attributes_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -922,7 +920,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::background\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_background_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -948,7 +946,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::background-rgba\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_background_rgba_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -974,7 +972,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::background-set\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_background_set_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1000,7 +998,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::editable\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_editable_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1026,7 +1024,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::editable-set\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_editable_set_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1052,7 +1050,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::ellipsize\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_ellipsize_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1078,7 +1076,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::ellipsize-set\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_ellipsize_set_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1104,7 +1102,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::family\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_family_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1130,7 +1128,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::family-set\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_family_set_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1156,7 +1154,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::font\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_font_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1182,7 +1180,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::font-desc\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_font_desc_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1208,7 +1206,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::foreground\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_foreground_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1234,7 +1232,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::foreground-rgba\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_foreground_rgba_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1260,7 +1258,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::foreground-set\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_foreground_set_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1286,7 +1284,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::language\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_language_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1312,7 +1310,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::language-set\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_language_set_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1338,7 +1336,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::markup\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_markup_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1364,7 +1362,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::max-width-chars\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_max_width_chars_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1390,7 +1388,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::placeholder-text\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_placeholder_text_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1416,7 +1414,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::rise\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_rise_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1442,7 +1440,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::rise-set\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_rise_set_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1468,7 +1466,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::scale\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_scale_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1494,7 +1492,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::scale-set\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_scale_set_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1523,7 +1521,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::single-paragraph-mode\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_single_paragraph_mode_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1549,7 +1547,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::size\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_size_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1575,7 +1573,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::size-points\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_size_points_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1601,7 +1599,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::size-set\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_size_set_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1627,7 +1625,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::stretch\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_stretch_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1653,7 +1651,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::stretch-set\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_stretch_set_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1679,7 +1677,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::strikethrough\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_strikethrough_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1705,7 +1703,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::strikethrough-set\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_strikethrough_set_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1731,7 +1729,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::style\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_style_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1757,7 +1755,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::style-set\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_style_set_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1783,7 +1781,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::text\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_text_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1809,7 +1807,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::underline\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_underline_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1835,7 +1833,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::underline-set\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_underline_set_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1861,7 +1859,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::variant\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_variant_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1887,7 +1885,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::variant-set\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_variant_set_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1913,7 +1911,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::weight\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_weight_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1939,7 +1937,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::weight-set\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_weight_set_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1965,7 +1963,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::width-chars\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_width_chars_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1991,7 +1989,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::wrap-mode\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_wrap_mode_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -2017,7 +2015,7 @@ pub trait CellRendererTextExt: IsA<CellRendererText> + sealed::Sealed + 'static 
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::wrap-width\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_wrap_width_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),

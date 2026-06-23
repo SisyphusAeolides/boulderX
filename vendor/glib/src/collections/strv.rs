@@ -2,7 +2,7 @@
 
 use std::{ffi::c_char, fmt, marker::PhantomData, mem, ptr};
 
-use crate::{ffi, gobject_ffi, prelude::*, translate::*, GStr, GString, GStringPtr};
+use crate::{prelude::*, translate::*, GStr, GString, GStringPtr};
 
 // rustdoc-stripper-ignore-next
 /// Minimum size of the `StrV` allocation.
@@ -63,8 +63,8 @@ impl std::hash::Hash for StrV {
     }
 }
 
-impl PartialEq<[&'_ str]> for StrV {
-    fn eq(&self, other: &[&'_ str]) -> bool {
+impl<'a> PartialEq<[&'a str]> for StrV {
+    fn eq(&self, other: &[&'a str]) -> bool {
         for (a, b) in Iterator::zip(self.iter(), other.iter()) {
             if a != b {
                 return false;
@@ -75,7 +75,7 @@ impl PartialEq<[&'_ str]> for StrV {
     }
 }
 
-impl PartialEq<StrV> for [&'_ str] {
+impl<'a> PartialEq<StrV> for [&'a str] {
     #[inline]
     fn eq(&self, other: &StrV) -> bool {
         other.eq(self)
@@ -304,9 +304,9 @@ impl From<Vec<String>> for StrV {
     }
 }
 
-impl From<Vec<&'_ str>> for StrV {
+impl<'a> From<Vec<&'a str>> for StrV {
     #[inline]
-    fn from(value: Vec<&'_ str>) -> Self {
+    fn from(value: Vec<&'a str>) -> Self {
         value.as_slice().into()
     }
 }
@@ -359,9 +359,9 @@ impl<const N: usize> From<[String; N]> for StrV {
     }
 }
 
-impl<const N: usize> From<[&'_ str; N]> for StrV {
+impl<'a, const N: usize> From<[&'a str; N]> for StrV {
     #[inline]
-    fn from(value: [&'_ str; N]) -> Self {
+    fn from(value: [&'a str; N]) -> Self {
         unsafe {
             let mut s = Self::with_capacity(value.len());
             for (i, item) in value.iter().enumerate() {
@@ -374,9 +374,9 @@ impl<const N: usize> From<[&'_ str; N]> for StrV {
     }
 }
 
-impl<const N: usize> From<[&'_ GStr; N]> for StrV {
+impl<'a, const N: usize> From<[&'a GStr; N]> for StrV {
     #[inline]
-    fn from(value: [&'_ GStr; N]) -> Self {
+    fn from(value: [&'a GStr; N]) -> Self {
         unsafe {
             let mut s = Self::with_capacity(value.len());
             for (i, item) in value.iter().enumerate() {
@@ -389,9 +389,9 @@ impl<const N: usize> From<[&'_ GStr; N]> for StrV {
     }
 }
 
-impl From<&'_ [&'_ str]> for StrV {
+impl<'a> From<&'a [&'a str]> for StrV {
     #[inline]
-    fn from(value: &'_ [&'_ str]) -> Self {
+    fn from(value: &'a [&'a str]) -> Self {
         unsafe {
             let mut s = Self::with_capacity(value.len());
             for (i, item) in value.iter().enumerate() {
@@ -404,9 +404,9 @@ impl From<&'_ [&'_ str]> for StrV {
     }
 }
 
-impl From<&'_ [&'_ GStr]> for StrV {
+impl<'a> From<&'a [&'a GStr]> for StrV {
     #[inline]
-    fn from(value: &'_ [&'_ GStr]) -> Self {
+    fn from(value: &'a [&'a GStr]) -> Self {
         unsafe {
             let mut s = Self::with_capacity(value.len());
             for (i, item) in value.iter().enumerate() {
@@ -646,18 +646,13 @@ impl StrV {
     /// This is guaranteed to be `NULL`-terminated.
     #[inline]
     pub fn into_raw(mut self) -> *mut *mut c_char {
-        // Make sure to allocate a valid pointer that points to a
-        // NULL-pointer.
         if self.len == 0 {
-            self.reserve(0);
-            unsafe {
-                *self.ptr.as_ptr().add(0) = ptr::null_mut();
-            }
+            ptr::null_mut()
+        } else {
+            self.len = 0;
+            self.capacity = 0;
+            self.ptr.as_ptr()
         }
-
-        self.len = 0;
-        self.capacity = 0;
-        self.ptr.as_ptr()
     }
 
     // rustdoc-stripper-ignore-next
@@ -719,9 +714,6 @@ impl StrV {
                     .checked_mul(new_capacity)
                     .unwrap(),
             ) as *mut *mut c_char;
-            if self.capacity == 0 {
-                *new_ptr = ptr::null_mut();
-            }
             self.ptr = ptr::NonNull::new_unchecked(new_ptr);
             self.capacity = new_capacity;
         }
@@ -1027,7 +1019,7 @@ impl StaticType for StrV {
     }
 }
 
-impl StaticType for &'_ [GStringPtr] {
+impl<'a> StaticType for &'a [GStringPtr] {
     #[inline]
     fn static_type() -> crate::Type {
         <Vec<String>>::static_type()
@@ -1102,7 +1094,7 @@ impl IntoStrV for StrV {
     }
 }
 
-impl IntoStrV for &'_ StrV {
+impl<'a> IntoStrV for &'a StrV {
     #[inline]
     fn run_with_strv<R, F: FnOnce(&[*mut c_char]) -> R>(self, f: F) -> R {
         f(unsafe { std::slice::from_raw_parts(self.as_ptr(), self.len()) })
@@ -1122,21 +1114,21 @@ impl IntoStrV for Vec<GString> {
     }
 }
 
-impl IntoStrV for Vec<&'_ GString> {
+impl<'a> IntoStrV for Vec<&'a GString> {
     #[inline]
     fn run_with_strv<R, F: FnOnce(&[*mut c_char]) -> R>(self, f: F) -> R {
         self.as_slice().run_with_strv(f)
     }
 }
 
-impl IntoStrV for Vec<&'_ GStr> {
+impl<'a> IntoStrV for Vec<&'a GStr> {
     #[inline]
     fn run_with_strv<R, F: FnOnce(&[*mut c_char]) -> R>(self, f: F) -> R {
         self.as_slice().run_with_strv(f)
     }
 }
 
-impl IntoStrV for Vec<&'_ str> {
+impl<'a> IntoStrV for Vec<&'a str> {
     #[inline]
     fn run_with_strv<R, F: FnOnce(&[*mut c_char]) -> R>(self, f: F) -> R {
         self.as_slice().run_with_strv(f)
@@ -1150,7 +1142,7 @@ impl IntoStrV for Vec<String> {
     }
 }
 
-impl IntoStrV for Vec<&'_ String> {
+impl<'a> IntoStrV for Vec<&'a String> {
     #[inline]
     fn run_with_strv<R, F: FnOnce(&[*mut c_char]) -> R>(self, f: F) -> R {
         self.as_slice().run_with_strv(f)
@@ -1182,7 +1174,7 @@ impl IntoStrV for &[GString] {
     }
 }
 
-impl IntoStrV for &[&GString] {
+impl<'a> IntoStrV for &[&'a GString] {
     #[inline]
     fn run_with_strv<R, F: FnOnce(&[*mut c_char]) -> R>(self, f: F) -> R {
         let required_len = (self.len() + 1) * mem::size_of::<*mut c_char>();
@@ -1207,7 +1199,7 @@ impl IntoStrV for &[&GString] {
     }
 }
 
-impl IntoStrV for &[&GStr] {
+impl<'a> IntoStrV for &[&'a GStr] {
     #[inline]
     fn run_with_strv<R, F: FnOnce(&[*mut c_char]) -> R>(self, f: F) -> R {
         let required_len = (self.len() + 1) * mem::size_of::<*mut c_char>();
@@ -1232,7 +1224,7 @@ impl IntoStrV for &[&GStr] {
     }
 }
 
-impl IntoStrV for &[&str] {
+impl<'a> IntoStrV for &[&'a str] {
     #[inline]
     fn run_with_strv<R, F: FnOnce(&[*mut c_char]) -> R>(self, f: F) -> R {
         let required_len = (self.len() + 1) * mem::size_of::<*mut c_char>()
@@ -1292,7 +1284,7 @@ impl IntoStrV for &[String] {
     }
 }
 
-impl IntoStrV for &[&String] {
+impl<'a> IntoStrV for &[&'a String] {
     #[inline]
     fn run_with_strv<R, F: FnOnce(&[*mut c_char]) -> R>(self, f: F) -> R {
         let required_len = (self.len() + 1) * mem::size_of::<*mut c_char>()
@@ -1329,21 +1321,21 @@ impl<const N: usize> IntoStrV for [GString; N] {
     }
 }
 
-impl<const N: usize> IntoStrV for [&'_ GString; N] {
+impl<'a, const N: usize> IntoStrV for [&'a GString; N] {
     #[inline]
     fn run_with_strv<R, F: FnOnce(&[*mut c_char]) -> R>(self, f: F) -> R {
         self.as_slice().run_with_strv(f)
     }
 }
 
-impl<const N: usize> IntoStrV for [&'_ GStr; N] {
+impl<'a, const N: usize> IntoStrV for [&'a GStr; N] {
     #[inline]
     fn run_with_strv<R, F: FnOnce(&[*mut c_char]) -> R>(self, f: F) -> R {
         self.as_slice().run_with_strv(f)
     }
 }
 
-impl<const N: usize> IntoStrV for [&'_ str; N] {
+impl<'a, const N: usize> IntoStrV for [&'a str; N] {
     #[inline]
     fn run_with_strv<R, F: FnOnce(&[*mut c_char]) -> R>(self, f: F) -> R {
         self.as_slice().run_with_strv(f)
@@ -1357,7 +1349,7 @@ impl<const N: usize> IntoStrV for [String; N] {
     }
 }
 
-impl<const N: usize> IntoStrV for [&'_ String; N] {
+impl<'a, const N: usize> IntoStrV for [&'a String; N] {
     #[inline]
     fn run_with_strv<R, F: FnOnce(&[*mut c_char]) -> R>(self, f: F) -> R {
         self.as_slice().run_with_strv(f)

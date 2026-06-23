@@ -12,10 +12,11 @@ use std::{
 pub trait Downgrade
 where
     Self: Sized,
+    Self::Weak: Upgrade,
 {
     // rustdoc-stripper-ignore-next
     /// Weak reference type.
-    type Weak: Upgrade;
+    type Weak;
 
     // rustdoc-stripper-ignore-next
     /// Downgrade to a weak reference.

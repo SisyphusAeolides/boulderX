@@ -3,11 +3,10 @@
 // DO NOT EDIT
 
 use crate::{
-    ffi, Accessible, AccessibleRole, Align, Buildable, ConstraintTarget, LayoutManager, Native,
+    Accessible, AccessibleRole, Align, Buildable, ConstraintTarget, LayoutManager, Native,
     Overflow, PositionType, ShortcutManager, Widget,
 };
 use glib::{
-    object::ObjectType as _,
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
     translate::*,
@@ -195,14 +194,6 @@ impl PopoverBuilder {
         }
     }
 
-    #[cfg(feature = "v4_18")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "v4_18")))]
-    pub fn limit_events(self, limit_events: bool) -> Self {
-        Self {
-            builder: self.builder.property("limit-events", limit_events),
-        }
-    }
-
     pub fn margin_bottom(self, margin_bottom: i32) -> Self {
         Self {
             builder: self.builder.property("margin-bottom", margin_bottom),
@@ -311,7 +302,6 @@ impl PopoverBuilder {
     /// Build the [`Popover`].
     #[must_use = "Building the object from the builder is usually expensive and is not expected to have side effects"]
     pub fn build(self) -> Popover {
-        assert_initialized_main_thread!();
         self.builder.build()
     }
 }
@@ -324,7 +314,6 @@ mod sealed {
 pub trait PopoverExt: IsA<Popover> + sealed::Sealed + 'static {
     #[doc(alias = "gtk_popover_get_autohide")]
     #[doc(alias = "get_autohide")]
-    #[doc(alias = "autohide")]
     fn is_autohide(&self) -> bool {
         unsafe {
             from_glib(ffi::gtk_popover_get_autohide(
@@ -335,7 +324,6 @@ pub trait PopoverExt: IsA<Popover> + sealed::Sealed + 'static {
 
     #[doc(alias = "gtk_popover_get_cascade_popdown")]
     #[doc(alias = "get_cascade_popdown")]
-    #[doc(alias = "cascade-popdown")]
     fn is_cascade_popdown(&self) -> bool {
         unsafe {
             from_glib(ffi::gtk_popover_get_cascade_popdown(
@@ -352,7 +340,6 @@ pub trait PopoverExt: IsA<Popover> + sealed::Sealed + 'static {
 
     #[doc(alias = "gtk_popover_get_has_arrow")]
     #[doc(alias = "get_has_arrow")]
-    #[doc(alias = "has-arrow")]
     fn has_arrow(&self) -> bool {
         unsafe {
             from_glib(ffi::gtk_popover_get_has_arrow(
@@ -363,7 +350,6 @@ pub trait PopoverExt: IsA<Popover> + sealed::Sealed + 'static {
 
     #[doc(alias = "gtk_popover_get_mnemonics_visible")]
     #[doc(alias = "get_mnemonics_visible")]
-    #[doc(alias = "mnemonics-visible")]
     fn is_mnemonics_visible(&self) -> bool {
         unsafe {
             from_glib(ffi::gtk_popover_get_mnemonics_visible(
@@ -389,7 +375,6 @@ pub trait PopoverExt: IsA<Popover> + sealed::Sealed + 'static {
 
     #[doc(alias = "gtk_popover_get_pointing_to")]
     #[doc(alias = "get_pointing_to")]
-    #[doc(alias = "pointing-to")]
     fn pointing_to(&self) -> (bool, gdk::Rectangle) {
         unsafe {
             let mut rect = gdk::Rectangle::uninitialized();
@@ -433,7 +418,6 @@ pub trait PopoverExt: IsA<Popover> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "gtk_popover_set_autohide")]
-    #[doc(alias = "autohide")]
     fn set_autohide(&self, autohide: bool) {
         unsafe {
             ffi::gtk_popover_set_autohide(self.as_ref().to_glib_none().0, autohide.into_glib());
@@ -441,7 +425,6 @@ pub trait PopoverExt: IsA<Popover> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "gtk_popover_set_cascade_popdown")]
-    #[doc(alias = "cascade-popdown")]
     fn set_cascade_popdown(&self, cascade_popdown: bool) {
         unsafe {
             ffi::gtk_popover_set_cascade_popdown(
@@ -452,7 +435,6 @@ pub trait PopoverExt: IsA<Popover> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "gtk_popover_set_child")]
-    #[doc(alias = "child")]
     fn set_child(&self, child: Option<&impl IsA<Widget>>) {
         unsafe {
             ffi::gtk_popover_set_child(
@@ -463,7 +445,6 @@ pub trait PopoverExt: IsA<Popover> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "gtk_popover_set_default_widget")]
-    #[doc(alias = "default-widget")]
     fn set_default_widget(&self, widget: Option<&impl IsA<Widget>>) {
         unsafe {
             ffi::gtk_popover_set_default_widget(
@@ -474,7 +455,6 @@ pub trait PopoverExt: IsA<Popover> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "gtk_popover_set_has_arrow")]
-    #[doc(alias = "has-arrow")]
     fn set_has_arrow(&self, has_arrow: bool) {
         unsafe {
             ffi::gtk_popover_set_has_arrow(self.as_ref().to_glib_none().0, has_arrow.into_glib());
@@ -482,7 +462,6 @@ pub trait PopoverExt: IsA<Popover> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "gtk_popover_set_mnemonics_visible")]
-    #[doc(alias = "mnemonics-visible")]
     fn set_mnemonics_visible(&self, mnemonics_visible: bool) {
         unsafe {
             ffi::gtk_popover_set_mnemonics_visible(
@@ -500,7 +479,6 @@ pub trait PopoverExt: IsA<Popover> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "gtk_popover_set_pointing_to")]
-    #[doc(alias = "pointing-to")]
     fn set_pointing_to(&self, rect: Option<&gdk::Rectangle>) {
         unsafe {
             ffi::gtk_popover_set_pointing_to(self.as_ref().to_glib_none().0, rect.to_glib_none().0);
@@ -508,7 +486,6 @@ pub trait PopoverExt: IsA<Popover> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "gtk_popover_set_position")]
-    #[doc(alias = "position")]
     fn set_position(&self, position: PositionType) {
         unsafe {
             ffi::gtk_popover_set_position(self.as_ref().to_glib_none().0, position.into_glib());
@@ -534,7 +511,7 @@ pub trait PopoverExt: IsA<Popover> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"activate-default\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     activate_default_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -560,7 +537,7 @@ pub trait PopoverExt: IsA<Popover> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"closed\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     closed_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -583,7 +560,7 @@ pub trait PopoverExt: IsA<Popover> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::autohide\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_autohide_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -609,7 +586,7 @@ pub trait PopoverExt: IsA<Popover> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::cascade-popdown\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_cascade_popdown_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -632,7 +609,7 @@ pub trait PopoverExt: IsA<Popover> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::child\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_child_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -658,7 +635,7 @@ pub trait PopoverExt: IsA<Popover> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::default-widget\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_default_widget_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -681,7 +658,7 @@ pub trait PopoverExt: IsA<Popover> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::has-arrow\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_has_arrow_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -707,7 +684,7 @@ pub trait PopoverExt: IsA<Popover> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::mnemonics-visible\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_mnemonics_visible_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -730,7 +707,7 @@ pub trait PopoverExt: IsA<Popover> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::pointing-to\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_pointing_to_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -753,7 +730,7 @@ pub trait PopoverExt: IsA<Popover> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::position\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_position_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),

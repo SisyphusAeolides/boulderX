@@ -6,11 +6,10 @@
 #[cfg_attr(docsrs, doc(cfg(feature = "v4_10")))]
 use crate::AccessibleRange;
 use crate::{
-    ffi, Accessible, AccessibleRole, Align, Buildable, ConstraintTarget, LayoutManager, Orientable,
+    Accessible, AccessibleRole, Align, Buildable, ConstraintTarget, LayoutManager, Orientable,
     Orientation, Overflow, ScrollType, Widget,
 };
 use glib::{
-    object::ObjectType as _,
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
     translate::*,
@@ -55,7 +54,6 @@ impl Paned {
 
     #[doc(alias = "gtk_paned_get_end_child")]
     #[doc(alias = "get_end_child")]
-    #[doc(alias = "end-child")]
     pub fn end_child(&self) -> Option<Widget> {
         unsafe { from_glib_none(ffi::gtk_paned_get_end_child(self.to_glib_none().0)) }
     }
@@ -68,48 +66,41 @@ impl Paned {
 
     #[doc(alias = "gtk_paned_get_resize_end_child")]
     #[doc(alias = "get_resize_end_child")]
-    #[doc(alias = "resize-end-child")]
     pub fn resizes_end_child(&self) -> bool {
         unsafe { from_glib(ffi::gtk_paned_get_resize_end_child(self.to_glib_none().0)) }
     }
 
     #[doc(alias = "gtk_paned_get_resize_start_child")]
     #[doc(alias = "get_resize_start_child")]
-    #[doc(alias = "resize-start-child")]
     pub fn resizes_start_child(&self) -> bool {
         unsafe { from_glib(ffi::gtk_paned_get_resize_start_child(self.to_glib_none().0)) }
     }
 
     #[doc(alias = "gtk_paned_get_shrink_end_child")]
     #[doc(alias = "get_shrink_end_child")]
-    #[doc(alias = "shrink-end-child")]
     pub fn shrinks_end_child(&self) -> bool {
         unsafe { from_glib(ffi::gtk_paned_get_shrink_end_child(self.to_glib_none().0)) }
     }
 
     #[doc(alias = "gtk_paned_get_shrink_start_child")]
     #[doc(alias = "get_shrink_start_child")]
-    #[doc(alias = "shrink-start-child")]
     pub fn shrinks_start_child(&self) -> bool {
         unsafe { from_glib(ffi::gtk_paned_get_shrink_start_child(self.to_glib_none().0)) }
     }
 
     #[doc(alias = "gtk_paned_get_start_child")]
     #[doc(alias = "get_start_child")]
-    #[doc(alias = "start-child")]
     pub fn start_child(&self) -> Option<Widget> {
         unsafe { from_glib_none(ffi::gtk_paned_get_start_child(self.to_glib_none().0)) }
     }
 
     #[doc(alias = "gtk_paned_get_wide_handle")]
     #[doc(alias = "get_wide_handle")]
-    #[doc(alias = "wide-handle")]
     pub fn is_wide_handle(&self) -> bool {
         unsafe { from_glib(ffi::gtk_paned_get_wide_handle(self.to_glib_none().0)) }
     }
 
     #[doc(alias = "gtk_paned_set_end_child")]
-    #[doc(alias = "end-child")]
     pub fn set_end_child(&self, child: Option<&impl IsA<Widget>>) {
         unsafe {
             ffi::gtk_paned_set_end_child(
@@ -120,7 +111,6 @@ impl Paned {
     }
 
     #[doc(alias = "gtk_paned_set_position")]
-    #[doc(alias = "position")]
     pub fn set_position(&self, position: i32) {
         unsafe {
             ffi::gtk_paned_set_position(self.to_glib_none().0, position);
@@ -128,7 +118,6 @@ impl Paned {
     }
 
     #[doc(alias = "gtk_paned_set_resize_end_child")]
-    #[doc(alias = "resize-end-child")]
     pub fn set_resize_end_child(&self, resize: bool) {
         unsafe {
             ffi::gtk_paned_set_resize_end_child(self.to_glib_none().0, resize.into_glib());
@@ -136,7 +125,6 @@ impl Paned {
     }
 
     #[doc(alias = "gtk_paned_set_resize_start_child")]
-    #[doc(alias = "resize-start-child")]
     pub fn set_resize_start_child(&self, resize: bool) {
         unsafe {
             ffi::gtk_paned_set_resize_start_child(self.to_glib_none().0, resize.into_glib());
@@ -144,7 +132,6 @@ impl Paned {
     }
 
     #[doc(alias = "gtk_paned_set_shrink_end_child")]
-    #[doc(alias = "shrink-end-child")]
     pub fn set_shrink_end_child(&self, resize: bool) {
         unsafe {
             ffi::gtk_paned_set_shrink_end_child(self.to_glib_none().0, resize.into_glib());
@@ -152,7 +139,6 @@ impl Paned {
     }
 
     #[doc(alias = "gtk_paned_set_shrink_start_child")]
-    #[doc(alias = "shrink-start-child")]
     pub fn set_shrink_start_child(&self, resize: bool) {
         unsafe {
             ffi::gtk_paned_set_shrink_start_child(self.to_glib_none().0, resize.into_glib());
@@ -160,7 +146,6 @@ impl Paned {
     }
 
     #[doc(alias = "gtk_paned_set_start_child")]
-    #[doc(alias = "start-child")]
     pub fn set_start_child(&self, child: Option<&impl IsA<Widget>>) {
         unsafe {
             ffi::gtk_paned_set_start_child(
@@ -171,7 +156,6 @@ impl Paned {
     }
 
     #[doc(alias = "gtk_paned_set_wide_handle")]
-    #[doc(alias = "wide-handle")]
     pub fn set_wide_handle(&self, wide: bool) {
         unsafe {
             ffi::gtk_paned_set_wide_handle(self.to_glib_none().0, wide.into_glib());
@@ -207,7 +191,7 @@ impl Paned {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"accept-position\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     accept_position_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -233,7 +217,7 @@ impl Paned {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"cancel-position\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     cancel_position_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -263,7 +247,7 @@ impl Paned {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"cycle-child-focus\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     cycle_child_focus_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -295,7 +279,7 @@ impl Paned {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"cycle-handle-focus\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     cycle_handle_focus_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -325,7 +309,7 @@ impl Paned {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"move-handle\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     move_handle_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -354,7 +338,7 @@ impl Paned {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"toggle-handle-focus\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     toggle_handle_focus_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -381,7 +365,7 @@ impl Paned {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::end-child\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_end_child_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -404,7 +388,7 @@ impl Paned {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::max-position\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_max_position_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -427,7 +411,7 @@ impl Paned {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::min-position\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_min_position_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -450,7 +434,7 @@ impl Paned {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::position\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_position_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -473,7 +457,7 @@ impl Paned {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::position-set\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_position_set_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -496,7 +480,7 @@ impl Paned {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::resize-end-child\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_resize_end_child_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -522,7 +506,7 @@ impl Paned {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::resize-start-child\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_resize_start_child_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -545,7 +529,7 @@ impl Paned {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::shrink-end-child\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_shrink_end_child_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -571,7 +555,7 @@ impl Paned {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::shrink-start-child\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_shrink_start_child_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -594,7 +578,7 @@ impl Paned {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::start-child\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_start_child_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -617,7 +601,7 @@ impl Paned {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::wide-handle\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_wide_handle_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -790,14 +774,6 @@ impl PanedBuilder {
         }
     }
 
-    #[cfg(feature = "v4_18")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "v4_18")))]
-    pub fn limit_events(self, limit_events: bool) -> Self {
-        Self {
-            builder: self.builder.property("limit-events", limit_events),
-        }
-    }
-
     pub fn margin_bottom(self, margin_bottom: i32) -> Self {
         Self {
             builder: self.builder.property("margin-bottom", margin_bottom),
@@ -912,7 +888,6 @@ impl PanedBuilder {
     /// Build the [`Paned`].
     #[must_use = "Building the object from the builder is usually expensive and is not expected to have side effects"]
     pub fn build(self) -> Paned {
-        assert_initialized_main_thread!();
         self.builder.build()
     }
 }

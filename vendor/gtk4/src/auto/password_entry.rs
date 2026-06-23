@@ -3,11 +3,10 @@
 // DO NOT EDIT
 
 use crate::{
-    ffi, Accessible, AccessibleRole, Align, Buildable, ConstraintTarget, Editable, LayoutManager,
+    Accessible, AccessibleRole, Align, Buildable, ConstraintTarget, Editable, LayoutManager,
     Overflow, Widget,
 };
 use glib::{
-    object::ObjectType as _,
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
     translate::*,
@@ -40,7 +39,6 @@ impl PasswordEntry {
 
     #[doc(alias = "gtk_password_entry_get_extra_menu")]
     #[doc(alias = "get_extra_menu")]
-    #[doc(alias = "extra-menu")]
     pub fn extra_menu(&self) -> Option<gio::MenuModel> {
         unsafe {
             from_glib_none(ffi::gtk_password_entry_get_extra_menu(
@@ -51,7 +49,6 @@ impl PasswordEntry {
 
     #[doc(alias = "gtk_password_entry_get_show_peek_icon")]
     #[doc(alias = "get_show_peek_icon")]
-    #[doc(alias = "show-peek-icon")]
     pub fn shows_peek_icon(&self) -> bool {
         unsafe {
             from_glib(ffi::gtk_password_entry_get_show_peek_icon(
@@ -61,7 +58,6 @@ impl PasswordEntry {
     }
 
     #[doc(alias = "gtk_password_entry_set_extra_menu")]
-    #[doc(alias = "extra-menu")]
     pub fn set_extra_menu(&self, model: Option<&impl IsA<gio::MenuModel>>) {
         unsafe {
             ffi::gtk_password_entry_set_extra_menu(
@@ -72,7 +68,6 @@ impl PasswordEntry {
     }
 
     #[doc(alias = "gtk_password_entry_set_show_peek_icon")]
-    #[doc(alias = "show-peek-icon")]
     pub fn set_show_peek_icon(&self, show_peek_icon: bool) {
         unsafe {
             ffi::gtk_password_entry_set_show_peek_icon(
@@ -116,7 +111,7 @@ impl PasswordEntry {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"activate\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     activate_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -148,7 +143,7 @@ impl PasswordEntry {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::activates-default\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_activates_default_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -171,7 +166,7 @@ impl PasswordEntry {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::extra-menu\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_extra_menu_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -194,7 +189,7 @@ impl PasswordEntry {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::placeholder-text\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_placeholder_text_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -217,7 +212,7 @@ impl PasswordEntry {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::show-peek-icon\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_show_peek_icon_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -355,14 +350,6 @@ impl PasswordEntryBuilder {
             builder: self
                 .builder
                 .property("layout-manager", layout_manager.clone().upcast()),
-        }
-    }
-
-    #[cfg(feature = "v4_18")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "v4_18")))]
-    pub fn limit_events(self, limit_events: bool) -> Self {
-        Self {
-            builder: self.builder.property("limit-events", limit_events),
         }
     }
 
@@ -510,7 +497,6 @@ impl PasswordEntryBuilder {
     /// Build the [`PasswordEntry`].
     #[must_use = "Building the object from the builder is usually expensive and is not expected to have side effects"]
     pub fn build(self) -> PasswordEntry {
-        assert_initialized_main_thread!();
         self.builder.build()
     }
 }

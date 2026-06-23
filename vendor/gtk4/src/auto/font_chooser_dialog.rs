@@ -4,7 +4,7 @@
 #![allow(deprecated)]
 
 use crate::{
-    ffi, Accessible, AccessibleRole, Align, Application, Buildable, ConstraintTarget, Dialog,
+    Accessible, AccessibleRole, Align, Application, Buildable, ConstraintTarget, Dialog,
     FontChooser, FontChooserLevel, LayoutManager, Native, Overflow, Root, ShortcutManager, Widget,
     Window,
 };
@@ -308,14 +308,6 @@ impl FontChooserDialogBuilder {
         }
     }
 
-    #[cfg(feature = "v4_18")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "v4_18")))]
-    pub fn limit_events(self, limit_events: bool) -> Self {
-        Self {
-            builder: self.builder.property("limit-events", limit_events),
-        }
-    }
-
     pub fn margin_bottom(self, margin_bottom: i32) -> Self {
         Self {
             builder: self.builder.property("margin-bottom", margin_bottom),
@@ -468,7 +460,6 @@ impl FontChooserDialogBuilder {
     /// Build the [`FontChooserDialog`].
     #[must_use = "Building the object from the builder is usually expensive and is not expected to have side effects"]
     pub fn build(self) -> FontChooserDialog {
-        assert_initialized_main_thread!();
         self.builder.build()
     }
 }

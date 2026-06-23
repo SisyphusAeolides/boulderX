@@ -2,7 +2,7 @@
 // from gir-files (https://github.com/gtk-rs/gir-files)
 // DO NOT EDIT
 
-use crate::{ffi, Converter, Initable};
+use crate::{Converter, Initable};
 use glib::{
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
@@ -53,7 +53,6 @@ impl CharsetConverter {
 
     #[doc(alias = "g_charset_converter_get_use_fallback")]
     #[doc(alias = "get_use_fallback")]
-    #[doc(alias = "use-fallback")]
     pub fn uses_fallback(&self) -> bool {
         unsafe {
             from_glib(ffi::g_charset_converter_get_use_fallback(
@@ -63,7 +62,6 @@ impl CharsetConverter {
     }
 
     #[doc(alias = "g_charset_converter_set_use_fallback")]
-    #[doc(alias = "use-fallback")]
     pub fn set_use_fallback(&self, use_fallback: bool) {
         unsafe {
             ffi::g_charset_converter_set_use_fallback(

@@ -8,7 +8,7 @@ use glib::{prelude::*, translate::*};
 #[cfg(all(not(unix), docsrs))]
 use socket::{AsRawFd, RawFd};
 
-use crate::{ffi, UnixFDMessage};
+use crate::UnixFDMessage;
 
 mod sealed {
     pub trait Sealed {}

@@ -2,7 +2,7 @@
 // from gir-files (https://github.com/gtk-rs/gir-files)
 // DO NOT EDIT
 
-use crate::{ffi, OutputStream, PollableOutputStream, Seekable};
+use crate::{OutputStream, PollableOutputStream, Seekable};
 use glib::{
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
@@ -38,7 +38,6 @@ mod sealed {
 pub trait MemoryOutputStreamExt: IsA<MemoryOutputStream> + sealed::Sealed + 'static {
     #[doc(alias = "g_memory_output_stream_get_data_size")]
     #[doc(alias = "get_data_size")]
-    #[doc(alias = "data-size")]
     fn data_size(&self) -> usize {
         unsafe { ffi::g_memory_output_stream_get_data_size(self.as_ref().to_glib_none().0) }
     }

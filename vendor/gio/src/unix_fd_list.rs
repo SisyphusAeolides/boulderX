@@ -8,7 +8,7 @@ use glib::{prelude::*, translate::*};
 #[cfg(all(not(unix), docsrs))]
 use socket::{AsRawFd, IntoRawFd, RawFd};
 
-use crate::{ffi, UnixFDList};
+use crate::UnixFDList;
 
 impl UnixFDList {
     #[doc(alias = "g_unix_fd_list_new_from_array")]
@@ -60,6 +60,7 @@ pub trait UnixFDListExtManual: sealed::Sealed + IsA<UnixFDList> + Sized {
     }
 
     #[doc(alias = "g_unix_fd_list_peek_fds")]
+
     fn peek_fds(&self) -> Vec<RawFd> {
         unsafe {
             let mut length = mem::MaybeUninit::uninit();
@@ -70,7 +71,6 @@ pub trait UnixFDListExtManual: sealed::Sealed + IsA<UnixFDList> + Sized {
             ret
         }
     }
-
     #[doc(alias = "g_unix_fd_list_steal_fds")]
     fn steal_fds(&self) -> Vec<RawFd> {
         unsafe {

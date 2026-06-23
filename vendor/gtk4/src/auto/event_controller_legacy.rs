@@ -2,9 +2,8 @@
 // from gir-files (https://github.com/gtk-rs/gir-files)
 // DO NOT EDIT
 
-use crate::{ffi, EventController, PropagationLimit, PropagationPhase};
+use crate::{EventController, PropagationLimit, PropagationPhase};
 use glib::{
-    object::ObjectType as _,
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
     translate::*,
@@ -57,7 +56,7 @@ impl EventControllerLegacy {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"event\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     event_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -114,7 +113,6 @@ impl EventControllerLegacyBuilder {
     /// Build the [`EventControllerLegacy`].
     #[must_use = "Building the object from the builder is usually expensive and is not expected to have side effects"]
     pub fn build(self) -> EventControllerLegacy {
-        assert_initialized_main_thread!();
         self.builder.build()
     }
 }

@@ -3,11 +3,10 @@
 // DO NOT EDIT
 
 use crate::{
-    ffi, DBusConnection, DBusInterface, DBusInterfaceInfo, DBusInterfaceSkeletonFlags,
+    DBusConnection, DBusInterface, DBusInterfaceInfo, DBusInterfaceSkeletonFlags,
     DBusMethodInvocation,
 };
 use glib::{
-    object::ObjectType as _,
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
     translate::*,

@@ -2,7 +2,7 @@
 
 use glib::translate::*;
 
-use crate::{ffi, Transform};
+use crate::Transform;
 
 impl Transform {
     #[doc(alias = "gsk_transform_parse")]

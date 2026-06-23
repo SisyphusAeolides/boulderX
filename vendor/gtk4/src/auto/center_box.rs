@@ -3,7 +3,7 @@
 // DO NOT EDIT
 
 use crate::{
-    ffi, Accessible, AccessibleRole, Align, BaselinePosition, Buildable, ConstraintTarget,
+    Accessible, AccessibleRole, Align, BaselinePosition, Buildable, ConstraintTarget,
     LayoutManager, Orientable, Orientation, Overflow, Widget,
 };
 use glib::{
@@ -39,7 +39,6 @@ impl CenterBox {
 
     #[doc(alias = "gtk_center_box_get_baseline_position")]
     #[doc(alias = "get_baseline_position")]
-    #[doc(alias = "baseline-position")]
     pub fn baseline_position(&self) -> BaselinePosition {
         unsafe {
             from_glib(ffi::gtk_center_box_get_baseline_position(
@@ -50,14 +49,12 @@ impl CenterBox {
 
     #[doc(alias = "gtk_center_box_get_center_widget")]
     #[doc(alias = "get_center_widget")]
-    #[doc(alias = "center-widget")]
     pub fn center_widget(&self) -> Option<Widget> {
         unsafe { from_glib_none(ffi::gtk_center_box_get_center_widget(self.to_glib_none().0)) }
     }
 
     #[doc(alias = "gtk_center_box_get_end_widget")]
     #[doc(alias = "get_end_widget")]
-    #[doc(alias = "end-widget")]
     pub fn end_widget(&self) -> Option<Widget> {
         unsafe { from_glib_none(ffi::gtk_center_box_get_end_widget(self.to_glib_none().0)) }
     }
@@ -66,7 +63,6 @@ impl CenterBox {
     #[cfg_attr(docsrs, doc(cfg(feature = "v4_12")))]
     #[doc(alias = "gtk_center_box_get_shrink_center_last")]
     #[doc(alias = "get_shrink_center_last")]
-    #[doc(alias = "shrink-center-last")]
     pub fn shrinks_center_last(&self) -> bool {
         unsafe {
             from_glib(ffi::gtk_center_box_get_shrink_center_last(
@@ -77,13 +73,11 @@ impl CenterBox {
 
     #[doc(alias = "gtk_center_box_get_start_widget")]
     #[doc(alias = "get_start_widget")]
-    #[doc(alias = "start-widget")]
     pub fn start_widget(&self) -> Option<Widget> {
         unsafe { from_glib_none(ffi::gtk_center_box_get_start_widget(self.to_glib_none().0)) }
     }
 
     #[doc(alias = "gtk_center_box_set_baseline_position")]
-    #[doc(alias = "baseline-position")]
     pub fn set_baseline_position(&self, position: BaselinePosition) {
         unsafe {
             ffi::gtk_center_box_set_baseline_position(self.to_glib_none().0, position.into_glib());
@@ -91,7 +85,6 @@ impl CenterBox {
     }
 
     #[doc(alias = "gtk_center_box_set_center_widget")]
-    #[doc(alias = "center-widget")]
     pub fn set_center_widget(&self, child: Option<&impl IsA<Widget>>) {
         unsafe {
             ffi::gtk_center_box_set_center_widget(
@@ -102,7 +95,6 @@ impl CenterBox {
     }
 
     #[doc(alias = "gtk_center_box_set_end_widget")]
-    #[doc(alias = "end-widget")]
     pub fn set_end_widget(&self, child: Option<&impl IsA<Widget>>) {
         unsafe {
             ffi::gtk_center_box_set_end_widget(
@@ -115,7 +107,6 @@ impl CenterBox {
     #[cfg(feature = "v4_12")]
     #[cfg_attr(docsrs, doc(cfg(feature = "v4_12")))]
     #[doc(alias = "gtk_center_box_set_shrink_center_last")]
-    #[doc(alias = "shrink-center-last")]
     pub fn set_shrink_center_last(&self, shrink_center_last: bool) {
         unsafe {
             ffi::gtk_center_box_set_shrink_center_last(
@@ -126,7 +117,6 @@ impl CenterBox {
     }
 
     #[doc(alias = "gtk_center_box_set_start_widget")]
-    #[doc(alias = "start-widget")]
     pub fn set_start_widget(&self, child: Option<&impl IsA<Widget>>) {
         unsafe {
             ffi::gtk_center_box_set_start_widget(
@@ -154,7 +144,7 @@ impl CenterBox {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::baseline-position\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_baseline_position_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -179,7 +169,7 @@ impl CenterBox {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::center-widget\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_center_widget_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -204,7 +194,7 @@ impl CenterBox {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::end-widget\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_end_widget_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -232,7 +222,7 @@ impl CenterBox {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::shrink-center-last\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_shrink_center_last_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -257,7 +247,7 @@ impl CenterBox {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::start-widget\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_start_widget_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -416,14 +406,6 @@ impl CenterBoxBuilder {
         }
     }
 
-    #[cfg(feature = "v4_18")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "v4_18")))]
-    pub fn limit_events(self, limit_events: bool) -> Self {
-        Self {
-            builder: self.builder.property("limit-events", limit_events),
-        }
-    }
-
     pub fn margin_bottom(self, margin_bottom: i32) -> Self {
         Self {
             builder: self.builder.property("margin-bottom", margin_bottom),
@@ -538,7 +520,6 @@ impl CenterBoxBuilder {
     /// Build the [`CenterBox`].
     #[must_use = "Building the object from the builder is usually expensive and is not expected to have side effects"]
     pub fn build(self) -> CenterBox {
-        assert_initialized_main_thread!();
         self.builder.build()
     }
 }

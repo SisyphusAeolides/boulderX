@@ -7,7 +7,7 @@ use std::{
 
 use glib::{translate::*, StrV};
 
-use crate::{ffi, FileInfo};
+use crate::FileInfo;
 
 impl FileInfo {
     #[cfg_attr(feature = "v2_62", deprecated)]

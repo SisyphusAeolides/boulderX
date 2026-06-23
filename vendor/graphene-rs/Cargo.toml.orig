@@ -17,9 +17,10 @@ version.workspace = true
 name = "graphene"
 
 [features]
+v1_12 = ["ffi/v1_12"]
 
 [dependencies]
-graphene-sys.workspace = true
+ffi = { package = "graphene-sys", path = "sys", version = "0.19" }
 libc.workspace = true
 glib.workspace = true
 

@@ -2,7 +2,7 @@
 // from gir-files (https://github.com/gtk-rs/gir-files)
 // DO NOT EDIT
 
-use crate::{ffi, EntryBuffer};
+use crate::EntryBuffer;
 use glib::{prelude::*, translate::*};
 
 glib::wrapper! {
@@ -68,7 +68,6 @@ impl PasswordEntryBufferBuilder {
     /// Build the [`PasswordEntryBuffer`].
     #[must_use = "Building the object from the builder is usually expensive and is not expected to have side effects"]
     pub fn build(self) -> PasswordEntryBuffer {
-        assert_initialized_main_thread!();
         self.builder.build()
     }
 }

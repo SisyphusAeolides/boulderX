@@ -5,7 +5,7 @@ use std::{pin::Pin, ptr};
 use glib::{prelude::*, translate::*, GString};
 use libc::c_char;
 
-use crate::{ffi, Cancellable, Subprocess};
+use crate::{Cancellable, Subprocess};
 
 impl Subprocess {
     #[doc(alias = "g_subprocess_communicate_utf8_async")]

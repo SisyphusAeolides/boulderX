@@ -2,7 +2,7 @@
 // from gir-files (https://github.com/gtk-rs/gir-files)
 // DO NOT EDIT
 
-use crate::{ffi, IOStream, SocketConnection};
+use crate::{IOStream, SocketConnection};
 use glib::{
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
@@ -31,7 +31,6 @@ mod sealed {
 pub trait TcpConnectionExt: IsA<TcpConnection> + sealed::Sealed + 'static {
     #[doc(alias = "g_tcp_connection_get_graceful_disconnect")]
     #[doc(alias = "get_graceful_disconnect")]
-    #[doc(alias = "graceful-disconnect")]
     fn is_graceful_disconnect(&self) -> bool {
         unsafe {
             from_glib(ffi::g_tcp_connection_get_graceful_disconnect(
@@ -41,7 +40,6 @@ pub trait TcpConnectionExt: IsA<TcpConnection> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "g_tcp_connection_set_graceful_disconnect")]
-    #[doc(alias = "graceful-disconnect")]
     fn set_graceful_disconnect(&self, graceful_disconnect: bool) {
         unsafe {
             ffi::g_tcp_connection_set_graceful_disconnect(

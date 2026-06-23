@@ -4,7 +4,7 @@ use crate::{ConicGradientNode, RenderNodeType};
 
 define_render_node!(
     ConicGradientNode,
-    crate::ffi::GskConicGradientNode,
+    ffi::GskConicGradientNode,
     RenderNodeType::ConicGradientNode
 );
 

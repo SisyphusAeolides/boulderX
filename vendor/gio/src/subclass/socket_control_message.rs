@@ -2,7 +2,7 @@
 
 use glib::{prelude::*, subclass::prelude::*, translate::*};
 
-use crate::{ffi, SocketControlMessage};
+use crate::SocketControlMessage;
 
 pub trait SocketControlMessageImpl: ObjectImpl + SocketControlMessageImplExt {
     fn level(&self) -> i32 {

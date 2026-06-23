@@ -2,7 +2,7 @@
 // from gir-files (https://github.com/gtk-rs/gir-files)
 // DO NOT EDIT
 
-use crate::{ffi, Expression, SortType, Sorter};
+use crate::{Expression, SortType, Sorter};
 use glib::{
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
@@ -52,7 +52,6 @@ impl NumericSorter {
 
     #[doc(alias = "gtk_numeric_sorter_get_sort_order")]
     #[doc(alias = "get_sort_order")]
-    #[doc(alias = "sort-order")]
     pub fn sort_order(&self) -> SortType {
         unsafe {
             from_glib(ffi::gtk_numeric_sorter_get_sort_order(
@@ -62,7 +61,6 @@ impl NumericSorter {
     }
 
     #[doc(alias = "gtk_numeric_sorter_set_expression")]
-    #[doc(alias = "expression")]
     pub fn set_expression(&self, expression: Option<impl AsRef<Expression>>) {
         unsafe {
             ffi::gtk_numeric_sorter_set_expression(
@@ -73,7 +71,6 @@ impl NumericSorter {
     }
 
     #[doc(alias = "gtk_numeric_sorter_set_sort_order")]
-    #[doc(alias = "sort-order")]
     pub fn set_sort_order(&self, sort_order: SortType) {
         unsafe {
             ffi::gtk_numeric_sorter_set_sort_order(self.to_glib_none().0, sort_order.into_glib());
@@ -95,7 +92,7 @@ impl NumericSorter {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::expression\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_expression_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -118,7 +115,7 @@ impl NumericSorter {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::sort-order\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_sort_order_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -167,7 +164,6 @@ impl NumericSorterBuilder {
     /// Build the [`NumericSorter`].
     #[must_use = "Building the object from the builder is usually expensive and is not expected to have side effects"]
     pub fn build(self) -> NumericSorter {
-        assert_initialized_main_thread!();
         self.builder.build()
     }
 }

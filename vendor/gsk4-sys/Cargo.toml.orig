@@ -48,12 +48,6 @@ version = "4.10"
 [package.metadata.system-deps.gtk4.v4_14]
 version = "4.14"
 
-[package.metadata.system-deps.gtk4.v4_16]
-version = "4.16"
-
-[package.metadata.system-deps.gtk4.v4_18]
-version = "4.17"
-
 [package.metadata.docs.rs]
 rustc-args = ["--cfg", "docsrs"]
 rustdoc-args = ["--cfg", "docsrs", "--generate-link-to-definition"]
@@ -70,8 +64,6 @@ v4_10 = ["v4_6"]
 vulkan = []
 broadway = []
 v4_14 = ["v4_10"]
-v4_16 = ["v4_14"]
-v4_18 = ["v4_16"]
 
 [dependencies]
 libc = "0.2"
@@ -95,7 +87,7 @@ workspace = true
 workspace = true
 
 [build-dependencies]
-system-deps = "7"
+system-deps = "6"
 
 [dev-dependencies]
 shell-words = "1.0.0"

@@ -2,7 +2,6 @@
 
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![allow(clippy::missing_safety_doc)]
-#![allow(clippy::manual_c_str_literals)]
 #![allow(renamed_and_removed_lints)]
 // Override docs references to point to locally generated docs
 // rustdoc-stripper-ignore-next
@@ -27,15 +26,14 @@
 #![doc = include_str!("../README.md")]
 
 pub use bitflags;
+pub use ffi;
 #[doc(hidden)]
 pub use glib_macros::cstr_bytes;
 pub use glib_macros::{
-    async_test, clone, closure, closure_local, derived_properties, flags, object_interface,
-    object_subclass, Boxed, Downgrade, Enum, ErrorDomain, Properties, SharedBoxed, ValueDelegate,
-    Variant,
+    clone, closure, closure_local, derived_properties, flags, object_interface, object_subclass,
+    Boxed, Downgrade, Enum, ErrorDomain, Properties, SharedBoxed, ValueDelegate, Variant,
 };
-pub use glib_sys as ffi;
-pub use gobject_sys as gobject_ffi;
+pub use gobject_ffi;
 
 pub use self::{
     byte_array::ByteArray,

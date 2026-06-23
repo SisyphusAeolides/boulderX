@@ -38,10 +38,6 @@ impl Widget {
         }
 
         self.properties.destructure_stream(stream);
-
-        if let Some(returned_widget) = &self.returned_widget {
-            returned_widget.destructure_stream(stream);
-        }
     }
 }
 

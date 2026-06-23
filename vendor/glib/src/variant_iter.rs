@@ -6,7 +6,7 @@
 
 use std::iter::FusedIterator;
 
-use crate::{ffi, translate::*, Variant};
+use crate::{translate::*, Variant};
 
 // rustdoc-stripper-ignore-next
 /// Iterator over items in a variant.
@@ -196,9 +196,9 @@ impl<'a> DoubleEndedIterator for VariantStrIter<'a> {
     }
 }
 
-impl ExactSizeIterator for VariantStrIter<'_> {}
+impl<'a> ExactSizeIterator for VariantStrIter<'a> {}
 
-impl FusedIterator for VariantStrIter<'_> {}
+impl<'a> FusedIterator for VariantStrIter<'a> {}
 
 #[cfg(test)]
 mod tests {

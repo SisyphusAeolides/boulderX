@@ -13,7 +13,7 @@ use std::{
     ptr, slice,
 };
 
-use crate::{ffi, gobject_ffi, prelude::*, translate::*, Type, Value};
+use crate::{prelude::*, translate::*, Type, Value};
 
 // rustdoc-stripper-ignore-next
 /// Representation of a borrowed [`GString`].
@@ -289,98 +289,25 @@ impl GStr {
         }
     }
     pub const NONE: Option<&'static GStr> = None;
-
-    // rustdoc-stripper-ignore-next
-    /// Interns the string and returns the canonical representation.
-    #[inline]
-    #[doc(alias = "g_intern_string")]
-    pub fn intern(&self) -> &'static GStr {
-        unsafe {
-            let s = ffi::g_intern_string(self.to_glib_none().0);
-            GStr::from_ptr(s)
-        }
-    }
-
-    // rustdoc-stripper-ignore-next
-    /// Interns the `'static` string and returns the canonical representation.
-    #[inline]
-    #[doc(alias = "g_intern_static_string")]
-    pub fn intern_static(&'static self) -> &'static GStr {
-        unsafe {
-            let s = ffi::g_intern_static_string(self.to_glib_none().0);
-            GStr::from_ptr(s)
-        }
-    }
-
-    // rustdoc-stripper-ignore-next
-    /// Interns the string and returns the canonical representation.
-    #[inline]
-    #[doc(alias = "g_intern_string")]
-    pub fn intern_from_str(s: impl AsRef<str>) -> &'static GStr {
-        unsafe {
-            let s = ffi::g_intern_string(s.as_ref().to_glib_none().0);
-            GStr::from_ptr(s)
-        }
-    }
 }
 
 // rustdoc-stripper-ignore-next
 /// Error type holding all possible failures when creating a [`GStr`] reference.
-#[derive(Debug)]
+#[derive(thiserror::Error, Debug)]
 pub enum GStrError {
-    InvalidUtf8(std::str::Utf8Error),
-    InteriorNul(GStrInteriorNulError),
+    #[error(transparent)]
+    InvalidUtf8(#[from] std::str::Utf8Error),
+    #[error(transparent)]
+    InteriorNul(#[from] GStrInteriorNulError),
+    #[error("data provided is not nul terminated")]
     NoTrailingNul,
-}
-
-impl std::error::Error for GStrError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::InvalidUtf8(err) => std::error::Error::source(err),
-            Self::InteriorNul(err) => std::error::Error::source(err),
-            Self::NoTrailingNul => None,
-        }
-    }
-}
-
-impl fmt::Display for GStrError {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::InvalidUtf8(err) => fmt::Display::fmt(err, fmt),
-            Self::InteriorNul(err) => fmt::Display::fmt(err, fmt),
-            Self::NoTrailingNul => fmt.write_str("data provided is not nul terminated"),
-        }
-    }
-}
-
-impl std::convert::From<std::str::Utf8Error> for GStrError {
-    fn from(err: std::str::Utf8Error) -> Self {
-        Self::InvalidUtf8(err)
-    }
-}
-
-impl std::convert::From<GStrInteriorNulError> for GStrError {
-    fn from(err: GStrInteriorNulError) -> Self {
-        Self::InteriorNul(err)
-    }
 }
 
 // rustdoc-stripper-ignore-next
 /// Error type indicating that a buffer had unexpected nul-bytes.
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[derive(thiserror::Error, Copy, Clone, PartialEq, Eq, Debug)]
+#[error("data provided contains an interior nul-byte at byte pos {0}")]
 pub struct GStrInteriorNulError(usize);
-
-impl std::error::Error for GStrInteriorNulError {}
-
-impl fmt::Display for GStrInteriorNulError {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            fmt,
-            "data provided contains an interior nul-byte at byte pos {}",
-            self.0
-        )
-    }
-}
 
 impl GStrInteriorNulError {
     // rustdoc-stripper-ignore-next
@@ -1048,18 +975,6 @@ impl std::hash::Hash for GStringPtr {
     }
 }
 
-impl<T: AsRef<str>> From<T> for GStringPtr {
-    fn from(value: T) -> Self {
-        unsafe {
-            let value = value.as_ref();
-            GStringPtr(ptr::NonNull::new_unchecked(ffi::g_strndup(
-                value.as_ptr() as *const _,
-                value.len(),
-            )))
-        }
-    }
-}
-
 // size_of::<Inner>() minus two bytes for length and enum discriminant
 const INLINE_LEN: usize =
     mem::size_of::<Option<Box<str>>>() + mem::size_of::<usize>() - mem::size_of::<u8>() * 2;
@@ -1076,7 +991,7 @@ const INLINE_LEN: usize =
 /// that contain interior nul-bytes will simply end at first nul-byte when converting to a C
 /// string.
 ///
-/// The constructors beginning with `from_utf8` and `from_string` can also be used to further
+/// The constructors beginning with `from_utf8` `and `from_string` can also be used to further
 /// control how interior nul-bytes are handled.
 pub struct GString(Inner);
 
@@ -1399,16 +1314,9 @@ macro_rules! gformat {
 /// Error type indicating that a buffer did not have a trailing nul-byte.
 ///
 /// `T` is the type of the value the conversion was attempted from.
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(thiserror::Error, Clone, PartialEq, Eq, Debug)]
+#[error("data provided is not nul terminated")]
 pub struct GStringNoTrailingNulError<T>(T);
-
-impl<T> std::error::Error for GStringNoTrailingNulError<T> where T: fmt::Debug {}
-
-impl<T> fmt::Display for GStringNoTrailingNulError<T> {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        fmt.write_str("data provided is not nul terminated")
-    }
-}
 
 impl<T> GStringNoTrailingNulError<T> {
     // rustdoc-stripper-ignore-next
@@ -1423,16 +1331,9 @@ impl<T> GStringNoTrailingNulError<T> {
 /// Error type indicating that a buffer had unexpected nul-bytes.
 ///
 /// `T` is the type of the value the conversion was attempted from.
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(thiserror::Error, Clone, PartialEq, Eq, Debug)]
+#[error("{1}")]
 pub struct GStringInteriorNulError<T>(T, GStrInteriorNulError);
-
-impl<T> std::error::Error for GStringInteriorNulError<T> where T: fmt::Debug {}
-
-impl<T> fmt::Display for GStringInteriorNulError<T> {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        fmt::Display::fmt(&self.1, fmt)
-    }
-}
 
 impl<T> GStringInteriorNulError<T> {
     // rustdoc-stripper-ignore-next
@@ -1453,16 +1354,9 @@ impl<T> GStringInteriorNulError<T> {
 /// Error type indicating that a buffer had invalid UTF-8.
 ///
 /// `T` is the type of the value the conversion was attempted from.
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(thiserror::Error, Clone, PartialEq, Eq, Debug)]
+#[error("{1}")]
 pub struct GStringUtf8Error<T>(T, std::str::Utf8Error);
-
-impl<T> std::error::Error for GStringUtf8Error<T> where T: fmt::Debug {}
-
-impl<T> fmt::Display for GStringUtf8Error<T> {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        fmt::Display::fmt(&self.1, fmt)
-    }
-}
 
 impl<T> GStringUtf8Error<T> {
     // rustdoc-stripper-ignore-next
@@ -1482,55 +1376,16 @@ impl<T> GStringUtf8Error<T> {
 
 // rustdoc-stripper-ignore-next
 /// Error type holding all possible failures when creating a [`GString`].
-#[derive(Debug)]
+#[derive(thiserror::Error, Debug)]
 pub enum GStringFromError<T> {
-    NoTrailingNul(GStringNoTrailingNulError<T>),
-    InteriorNul(GStringInteriorNulError<T>),
-    InvalidUtf8(GStringUtf8Error<T>),
+    #[error(transparent)]
+    NoTrailingNul(#[from] GStringNoTrailingNulError<T>),
+    #[error(transparent)]
+    InteriorNul(#[from] GStringInteriorNulError<T>),
+    #[error(transparent)]
+    InvalidUtf8(#[from] GStringUtf8Error<T>),
+    #[error("unable to convert")]
     Unspecified(T),
-}
-
-impl<T> std::error::Error for GStringFromError<T>
-where
-    T: fmt::Debug,
-{
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::NoTrailingNul(err) => std::error::Error::source(err),
-            Self::InteriorNul(err) => std::error::Error::source(err),
-            Self::InvalidUtf8(err) => std::error::Error::source(err),
-            Self::Unspecified { .. } => None,
-        }
-    }
-}
-
-impl<T> fmt::Display for GStringFromError<T> {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Self::NoTrailingNul(err) => fmt::Display::fmt(err, fmt),
-            Self::InteriorNul(err) => fmt::Display::fmt(err, fmt),
-            Self::InvalidUtf8(err) => fmt::Display::fmt(err, fmt),
-            Self::Unspecified(_) => fmt.write_str("unable to convert"),
-        }
-    }
-}
-
-impl<T> std::convert::From<GStringNoTrailingNulError<T>> for GStringFromError<T> {
-    fn from(err: GStringNoTrailingNulError<T>) -> Self {
-        GStringFromError::NoTrailingNul(err)
-    }
-}
-
-impl<T> std::convert::From<GStringInteriorNulError<T>> for GStringFromError<T> {
-    fn from(err: GStringInteriorNulError<T>) -> Self {
-        GStringFromError::InteriorNul(err)
-    }
-}
-
-impl<T> std::convert::From<GStringUtf8Error<T>> for GStringFromError<T> {
-    fn from(err: GStringUtf8Error<T>) -> Self {
-        GStringFromError::InvalidUtf8(err)
-    }
 }
 
 impl<T> GStringFromError<T> {
@@ -2041,7 +1896,7 @@ impl<'a> From<&'a GString> for Cow<'a, GStr> {
     }
 }
 
-impl From<GString> for Cow<'_, GStr> {
+impl<'a> From<GString> for Cow<'a, GStr> {
     #[inline]
     fn from(v: GString) -> Self {
         Cow::Owned(v)

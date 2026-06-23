@@ -6,7 +6,7 @@
 use glib::translate::*;
 
 use crate::{
-    ffi, prelude::*, subclass::prelude::*, DeleteType, MovementStep, Snapshot, TextExtendSelection,
+    prelude::*, subclass::prelude::*, DeleteType, MovementStep, Snapshot, TextExtendSelection,
     TextIter, TextView, TextViewLayer,
 };
 

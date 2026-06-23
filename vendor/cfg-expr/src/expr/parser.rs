@@ -1,8 +1,8 @@
 use crate::{
     error::{ParseError, Reason},
     expr::{
-        ExprNode, Expression, Func, InnerPredicate,
         lexer::{Lexer, Token},
+        ExprNode, Expression, Func, InnerPredicate,
     },
 };
 use smallvec::SmallVec;
@@ -200,7 +200,7 @@ impl Expression {
                                     "target_pointer_width",
                                     "target_vendor",
                                 ]),
-                            });
+                            })
                         }
                     };
 

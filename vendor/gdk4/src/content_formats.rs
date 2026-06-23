@@ -2,7 +2,7 @@
 
 use glib::{translate::*, Slice};
 
-use crate::{ffi, ContentFormats, ContentFormatsBuilder};
+use crate::{ContentFormats, ContentFormatsBuilder};
 
 impl ContentFormats {
     #[doc(alias = "gdk_content_formats_get_gtypes")]

@@ -2,7 +2,6 @@
 // from gir-files (https://github.com/gtk-rs/gir-files)
 // DO NOT EDIT
 
-use crate::ffi;
 use glib::{
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
@@ -86,7 +85,6 @@ pub trait ActionExt: IsA<Action> + sealed::Sealed + 'static {
 
     #[doc(alias = "g_action_get_enabled")]
     #[doc(alias = "get_enabled")]
-    #[doc(alias = "enabled")]
     fn is_enabled(&self) -> bool {
         unsafe { from_glib(ffi::g_action_get_enabled(self.as_ref().to_glib_none().0)) }
     }
@@ -99,7 +97,6 @@ pub trait ActionExt: IsA<Action> + sealed::Sealed + 'static {
 
     #[doc(alias = "g_action_get_parameter_type")]
     #[doc(alias = "get_parameter_type")]
-    #[doc(alias = "parameter-type")]
     fn parameter_type(&self) -> Option<glib::VariantType> {
         unsafe {
             from_glib_none(ffi::g_action_get_parameter_type(
@@ -122,7 +119,6 @@ pub trait ActionExt: IsA<Action> + sealed::Sealed + 'static {
 
     #[doc(alias = "g_action_get_state_type")]
     #[doc(alias = "get_state_type")]
-    #[doc(alias = "state-type")]
     fn state_type(&self) -> Option<glib::VariantType> {
         unsafe { from_glib_none(ffi::g_action_get_state_type(self.as_ref().to_glib_none().0)) }
     }

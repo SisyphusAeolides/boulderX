@@ -8,7 +8,7 @@ use glib::{
 };
 use libc::{c_double, c_int};
 
-use crate::{ffi, prelude::*, SpinButton};
+use crate::{prelude::*, SpinButton};
 
 impl SpinButton {
     pub fn connect_input<F>(&self, f: F) -> SignalHandlerId
@@ -20,9 +20,7 @@ impl SpinButton {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"input\0".as_ptr() as *mut _,
-                Some(transmute::<usize, unsafe extern "C" fn()>(
-                    input_trampoline::<F> as usize,
-                )),
+                Some(transmute(input_trampoline::<F> as usize)),
                 Box_::into_raw(f),
             )
         }

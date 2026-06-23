@@ -5,11 +5,8 @@
 #[cfg(feature = "v4_10")]
 #[cfg_attr(docsrs, doc(cfg(feature = "v4_10")))]
 use crate::AccessibleRange;
-use crate::{
-    ffi, Accessible, Adjustment, Buildable, ConstraintTarget, Orientable, ScrollType, Widget,
-};
+use crate::{Accessible, Adjustment, Buildable, ConstraintTarget, Orientable, ScrollType, Widget};
 use glib::{
-    object::ObjectType as _,
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
     translate::*,
@@ -59,7 +56,6 @@ pub trait RangeExt: IsA<Range> + sealed::Sealed + 'static {
 
     #[doc(alias = "gtk_range_get_fill_level")]
     #[doc(alias = "get_fill_level")]
-    #[doc(alias = "fill-level")]
     fn fill_level(&self) -> f64 {
         unsafe { ffi::gtk_range_get_fill_level(self.as_ref().to_glib_none().0) }
     }
@@ -72,7 +68,6 @@ pub trait RangeExt: IsA<Range> + sealed::Sealed + 'static {
 
     #[doc(alias = "gtk_range_get_inverted")]
     #[doc(alias = "get_inverted")]
-    #[doc(alias = "inverted")]
     fn is_inverted(&self) -> bool {
         unsafe { from_glib(ffi::gtk_range_get_inverted(self.as_ref().to_glib_none().0)) }
     }
@@ -92,7 +87,6 @@ pub trait RangeExt: IsA<Range> + sealed::Sealed + 'static {
 
     #[doc(alias = "gtk_range_get_restrict_to_fill_level")]
     #[doc(alias = "get_restrict_to_fill_level")]
-    #[doc(alias = "restrict-to-fill-level")]
     fn restricts_to_fill_level(&self) -> bool {
         unsafe {
             from_glib(ffi::gtk_range_get_restrict_to_fill_level(
@@ -103,14 +97,12 @@ pub trait RangeExt: IsA<Range> + sealed::Sealed + 'static {
 
     #[doc(alias = "gtk_range_get_round_digits")]
     #[doc(alias = "get_round_digits")]
-    #[doc(alias = "round-digits")]
     fn round_digits(&self) -> i32 {
         unsafe { ffi::gtk_range_get_round_digits(self.as_ref().to_glib_none().0) }
     }
 
     #[doc(alias = "gtk_range_get_show_fill_level")]
     #[doc(alias = "get_show_fill_level")]
-    #[doc(alias = "show-fill-level")]
     fn shows_fill_level(&self) -> bool {
         unsafe {
             from_glib(ffi::gtk_range_get_show_fill_level(
@@ -151,7 +143,6 @@ pub trait RangeExt: IsA<Range> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "gtk_range_set_adjustment")]
-    #[doc(alias = "adjustment")]
     fn set_adjustment(&self, adjustment: &impl IsA<Adjustment>) {
         unsafe {
             ffi::gtk_range_set_adjustment(
@@ -162,7 +153,6 @@ pub trait RangeExt: IsA<Range> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "gtk_range_set_fill_level")]
-    #[doc(alias = "fill-level")]
     fn set_fill_level(&self, fill_level: f64) {
         unsafe {
             ffi::gtk_range_set_fill_level(self.as_ref().to_glib_none().0, fill_level);
@@ -184,7 +174,6 @@ pub trait RangeExt: IsA<Range> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "gtk_range_set_inverted")]
-    #[doc(alias = "inverted")]
     fn set_inverted(&self, setting: bool) {
         unsafe {
             ffi::gtk_range_set_inverted(self.as_ref().to_glib_none().0, setting.into_glib());
@@ -199,7 +188,6 @@ pub trait RangeExt: IsA<Range> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "gtk_range_set_restrict_to_fill_level")]
-    #[doc(alias = "restrict-to-fill-level")]
     fn set_restrict_to_fill_level(&self, restrict_to_fill_level: bool) {
         unsafe {
             ffi::gtk_range_set_restrict_to_fill_level(
@@ -210,7 +198,6 @@ pub trait RangeExt: IsA<Range> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "gtk_range_set_round_digits")]
-    #[doc(alias = "round-digits")]
     fn set_round_digits(&self, round_digits: i32) {
         unsafe {
             ffi::gtk_range_set_round_digits(self.as_ref().to_glib_none().0, round_digits);
@@ -218,7 +205,6 @@ pub trait RangeExt: IsA<Range> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "gtk_range_set_show_fill_level")]
-    #[doc(alias = "show-fill-level")]
     fn set_show_fill_level(&self, show_fill_level: bool) {
         unsafe {
             ffi::gtk_range_set_show_fill_level(
@@ -249,7 +235,7 @@ pub trait RangeExt: IsA<Range> + sealed::Sealed + 'static {
     fn connect_adjust_bounds<F: Fn(&Self, f64) + 'static>(&self, f: F) -> SignalHandlerId {
         unsafe extern "C" fn adjust_bounds_trampoline<P: IsA<Range>, F: Fn(&P, f64) + 'static>(
             this: *mut ffi::GtkRange,
-            value: std::ffi::c_double,
+            value: libc::c_double,
             f: glib::ffi::gpointer,
         ) {
             let f: &F = &*(f as *const F);
@@ -260,7 +246,7 @@ pub trait RangeExt: IsA<Range> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"adjust-bounds\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     adjust_bounds_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -279,7 +265,7 @@ pub trait RangeExt: IsA<Range> + sealed::Sealed + 'static {
         >(
             this: *mut ffi::GtkRange,
             scroll: ffi::GtkScrollType,
-            value: std::ffi::c_double,
+            value: libc::c_double,
             f: glib::ffi::gpointer,
         ) -> glib::ffi::gboolean {
             let f: &F = &*(f as *const F);
@@ -295,7 +281,7 @@ pub trait RangeExt: IsA<Range> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"change-value\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     change_value_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -324,7 +310,7 @@ pub trait RangeExt: IsA<Range> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"move-slider\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     move_slider_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -350,7 +336,7 @@ pub trait RangeExt: IsA<Range> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"value-changed\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     value_changed_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -373,7 +359,7 @@ pub trait RangeExt: IsA<Range> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::adjustment\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_adjustment_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -396,7 +382,7 @@ pub trait RangeExt: IsA<Range> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::fill-level\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_fill_level_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -419,7 +405,7 @@ pub trait RangeExt: IsA<Range> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::inverted\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_inverted_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -448,7 +434,7 @@ pub trait RangeExt: IsA<Range> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::restrict-to-fill-level\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_restrict_to_fill_level_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -471,7 +457,7 @@ pub trait RangeExt: IsA<Range> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::round-digits\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_round_digits_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -497,7 +483,7 @@ pub trait RangeExt: IsA<Range> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::show-fill-level\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_show_fill_level_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),

@@ -16,8 +16,6 @@ repository.workspace = true
 
 categories.workspace = true
 
-include = ["src/", "tests/", "README.md", "LICENSE-MIT", "LICENSE-APACHE"]
-
 [lib]
 proc-macro = true
 
@@ -42,4 +40,4 @@ syn = { version = "2.0", features = [
 [dev-dependencies]
 relm4 = { path = "../relm4" }
 rustversion = "1"
-trybuild = "1.0.97"
+trybuild = "1.0.89"

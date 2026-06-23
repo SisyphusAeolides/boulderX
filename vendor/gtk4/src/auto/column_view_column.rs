@@ -2,7 +2,7 @@
 // from gir-files (https://github.com/gtk-rs/gir-files)
 // DO NOT EDIT
 
-use crate::{ffi, ColumnView, ListItemFactory, Sorter};
+use crate::{ColumnView, ListItemFactory, Sorter};
 use glib::{
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
@@ -44,7 +44,6 @@ impl ColumnViewColumn {
 
     #[doc(alias = "gtk_column_view_column_get_column_view")]
     #[doc(alias = "get_column_view")]
-    #[doc(alias = "column-view")]
     pub fn column_view(&self) -> Option<ColumnView> {
         unsafe {
             from_glib_none(ffi::gtk_column_view_column_get_column_view(
@@ -55,7 +54,6 @@ impl ColumnViewColumn {
 
     #[doc(alias = "gtk_column_view_column_get_expand")]
     #[doc(alias = "get_expand")]
-    #[doc(alias = "expand")]
     pub fn expands(&self) -> bool {
         unsafe {
             from_glib(ffi::gtk_column_view_column_get_expand(
@@ -76,14 +74,12 @@ impl ColumnViewColumn {
 
     #[doc(alias = "gtk_column_view_column_get_fixed_width")]
     #[doc(alias = "get_fixed_width")]
-    #[doc(alias = "fixed-width")]
     pub fn fixed_width(&self) -> i32 {
         unsafe { ffi::gtk_column_view_column_get_fixed_width(self.to_glib_none().0) }
     }
 
     #[doc(alias = "gtk_column_view_column_get_header_menu")]
     #[doc(alias = "get_header_menu")]
-    #[doc(alias = "header-menu")]
     pub fn header_menu(&self) -> Option<gio::MenuModel> {
         unsafe {
             from_glib_none(ffi::gtk_column_view_column_get_header_menu(
@@ -102,7 +98,6 @@ impl ColumnViewColumn {
 
     #[doc(alias = "gtk_column_view_column_get_resizable")]
     #[doc(alias = "get_resizable")]
-    #[doc(alias = "resizable")]
     pub fn is_resizable(&self) -> bool {
         unsafe {
             from_glib(ffi::gtk_column_view_column_get_resizable(
@@ -129,7 +124,6 @@ impl ColumnViewColumn {
 
     #[doc(alias = "gtk_column_view_column_get_visible")]
     #[doc(alias = "get_visible")]
-    #[doc(alias = "visible")]
     pub fn is_visible(&self) -> bool {
         unsafe {
             from_glib(ffi::gtk_column_view_column_get_visible(
@@ -139,7 +133,6 @@ impl ColumnViewColumn {
     }
 
     #[doc(alias = "gtk_column_view_column_set_expand")]
-    #[doc(alias = "expand")]
     pub fn set_expand(&self, expand: bool) {
         unsafe {
             ffi::gtk_column_view_column_set_expand(self.to_glib_none().0, expand.into_glib());
@@ -147,7 +140,6 @@ impl ColumnViewColumn {
     }
 
     #[doc(alias = "gtk_column_view_column_set_factory")]
-    #[doc(alias = "factory")]
     pub fn set_factory(&self, factory: Option<&impl IsA<ListItemFactory>>) {
         unsafe {
             ffi::gtk_column_view_column_set_factory(
@@ -158,7 +150,6 @@ impl ColumnViewColumn {
     }
 
     #[doc(alias = "gtk_column_view_column_set_fixed_width")]
-    #[doc(alias = "fixed-width")]
     pub fn set_fixed_width(&self, fixed_width: i32) {
         unsafe {
             ffi::gtk_column_view_column_set_fixed_width(self.to_glib_none().0, fixed_width);
@@ -166,7 +157,6 @@ impl ColumnViewColumn {
     }
 
     #[doc(alias = "gtk_column_view_column_set_header_menu")]
-    #[doc(alias = "header-menu")]
     pub fn set_header_menu(&self, menu: Option<&impl IsA<gio::MenuModel>>) {
         unsafe {
             ffi::gtk_column_view_column_set_header_menu(
@@ -179,7 +169,6 @@ impl ColumnViewColumn {
     #[cfg(feature = "v4_10")]
     #[cfg_attr(docsrs, doc(cfg(feature = "v4_10")))]
     #[doc(alias = "gtk_column_view_column_set_id")]
-    #[doc(alias = "id")]
     pub fn set_id(&self, id: Option<&str>) {
         unsafe {
             ffi::gtk_column_view_column_set_id(self.to_glib_none().0, id.to_glib_none().0);
@@ -187,7 +176,6 @@ impl ColumnViewColumn {
     }
 
     #[doc(alias = "gtk_column_view_column_set_resizable")]
-    #[doc(alias = "resizable")]
     pub fn set_resizable(&self, resizable: bool) {
         unsafe {
             ffi::gtk_column_view_column_set_resizable(self.to_glib_none().0, resizable.into_glib());
@@ -195,7 +183,6 @@ impl ColumnViewColumn {
     }
 
     #[doc(alias = "gtk_column_view_column_set_sorter")]
-    #[doc(alias = "sorter")]
     pub fn set_sorter(&self, sorter: Option<&impl IsA<Sorter>>) {
         unsafe {
             ffi::gtk_column_view_column_set_sorter(
@@ -206,7 +193,6 @@ impl ColumnViewColumn {
     }
 
     #[doc(alias = "gtk_column_view_column_set_title")]
-    #[doc(alias = "title")]
     pub fn set_title(&self, title: Option<&str>) {
         unsafe {
             ffi::gtk_column_view_column_set_title(self.to_glib_none().0, title.to_glib_none().0);
@@ -214,7 +200,6 @@ impl ColumnViewColumn {
     }
 
     #[doc(alias = "gtk_column_view_column_set_visible")]
-    #[doc(alias = "visible")]
     pub fn set_visible(&self, visible: bool) {
         unsafe {
             ffi::gtk_column_view_column_set_visible(self.to_glib_none().0, visible.into_glib());
@@ -236,7 +221,7 @@ impl ColumnViewColumn {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::column-view\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_column_view_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -259,7 +244,7 @@ impl ColumnViewColumn {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::expand\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_expand_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -282,7 +267,7 @@ impl ColumnViewColumn {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::factory\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_factory_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -305,7 +290,7 @@ impl ColumnViewColumn {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::fixed-width\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_fixed_width_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -328,7 +313,7 @@ impl ColumnViewColumn {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::header-menu\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_header_menu_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -353,7 +338,7 @@ impl ColumnViewColumn {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::id\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_id_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -376,7 +361,7 @@ impl ColumnViewColumn {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::resizable\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_resizable_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -399,7 +384,7 @@ impl ColumnViewColumn {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::sorter\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_sorter_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -422,7 +407,7 @@ impl ColumnViewColumn {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::title\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_title_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -445,7 +430,7 @@ impl ColumnViewColumn {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::visible\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_visible_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -538,7 +523,6 @@ impl ColumnViewColumnBuilder {
     /// Build the [`ColumnViewColumn`].
     #[must_use = "Building the object from the builder is usually expensive and is not expected to have side effects"]
     pub fn build(self) -> ColumnViewColumn {
-        assert_initialized_main_thread!();
         self.builder.build()
     }
 }

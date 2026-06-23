@@ -5,7 +5,7 @@
 #[cfg(feature = "v2_70")]
 #[cfg_attr(docsrs, doc(cfg(feature = "v2_70")))]
 use crate::InetAddress;
-use crate::{ffi, SocketConnectable, TlsCertificateFlags};
+use crate::{SocketConnectable, TlsCertificateFlags};
 #[cfg(feature = "v2_70")]
 #[cfg_attr(docsrs, doc(cfg(feature = "v2_70")))]
 use glib::signal::{connect_raw, SignalHandlerId};
@@ -175,7 +175,6 @@ pub trait TlsCertificateExt: IsA<TlsCertificate> + sealed::Sealed + 'static {
     #[cfg_attr(docsrs, doc(cfg(feature = "v2_70")))]
     #[doc(alias = "g_tls_certificate_get_dns_names")]
     #[doc(alias = "get_dns_names")]
-    #[doc(alias = "dns-names")]
     fn dns_names(&self) -> Vec<glib::Bytes> {
         unsafe {
             FromGlibPtrContainer::from_glib_container(ffi::g_tls_certificate_get_dns_names(
@@ -188,7 +187,6 @@ pub trait TlsCertificateExt: IsA<TlsCertificate> + sealed::Sealed + 'static {
     #[cfg_attr(docsrs, doc(cfg(feature = "v2_70")))]
     #[doc(alias = "g_tls_certificate_get_ip_addresses")]
     #[doc(alias = "get_ip_addresses")]
-    #[doc(alias = "ip-addresses")]
     fn ip_addresses(&self) -> Vec<InetAddress> {
         unsafe {
             FromGlibPtrContainer::from_glib_container(ffi::g_tls_certificate_get_ip_addresses(
@@ -212,7 +210,6 @@ pub trait TlsCertificateExt: IsA<TlsCertificate> + sealed::Sealed + 'static {
     #[cfg_attr(docsrs, doc(cfg(feature = "v2_70")))]
     #[doc(alias = "g_tls_certificate_get_issuer_name")]
     #[doc(alias = "get_issuer_name")]
-    #[doc(alias = "issuer-name")]
     fn issuer_name(&self) -> Option<glib::GString> {
         unsafe {
             from_glib_full(ffi::g_tls_certificate_get_issuer_name(
@@ -225,7 +222,6 @@ pub trait TlsCertificateExt: IsA<TlsCertificate> + sealed::Sealed + 'static {
     #[cfg_attr(docsrs, doc(cfg(feature = "v2_70")))]
     #[doc(alias = "g_tls_certificate_get_not_valid_after")]
     #[doc(alias = "get_not_valid_after")]
-    #[doc(alias = "not-valid-after")]
     fn not_valid_after(&self) -> Option<glib::DateTime> {
         unsafe {
             from_glib_full(ffi::g_tls_certificate_get_not_valid_after(
@@ -238,7 +234,6 @@ pub trait TlsCertificateExt: IsA<TlsCertificate> + sealed::Sealed + 'static {
     #[cfg_attr(docsrs, doc(cfg(feature = "v2_70")))]
     #[doc(alias = "g_tls_certificate_get_not_valid_before")]
     #[doc(alias = "get_not_valid_before")]
-    #[doc(alias = "not-valid-before")]
     fn not_valid_before(&self) -> Option<glib::DateTime> {
         unsafe {
             from_glib_full(ffi::g_tls_certificate_get_not_valid_before(
@@ -251,7 +246,6 @@ pub trait TlsCertificateExt: IsA<TlsCertificate> + sealed::Sealed + 'static {
     #[cfg_attr(docsrs, doc(cfg(feature = "v2_70")))]
     #[doc(alias = "g_tls_certificate_get_subject_name")]
     #[doc(alias = "get_subject_name")]
-    #[doc(alias = "subject-name")]
     fn subject_name(&self) -> Option<glib::GString> {
         unsafe {
             from_glib_full(ffi::g_tls_certificate_get_subject_name(

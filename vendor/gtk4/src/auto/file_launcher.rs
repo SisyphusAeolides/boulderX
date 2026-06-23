@@ -2,7 +2,7 @@
 // from gir-files (https://github.com/gtk-rs/gir-files)
 // DO NOT EDIT
 
-use crate::{ffi, Window};
+use crate::Window;
 use glib::{
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
@@ -34,7 +34,6 @@ impl FileLauncher {
     #[cfg_attr(docsrs, doc(cfg(feature = "v4_12")))]
     #[doc(alias = "gtk_file_launcher_get_always_ask")]
     #[doc(alias = "get_always_ask")]
-    #[doc(alias = "always-ask")]
     pub fn must_always_ask(&self) -> bool {
         unsafe { from_glib(ffi::gtk_file_launcher_get_always_ask(self.to_glib_none().0)) }
     }
@@ -49,7 +48,6 @@ impl FileLauncher {
     #[cfg_attr(docsrs, doc(cfg(feature = "v4_14")))]
     #[doc(alias = "gtk_file_launcher_get_writable")]
     #[doc(alias = "get_writable")]
-    #[doc(alias = "writable")]
     pub fn is_writable(&self) -> bool {
         unsafe { from_glib(ffi::gtk_file_launcher_get_writable(self.to_glib_none().0)) }
     }
@@ -191,7 +189,6 @@ impl FileLauncher {
     #[cfg(feature = "v4_12")]
     #[cfg_attr(docsrs, doc(cfg(feature = "v4_12")))]
     #[doc(alias = "gtk_file_launcher_set_always_ask")]
-    #[doc(alias = "always-ask")]
     pub fn set_always_ask(&self, always_ask: bool) {
         unsafe {
             ffi::gtk_file_launcher_set_always_ask(self.to_glib_none().0, always_ask.into_glib());
@@ -199,7 +196,6 @@ impl FileLauncher {
     }
 
     #[doc(alias = "gtk_file_launcher_set_file")]
-    #[doc(alias = "file")]
     pub fn set_file(&self, file: Option<&impl IsA<gio::File>>) {
         unsafe {
             ffi::gtk_file_launcher_set_file(
@@ -212,7 +208,6 @@ impl FileLauncher {
     #[cfg(feature = "v4_14")]
     #[cfg_attr(docsrs, doc(cfg(feature = "v4_14")))]
     #[doc(alias = "gtk_file_launcher_set_writable")]
-    #[doc(alias = "writable")]
     pub fn set_writable(&self, writable: bool) {
         unsafe {
             ffi::gtk_file_launcher_set_writable(self.to_glib_none().0, writable.into_glib());
@@ -236,7 +231,7 @@ impl FileLauncher {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::always-ask\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_always_ask_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -261,7 +256,7 @@ impl FileLauncher {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::file\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_file_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -286,7 +281,7 @@ impl FileLauncher {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::writable\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_writable_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),

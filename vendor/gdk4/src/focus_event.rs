@@ -6,7 +6,7 @@ use crate::{EventType, FocusEvent};
 
 define_event! {
     FocusEvent,
-    crate::ffi::GdkFocusEvent,
+    ffi::GdkFocusEvent,
     &[EventType::FocusChange]
 }
 

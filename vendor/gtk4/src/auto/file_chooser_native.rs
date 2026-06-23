@@ -3,7 +3,7 @@
 // DO NOT EDIT
 #![allow(deprecated)]
 
-use crate::{ffi, FileChooser, FileChooserAction, FileFilter, NativeDialog, Window};
+use crate::{FileChooser, FileChooserAction, FileFilter, NativeDialog, Window};
 use glib::{
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
@@ -55,7 +55,6 @@ impl FileChooserNative {
     #[allow(deprecated)]
     #[doc(alias = "gtk_file_chooser_native_get_accept_label")]
     #[doc(alias = "get_accept_label")]
-    #[doc(alias = "accept-label")]
     pub fn accept_label(&self) -> Option<glib::GString> {
         unsafe {
             from_glib_none(ffi::gtk_file_chooser_native_get_accept_label(
@@ -68,7 +67,6 @@ impl FileChooserNative {
     #[allow(deprecated)]
     #[doc(alias = "gtk_file_chooser_native_get_cancel_label")]
     #[doc(alias = "get_cancel_label")]
-    #[doc(alias = "cancel-label")]
     pub fn cancel_label(&self) -> Option<glib::GString> {
         unsafe {
             from_glib_none(ffi::gtk_file_chooser_native_get_cancel_label(
@@ -80,7 +78,6 @@ impl FileChooserNative {
     #[cfg_attr(feature = "v4_10", deprecated = "Since 4.10")]
     #[allow(deprecated)]
     #[doc(alias = "gtk_file_chooser_native_set_accept_label")]
-    #[doc(alias = "accept-label")]
     pub fn set_accept_label(&self, accept_label: Option<&str>) {
         unsafe {
             ffi::gtk_file_chooser_native_set_accept_label(
@@ -93,7 +90,6 @@ impl FileChooserNative {
     #[cfg_attr(feature = "v4_10", deprecated = "Since 4.10")]
     #[allow(deprecated)]
     #[doc(alias = "gtk_file_chooser_native_set_cancel_label")]
-    #[doc(alias = "cancel-label")]
     pub fn set_cancel_label(&self, cancel_label: Option<&str>) {
         unsafe {
             ffi::gtk_file_chooser_native_set_cancel_label(
@@ -118,7 +114,7 @@ impl FileChooserNative {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::accept-label\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_accept_label_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -141,7 +137,7 @@ impl FileChooserNative {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::cancel-label\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_cancel_label_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -242,7 +238,6 @@ impl FileChooserNativeBuilder {
     /// Build the [`FileChooserNative`].
     #[must_use = "Building the object from the builder is usually expensive and is not expected to have side effects"]
     pub fn build(self) -> FileChooserNative {
-        assert_initialized_main_thread!();
         self.builder.build()
     }
 }

@@ -10,7 +10,7 @@ use std::{
 
 use glib::{prelude::*, subclass::prelude::*, translate::*};
 
-use crate::{ffi, Pixbuf, PixbufAnimationIter};
+use crate::{Pixbuf, PixbufAnimationIter};
 
 pub trait PixbufAnimationIterImpl: ObjectImpl {
     // rustdoc-stripper-ignore-next

@@ -11,7 +11,7 @@ use std::ptr;
 #[cfg(feature = "use_glib")]
 use glib::translate::*;
 
-use crate::{ffi, utils::status_to_result, DeviceType, Error};
+use crate::{utils::status_to_result, DeviceType, Error};
 #[cfg(feature = "script")]
 use crate::{Content, RecordingSurface, ScriptMode, Surface};
 
@@ -19,7 +19,7 @@ use crate::{Content, RecordingSurface, ScriptMode, Surface};
 #[must_use = "if unused the Device will immediately be released"]
 pub struct DeviceAcquireGuard<'a>(&'a Device);
 
-impl Drop for DeviceAcquireGuard<'_> {
+impl<'a> Drop for DeviceAcquireGuard<'a> {
     #[inline]
     fn drop(&mut self) {
         self.0.release();
@@ -159,7 +159,7 @@ impl Device {
     }
 
     #[doc(alias = "cairo_device_acquire")]
-    pub fn acquire(&self) -> Result<DeviceAcquireGuard<'_>, Error> {
+    pub fn acquire(&self) -> Result<DeviceAcquireGuard, Error> {
         unsafe {
             let status = ffi::cairo_device_acquire(self.to_raw_none());
             status_to_result(status)?;

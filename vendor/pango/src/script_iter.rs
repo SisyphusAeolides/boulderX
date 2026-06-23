@@ -4,7 +4,7 @@ use std::{marker::PhantomData, mem, ptr};
 
 use glib::{translate::*, GStr};
 
-use crate::{ffi, Script};
+use crate::Script;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct ScriptIter<'text> {
@@ -14,7 +14,7 @@ pub struct ScriptIter<'text> {
 
 #[cfg(feature = "v1_44")]
 #[cfg_attr(docsrs, doc(cfg(feature = "v1_44")))]
-impl Clone for ScriptIter<'_> {
+impl<'text> Clone for ScriptIter<'text> {
     #[inline]
     fn clone(&self) -> Self {
         let ptr = unsafe {
@@ -30,7 +30,7 @@ impl Clone for ScriptIter<'_> {
     }
 }
 
-impl Drop for ScriptIter<'_> {
+impl<'text> Drop for ScriptIter<'text> {
     #[inline]
     fn drop(&mut self) {
         unsafe {
@@ -41,7 +41,7 @@ impl Drop for ScriptIter<'_> {
 
 #[cfg(feature = "v1_44")]
 #[cfg_attr(docsrs, doc(cfg(feature = "v1_44")))]
-impl glib::prelude::StaticType for ScriptIter<'_> {
+impl<'text> glib::prelude::StaticType for ScriptIter<'text> {
     #[inline]
     fn static_type() -> glib::Type {
         unsafe { from_glib(ffi::pango_script_iter_get_type()) }
@@ -114,7 +114,7 @@ impl<'text> Iterator for ScriptIntoIter<'text> {
     }
 }
 
-impl std::iter::FusedIterator for ScriptIntoIter<'_> {}
+impl<'text> std::iter::FusedIterator for ScriptIntoIter<'text> {}
 
 #[doc(hidden)]
 impl<'a, 'text> ToGlibPtr<'a, *const ffi::PangoScriptIter> for ScriptIter<'text>
@@ -141,7 +141,7 @@ where
 }
 
 #[doc(hidden)]
-impl FromGlibPtrFull<*mut ffi::PangoScriptIter> for ScriptIter<'_> {
+impl<'text> FromGlibPtrFull<*mut ffi::PangoScriptIter> for ScriptIter<'text> {
     #[inline]
     unsafe fn from_glib_full(ptr: *mut ffi::PangoScriptIter) -> Self {
         Self {

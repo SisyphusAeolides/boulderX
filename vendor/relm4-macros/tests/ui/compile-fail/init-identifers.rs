@@ -15,7 +15,7 @@ impl SimpleComponent for ComponentInitBadIdentifiers {
 
     fn init(
         _: Self::Init,
-        (_a, _b): Self::Root,
+        (a, b): Self::Root,
         _: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         todo!();

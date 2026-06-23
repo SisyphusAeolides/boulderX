@@ -2,7 +2,7 @@
 
 use glib::translate::*;
 
-use crate::{ffi, BorderNode, RenderNodeType, RoundedRect};
+use crate::{BorderNode, RenderNodeType, RoundedRect};
 
 define_render_node!(BorderNode, ffi::GskBorderNode, RenderNodeType::BorderNode);
 

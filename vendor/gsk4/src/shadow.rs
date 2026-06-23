@@ -2,7 +2,6 @@
 
 use std::fmt;
 
-use crate::ffi;
 use gdk::RGBA;
 use glib::translate::*;
 

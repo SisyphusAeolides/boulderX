@@ -4,7 +4,7 @@ use std::{mem, ptr, sync::OnceLock};
 
 use glib::{prelude::*, subclass::prelude::*, translate::*, GString, Quark, Variant, VariantType};
 
-use crate::{ffi, ActionGroup};
+use crate::ActionGroup;
 
 pub trait ActionGroupImpl: ObjectImpl {
     fn action_added(&self, action_name: &str) {

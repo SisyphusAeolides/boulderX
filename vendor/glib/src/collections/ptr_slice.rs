@@ -2,7 +2,7 @@
 
 use std::{fmt, marker::PhantomData, mem, ptr};
 
-use crate::{ffi, translate::*};
+use crate::translate::*;
 
 // rustdoc-stripper-ignore-next
 /// Minimum size of the `PtrSlice` allocation.
@@ -601,11 +601,6 @@ impl<T: TransparentPtrType> PtrSlice<T> {
     /// Creates a new empty slice.
     #[inline]
     pub fn new() -> Self {
-        debug_assert_eq!(
-            mem::size_of::<T>(),
-            mem::size_of::<<T as GlibPtrDefault>::GlibType>()
-        );
-
         PtrSlice {
             ptr: ptr::NonNull::dangling(),
             len: 0,
@@ -658,21 +653,13 @@ impl<T: TransparentPtrType> PtrSlice<T> {
     /// This is guaranteed to be `NULL`-terminated.
     #[inline]
     pub fn into_raw(mut self) -> *mut <T as GlibPtrDefault>::GlibType {
-        // Make sure to allocate a valid pointer that points to a
-        // NULL-pointer.
         if self.len == 0 {
-            self.reserve(0);
-            unsafe {
-                ptr::write(
-                    self.ptr.as_ptr().add(0),
-                    Ptr::from(ptr::null_mut::<<T as GlibPtrDefault>::GlibType>()),
-                );
-            }
+            ptr::null_mut()
+        } else {
+            self.len = 0;
+            self.capacity = 0;
+            self.ptr.as_ptr()
         }
-
-        self.len = 0;
-        self.capacity = 0;
-        self.ptr.as_ptr()
     }
 
     // rustdoc-stripper-ignore-next
@@ -731,12 +718,6 @@ impl<T: TransparentPtrType> PtrSlice<T> {
             let new_ptr =
                 ffi::g_realloc(ptr, mem::size_of::<T>().checked_mul(new_capacity).unwrap())
                     as *mut <T as GlibPtrDefault>::GlibType;
-            if self.capacity == 0 {
-                ptr::write(
-                    new_ptr,
-                    Ptr::from(ptr::null_mut::<<T as GlibPtrDefault>::GlibType>()),
-                );
-            }
             self.ptr = ptr::NonNull::new_unchecked(new_ptr);
             self.capacity = new_capacity;
         }
@@ -1105,7 +1086,7 @@ impl<T: TransparentPtrType> IntoPtrSlice<T> for PtrSlice<T> {
     }
 }
 
-impl<T: TransparentPtrType> IntoPtrSlice<T> for &'_ PtrSlice<T> {
+impl<'a, T: TransparentPtrType> IntoPtrSlice<T> for &'a PtrSlice<T> {
     #[inline]
     fn run_with_ptr_slice<R, F: FnOnce(&[<T as GlibPtrDefault>::GlibType]) -> R>(self, f: F) -> R {
         f(unsafe { std::slice::from_raw_parts(self.as_ptr() as *mut _, self.len() + 1) })
@@ -1168,7 +1149,7 @@ impl<T: TransparentPtrType, const N: usize> IntoPtrSlice<T> for [T; N] {
     }
 }
 
-impl<T: TransparentPtrType> IntoPtrSlice<T> for &'_ [T] {
+impl<'a, T: TransparentPtrType> IntoPtrSlice<T> for &'a [T] {
     #[inline]
     fn run_with_ptr_slice<R, F: FnOnce(&[<T as GlibPtrDefault>::GlibType]) -> R>(self, f: F) -> R {
         if self.len() < MAX_STACK_ALLOCATION {

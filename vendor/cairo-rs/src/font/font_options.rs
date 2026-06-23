@@ -11,9 +11,7 @@ use glib::translate::*;
 
 #[cfg(feature = "v1_16")]
 use crate::font::font_face::to_optional_string;
-use crate::{
-    ffi, utils::status_to_result, Antialias, Error, HintMetrics, HintStyle, SubpixelOrder,
-};
+use crate::{utils::status_to_result, Antialias, Error, HintMetrics, HintStyle, SubpixelOrder};
 
 #[cfg(feature = "use_glib")]
 glib::wrapper! {

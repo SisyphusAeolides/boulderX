@@ -2,7 +2,7 @@
 // from gir-files (https://github.com/gtk-rs/gir-files)
 // DO NOT EDIT
 
-use crate::{ffi, ListItem, Widget};
+use crate::{ListItem, Widget};
 use glib::{prelude::*, translate::*};
 
 glib::wrapper! {
@@ -33,7 +33,6 @@ impl ColumnViewCell {
     #[cfg_attr(docsrs, doc(cfg(not(feature = "v4_12"))))]
     #[doc(alias = "gtk_column_view_cell_get_focusable")]
     #[doc(alias = "get_focusable")]
-    #[doc(alias = "focusable")]
     pub fn is_focusable(&self) -> bool {
         unsafe {
             from_glib(ffi::gtk_column_view_cell_get_focusable(
@@ -56,7 +55,6 @@ impl ColumnViewCell {
 
     #[doc(alias = "gtk_column_view_cell_get_selected")]
     #[doc(alias = "get_selected")]
-    #[doc(alias = "selected")]
     pub fn is_selected(&self) -> bool {
         unsafe {
             from_glib(ffi::gtk_column_view_cell_get_selected(
@@ -66,7 +64,6 @@ impl ColumnViewCell {
     }
 
     #[doc(alias = "gtk_column_view_cell_set_child")]
-    #[doc(alias = "child")]
     pub fn set_child(&self, child: Option<&impl IsA<Widget>>) {
         unsafe {
             ffi::gtk_column_view_cell_set_child(
@@ -79,7 +76,6 @@ impl ColumnViewCell {
     #[cfg(not(feature = "v4_12"))]
     #[cfg_attr(docsrs, doc(cfg(not(feature = "v4_12"))))]
     #[doc(alias = "gtk_column_view_cell_set_focusable")]
-    #[doc(alias = "focusable")]
     pub fn set_focusable(&self, focusable: bool) {
         unsafe {
             ffi::gtk_column_view_cell_set_focusable(self.to_glib_none().0, focusable.into_glib());
@@ -155,7 +151,6 @@ impl ColumnViewCellBuilder {
     /// Build the [`ColumnViewCell`].
     #[must_use = "Building the object from the builder is usually expensive and is not expected to have side effects"]
     pub fn build(self) -> ColumnViewCell {
-        assert_initialized_main_thread!();
         self.builder.build()
     }
 }

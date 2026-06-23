@@ -4,11 +4,10 @@
 #![allow(deprecated)]
 
 use crate::{
-    ffi, CairoContext, Cursor, Device, Display, Event, FrameClock, GLContext, ModifierType,
-    Monitor, VulkanContext,
+    CairoContext, Cursor, Device, Display, Event, FrameClock, GLContext, ModifierType, Monitor,
+    VulkanContext,
 };
 use glib::{
-    object::ObjectType as _,
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
     translate::*,
@@ -159,7 +158,6 @@ pub trait SurfaceExt: IsA<Surface> + sealed::Sealed + 'static {
 
     #[doc(alias = "gdk_surface_get_frame_clock")]
     #[doc(alias = "get_frame_clock")]
-    #[doc(alias = "frame-clock")]
     fn frame_clock(&self) -> FrameClock {
         unsafe {
             from_glib_none(ffi::gdk_surface_get_frame_clock(
@@ -176,7 +174,6 @@ pub trait SurfaceExt: IsA<Surface> + sealed::Sealed + 'static {
 
     #[doc(alias = "gdk_surface_get_mapped")]
     #[doc(alias = "get_mapped")]
-    #[doc(alias = "mapped")]
     fn is_mapped(&self) -> bool {
         unsafe { from_glib(ffi::gdk_surface_get_mapped(self.as_ref().to_glib_none().0)) }
     }
@@ -191,7 +188,6 @@ pub trait SurfaceExt: IsA<Surface> + sealed::Sealed + 'static {
 
     #[doc(alias = "gdk_surface_get_scale_factor")]
     #[doc(alias = "get_scale_factor")]
-    #[doc(alias = "scale-factor")]
     fn scale_factor(&self) -> i32 {
         unsafe { ffi::gdk_surface_get_scale_factor(self.as_ref().to_glib_none().0) }
     }
@@ -233,7 +229,6 @@ pub trait SurfaceExt: IsA<Surface> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "gdk_surface_set_cursor")]
-    #[doc(alias = "cursor")]
     fn set_cursor(&self, cursor: Option<&Cursor>) {
         unsafe {
             ffi::gdk_surface_set_cursor(self.as_ref().to_glib_none().0, cursor.to_glib_none().0);
@@ -261,8 +256,6 @@ pub trait SurfaceExt: IsA<Surface> + sealed::Sealed + 'static {
         }
     }
 
-    #[cfg_attr(feature = "v4_16", deprecated = "Since 4.16")]
-    #[allow(deprecated)]
     #[doc(alias = "gdk_surface_set_opaque_region")]
     fn set_opaque_region(&self, region: Option<&cairo::Region>) {
         unsafe {
@@ -294,7 +287,7 @@ pub trait SurfaceExt: IsA<Surface> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"enter-monitor\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     enter_monitor_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -324,7 +317,7 @@ pub trait SurfaceExt: IsA<Surface> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"event\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     event_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -336,8 +329,8 @@ pub trait SurfaceExt: IsA<Surface> + sealed::Sealed + 'static {
     fn connect_layout<F: Fn(&Self, i32, i32) + 'static>(&self, f: F) -> SignalHandlerId {
         unsafe extern "C" fn layout_trampoline<P: IsA<Surface>, F: Fn(&P, i32, i32) + 'static>(
             this: *mut ffi::GdkSurface,
-            width: std::ffi::c_int,
-            height: std::ffi::c_int,
+            width: libc::c_int,
+            height: libc::c_int,
             f: glib::ffi::gpointer,
         ) {
             let f: &F = &*(f as *const F);
@@ -352,7 +345,7 @@ pub trait SurfaceExt: IsA<Surface> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"layout\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     layout_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -381,7 +374,7 @@ pub trait SurfaceExt: IsA<Surface> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"leave-monitor\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     leave_monitor_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -414,7 +407,7 @@ pub trait SurfaceExt: IsA<Surface> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"render\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     render_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -437,7 +430,7 @@ pub trait SurfaceExt: IsA<Surface> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::cursor\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_cursor_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -460,7 +453,7 @@ pub trait SurfaceExt: IsA<Surface> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::height\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_height_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -483,7 +476,7 @@ pub trait SurfaceExt: IsA<Surface> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::mapped\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_mapped_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -508,7 +501,7 @@ pub trait SurfaceExt: IsA<Surface> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::scale\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_scale_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -534,7 +527,7 @@ pub trait SurfaceExt: IsA<Surface> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::scale-factor\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_scale_factor_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -557,7 +550,7 @@ pub trait SurfaceExt: IsA<Surface> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::width\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_width_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),

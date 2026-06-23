@@ -1,5 +1,5 @@
 [build-dependencies]
-system-deps = "7"
+system-deps = "6"
 
 [dependencies]
 libc = "0.2"
@@ -11,7 +11,7 @@ workspace = true
 workspace = true
 
 [target."cfg(windows)".dependencies.windows-sys]
-version = ">=0.52, <=0.59"
+version = "0.52"
 features = ["Win32_Networking_WinSock"]
 
 [dev-dependencies]
@@ -31,9 +31,6 @@ v2_74 = ["v2_72"]
 v2_76 = ["v2_74"]
 v2_78 = ["v2_76"]
 v2_80 = ["v2_78"]
-v2_82 = ["v2_80"]
-v2_84 = ["v2_82"]
-v2_86 = ["v2_84"]
 
 [lib]
 name = "gio_sys"
@@ -106,16 +103,7 @@ version = "2.76"
 version = "2.77"
 
 [package.metadata.system-deps.gio_2_0.v2_80]
-version = "2.80"
-
-[package.metadata.system-deps.gio_2_0.v2_82]
-version = "2.82"
-
-[package.metadata.system-deps.gio_2_0.v2_84]
-version = "2.84"
-
-[package.metadata.system-deps.gio_2_0.v2_86]
-version = "2.85"
+version = "2.79"
 
 [package.metadata.docs.rs]
 rustc-args = ["--cfg", "docsrs"]

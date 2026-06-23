@@ -6,7 +6,7 @@ use crate::{EventType, TouchpadEvent};
 
 define_event! {
     TouchpadEvent,
-    crate::ffi::GdkTouchpadEvent,
+    ffi::GdkTouchpadEvent,
     &[
         EventType::TouchpadSwipe,
         EventType::TouchpadPinch,

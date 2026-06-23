@@ -54,7 +54,6 @@ use std::{
 use libc::{c_char, c_void};
 
 use crate::{
-    ffi, gobject_ffi,
     gstring::GString,
     prelude::*,
     translate::*,
@@ -571,9 +570,7 @@ impl Value {
     ///
     /// Returns `Ok` if the type is correct.
     #[inline]
-    pub fn get<'a, T>(
-        &'a self,
-    ) -> Result<T, <<T as FromValue<'a>>::Checker as ValueTypeChecker>::Error>
+    pub fn get<'a, T>(&'a self) -> Result<T, <<T as FromValue>::Checker as ValueTypeChecker>::Error>
     where
         T: FromValue<'a>,
     {
@@ -586,9 +583,7 @@ impl Value {
     // rustdoc-stripper-ignore-next
     /// Tries to get a value of an owned type `T`.
     #[inline]
-    pub fn get_owned<T>(
-        &self,
-    ) -> Result<T, <<T as FromValue<'_>>::Checker as ValueTypeChecker>::Error>
+    pub fn get_owned<T>(&self) -> Result<T, <<T as FromValue>::Checker as ValueTypeChecker>::Error>
     where
         T: for<'b> FromValue<'b> + 'static,
     {
@@ -671,9 +666,6 @@ impl Value {
         }
     }
 
-    // rustdoc-stripper-ignore-next
-    /// Converts a `Value` into a `SendValue`. This fails if `self` does not store a value of type
-    /// `T`. It is required for `T` to be `Send` to call this function.
     #[inline]
     pub fn try_into_send_value<T: Send + StaticType>(self) -> Result<SendValue, Self> {
         if self.type_().is_a(T::static_type()) {
@@ -681,17 +673,6 @@ impl Value {
         } else {
             Err(self)
         }
-    }
-
-    // rustdoc-stripper-ignore-next
-    /// Converts a `Value` into a `SendValue`.
-    ///
-    /// # Safety
-    ///
-    /// The type of the value contained in `self` must be `Send`.
-    #[inline]
-    pub unsafe fn into_send_value(self) -> SendValue {
-        SendValue::unsafe_from(self.into_raw())
     }
 
     fn content_debug_string(&self) -> GString {
@@ -731,7 +712,7 @@ impl ToValue for Value {
     }
 }
 
-impl ToValue for &Value {
+impl<'a> ToValue for &'a Value {
     #[inline]
     fn to_value(&self) -> Value {
         (*self).clone()
@@ -784,7 +765,7 @@ impl ToValue for SendValue {
     }
 }
 
-impl ToValue for &SendValue {
+impl<'a> ToValue for &'a SendValue {
     #[inline]
     fn to_value(&self) -> Value {
         unsafe { from_glib_none(self.to_glib_none().0) }
@@ -834,7 +815,7 @@ impl SendValue {
         }
     }
     #[inline]
-    pub fn from_owned<T: Send + Into<Value>>(t: T) -> Self {
+    pub fn from_owned<T: Send + Into<Value> + ?Sized>(t: T) -> Self {
         unsafe { Self::unsafe_from(t.into().into_raw()) }
     }
 }
@@ -1038,7 +1019,7 @@ impl From<Vec<String>> for Value {
     }
 }
 
-impl ToValue for [&'_ str] {
+impl<'a> ToValue for [&'a str] {
     fn to_value(&self) -> Value {
         unsafe {
             let mut value = Value::for_value_type::<Vec<String>>();
@@ -1053,7 +1034,7 @@ impl ToValue for [&'_ str] {
     }
 }
 
-impl ToValue for &'_ [&'_ str] {
+impl<'a> ToValue for &'a [&'a str] {
     fn to_value(&self) -> Value {
         unsafe {
             let mut value = Value::for_value_type::<Vec<String>>();

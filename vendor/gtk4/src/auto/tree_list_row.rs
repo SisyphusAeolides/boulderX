@@ -2,7 +2,6 @@
 // from gir-files (https://github.com/gtk-rs/gir-files)
 // DO NOT EDIT
 
-use crate::ffi;
 use glib::{
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
@@ -46,7 +45,6 @@ impl TreeListRow {
 
     #[doc(alias = "gtk_tree_list_row_get_expanded")]
     #[doc(alias = "get_expanded")]
-    #[doc(alias = "expanded")]
     pub fn is_expanded(&self) -> bool {
         unsafe { from_glib(ffi::gtk_tree_list_row_get_expanded(self.to_glib_none().0)) }
     }
@@ -71,13 +69,11 @@ impl TreeListRow {
     }
 
     #[doc(alias = "gtk_tree_list_row_is_expandable")]
-    #[doc(alias = "expandable")]
     pub fn is_expandable(&self) -> bool {
         unsafe { from_glib(ffi::gtk_tree_list_row_is_expandable(self.to_glib_none().0)) }
     }
 
     #[doc(alias = "gtk_tree_list_row_set_expanded")]
-    #[doc(alias = "expanded")]
     pub fn set_expanded(&self, expanded: bool) {
         unsafe {
             ffi::gtk_tree_list_row_set_expanded(self.to_glib_none().0, expanded.into_glib());
@@ -99,7 +95,7 @@ impl TreeListRow {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::children\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_children_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -122,7 +118,7 @@ impl TreeListRow {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::depth\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_depth_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -145,7 +141,7 @@ impl TreeListRow {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::expandable\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_expandable_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -168,7 +164,7 @@ impl TreeListRow {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::expanded\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_expanded_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -191,7 +187,7 @@ impl TreeListRow {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::item\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_item_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),

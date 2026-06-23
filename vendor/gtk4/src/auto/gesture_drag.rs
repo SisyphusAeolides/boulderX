@@ -2,9 +2,8 @@
 // from gir-files (https://github.com/gtk-rs/gir-files)
 // DO NOT EDIT
 
-use crate::{ffi, EventController, Gesture, GestureSingle, PropagationLimit, PropagationPhase};
+use crate::{EventController, Gesture, GestureSingle, PropagationLimit, PropagationPhase};
 use glib::{
-    object::ObjectType as _,
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
     translate::*,
@@ -110,7 +109,6 @@ impl GestureDragBuilder {
     /// Build the [`GestureDrag`].
     #[must_use = "Building the object from the builder is usually expensive and is not expected to have side effects"]
     pub fn build(self) -> GestureDrag {
-        assert_initialized_main_thread!();
         self.builder.build()
     }
 }
@@ -166,8 +164,8 @@ pub trait GestureDragExt: IsA<GestureDrag> + sealed::Sealed + 'static {
             F: Fn(&P, f64, f64) + 'static,
         >(
             this: *mut ffi::GtkGestureDrag,
-            start_x: std::ffi::c_double,
-            start_y: std::ffi::c_double,
+            start_x: libc::c_double,
+            start_y: libc::c_double,
             f: glib::ffi::gpointer,
         ) {
             let f: &F = &*(f as *const F);
@@ -182,7 +180,7 @@ pub trait GestureDragExt: IsA<GestureDrag> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"drag-begin\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     drag_begin_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -197,8 +195,8 @@ pub trait GestureDragExt: IsA<GestureDrag> + sealed::Sealed + 'static {
             F: Fn(&P, f64, f64) + 'static,
         >(
             this: *mut ffi::GtkGestureDrag,
-            offset_x: std::ffi::c_double,
-            offset_y: std::ffi::c_double,
+            offset_x: libc::c_double,
+            offset_y: libc::c_double,
             f: glib::ffi::gpointer,
         ) {
             let f: &F = &*(f as *const F);
@@ -213,7 +211,7 @@ pub trait GestureDragExt: IsA<GestureDrag> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"drag-end\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     drag_end_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -228,8 +226,8 @@ pub trait GestureDragExt: IsA<GestureDrag> + sealed::Sealed + 'static {
             F: Fn(&P, f64, f64) + 'static,
         >(
             this: *mut ffi::GtkGestureDrag,
-            offset_x: std::ffi::c_double,
-            offset_y: std::ffi::c_double,
+            offset_x: libc::c_double,
+            offset_y: libc::c_double,
             f: glib::ffi::gpointer,
         ) {
             let f: &F = &*(f as *const F);
@@ -244,7 +242,7 @@ pub trait GestureDragExt: IsA<GestureDrag> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"drag-update\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     drag_update_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),

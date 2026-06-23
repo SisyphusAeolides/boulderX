@@ -2,7 +2,6 @@
 
 use std::mem;
 
-use crate::ffi;
 use glib::translate::*;
 use graphene::{Point, Rect, Size};
 

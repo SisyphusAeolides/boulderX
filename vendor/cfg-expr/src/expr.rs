@@ -100,19 +100,10 @@ impl TargetMatcher for target_lexicon::Triple {
     #[allow(clippy::cognitive_complexity)]
     #[allow(clippy::match_same_arms)]
     fn matches(&self, tp: &TargetPredicate) -> bool {
+        use target_lexicon::*;
         use TargetPredicate::{
             Abi, Arch, Endian, Env, Family, HasAtomic, Os, Panic, PointerWidth, Vendor,
         };
-        use target_lexicon::{
-            self as tl, Architecture as arch, ArmArchitecture, Endianness as endian,
-            Environment as env, Mips32Architecture as mips32, Mips64Architecture as mips64,
-            OperatingSystem as os,
-        };
-
-        const NUTTX: tl::Vendor = tl::Vendor::Custom(tl::CustomVendor::Static("nuttx"));
-        const RTEMS: tl::Vendor = tl::Vendor::Custom(tl::CustomVendor::Static("rtems"));
-        const WALI: tl::Vendor = tl::Vendor::Custom(tl::CustomVendor::Static("wali"));
-        const WASIP3: tl::Vendor = tl::Vendor::Custom(tl::CustomVendor::Static("wasip3"));
 
         match tp {
             Abi(_) => {
@@ -121,37 +112,42 @@ impl TargetMatcher for target_lexicon::Triple {
             }
             Arch(arch) => {
                 if arch == &targ::Arch::x86 {
-                    matches!(self.architecture, arch::X86_32(_))
+                    matches!(self.architecture, Architecture::X86_32(_))
                 } else if arch == &targ::Arch::wasm32 {
-                    self.architecture == arch::Wasm32 || self.architecture == arch::Asmjs
+                    self.architecture == Architecture::Wasm32
+                        || self.architecture == Architecture::Asmjs
                 } else if arch == &targ::Arch::arm {
-                    matches!(self.architecture, arch::Arm(_))
+                    matches!(self.architecture, Architecture::Arm(_))
                 } else if arch == &targ::Arch::bpf {
-                    self.architecture == arch::Bpfeb || self.architecture == arch::Bpfel
+                    self.architecture == Architecture::Bpfeb
+                        || self.architecture == Architecture::Bpfel
                 } else if arch == &targ::Arch::x86_64 {
-                    self.architecture == arch::X86_64 || self.architecture == arch::X86_64h
+                    self.architecture == Architecture::X86_64
+                        || self.architecture == Architecture::X86_64h
                 } else if arch == &targ::Arch::mips32r6 {
                     matches!(
                         self.architecture,
-                        arch::Mips32(mips32::Mipsisa32r6 | mips32::Mipsisa32r6el)
+                        Architecture::Mips32(
+                            Mips32Architecture::Mipsisa32r6 | Mips32Architecture::Mipsisa32r6el
+                        )
                     )
                 } else if arch == &targ::Arch::mips64r6 {
                     matches!(
                         self.architecture,
-                        arch::Mips64(mips64::Mipsisa64r6 | mips64::Mipsisa64r6el)
+                        Architecture::Mips64(
+                            Mips64Architecture::Mipsisa64r6 | Mips64Architecture::Mipsisa64r6el
+                        )
                     )
-                } else if arch == &targ::Arch::amdgpu {
-                    self.architecture == arch::AmdGcn
                 } else {
-                    match arch.0.parse::<arch>() {
+                    match arch.0.parse::<Architecture>() {
                         Ok(a) => match (self.architecture, a) {
-                            (arch::Aarch64(_), arch::Aarch64(_))
-                            | (arch::Mips32(_), arch::Mips32(_))
-                            | (arch::Mips64(_), arch::Mips64(_))
-                            | (arch::Powerpc64le, arch::Powerpc64)
-                            | (arch::Riscv32(_), arch::Riscv32(_))
-                            | (arch::Riscv64(_), arch::Riscv64(_))
-                            | (arch::Sparcv9, arch::Sparc64) => true,
+                            (Architecture::Aarch64(_), Architecture::Aarch64(_))
+                            | (Architecture::Mips32(_), Architecture::Mips32(_))
+                            | (Architecture::Mips64(_), Architecture::Mips64(_))
+                            | (Architecture::Powerpc64le, Architecture::Powerpc64)
+                            | (Architecture::Riscv32(_), Architecture::Riscv32(_))
+                            | (Architecture::Riscv64(_), Architecture::Riscv64(_))
+                            | (Architecture::Sparcv9, Architecture::Sparc64) => true,
                             (a, b) => a == b,
                         },
                         Err(_) => false,
@@ -161,8 +157,8 @@ impl TargetMatcher for target_lexicon::Triple {
             Endian(end) => match self.architecture.endianness() {
                 Ok(endian) => matches!(
                     (end, endian),
-                    (crate::targets::Endian::little, endian::Little)
-                        | (crate::targets::Endian::big, endian::Big)
+                    (crate::targets::Endian::little, Endianness::Little)
+                        | (crate::targets::Endian::big, Endianness::Big)
                 ),
 
                 Err(_) => false,
@@ -170,84 +166,86 @@ impl TargetMatcher for target_lexicon::Triple {
             Env(env) => {
                 // The environment is implied by some operating systems
                 match self.operating_system {
-                    os::Redox => env == &targ::Env::relibc,
-                    os::VxWorks => env == &targ::Env::gnu,
-                    os::Freebsd => env.0.is_empty(),
-                    os::Netbsd => match self.architecture {
-                        arch::Arm(ArmArchitecture::Armv6 | ArmArchitecture::Armv7) => {
-                            env.0.is_empty()
+                    OperatingSystem::Redox => env == &targ::Env::relibc,
+                    OperatingSystem::VxWorks => env == &targ::Env::gnu,
+                    OperatingSystem::Freebsd => match self.architecture {
+                        Architecture::Arm(ArmArchitecture::Armv6 | ArmArchitecture::Armv7) => {
+                            env == &targ::Env::gnueabihf
                         }
                         _ => env.0.is_empty(),
                     },
-                    os::None_ | os::Cloudabi | os::Hermit => match self.environment {
-                        env::LinuxKernel => env == &targ::Env::gnu,
+                    OperatingSystem::Netbsd => match self.architecture {
+                        Architecture::Arm(ArmArchitecture::Armv6 | ArmArchitecture::Armv7) => {
+                            env == &targ::Env::eabihf
+                        }
                         _ => env.0.is_empty(),
                     },
-                    os::IOS(_) | os::TvOS(_) => match self.environment {
-                        env::LinuxKernel => env == &targ::Env::gnu,
-                        env::Macabi => env == &targ::Env::macabi,
-                        env::Sim => env == &targ::Env::sim,
-                        env::Unknown => env.0.is_empty() || env == &targ::Env::sim,
+                    OperatingSystem::None_
+                    | OperatingSystem::Cloudabi
+                    | OperatingSystem::Hermit
+                    | OperatingSystem::Ios => match self.environment {
+                        Environment::LinuxKernel => env == &targ::Env::gnu,
                         _ => env.0.is_empty(),
                     },
-                    os::WasiP1 => env == &targ::Env::p1,
-                    os::WasiP2 => env == &targ::Env::p2,
-                    os::Wasi => env.0.is_empty() || env == &targ::Env::p1,
                     _ => {
                         if env.0.is_empty() {
                             matches!(
                                 self.environment,
-                                env::Unknown
-                                    | env::Android
-                                    | env::Softfloat
-                                    | env::Androideabi
-                                    | env::Eabi
-                                    | env::Eabihf
-                                    | env::Sim
-                                    | env::None
+                                Environment::Unknown
+                                    | Environment::Android
+                                    | Environment::Softfloat
+                                    | Environment::Androideabi
+                                    | Environment::Eabi
+                                    | Environment::Eabihf
+                                    | Environment::Sim
                             )
-                        } else if env == &targ::Env::p3 {
-                            self.vendor == WASIP3
                         } else {
-                            match env.0.parse::<env>() {
+                            match env.0.parse::<Environment>() {
                                 Ok(e) => {
                                     // Rustc shortens multiple "gnu*" environments to just "gnu"
                                     if env == &targ::Env::gnu {
                                         match self.environment {
-                                            env::Gnu
-                                            | env::Gnuabi64
-                                            | env::Gnueabi
-                                            | env::Gnuspe
-                                            | env::Gnux32
-                                            | env::GnuIlp32
-                                            | env::Gnueabihf
-                                            | env::GnuLlvm => true,
+                                            Environment::Gnu
+                                            | Environment::Gnuabi64
+                                            | Environment::Gnueabi
+                                            | Environment::Gnuspe
+                                            | Environment::Gnux32
+                                            | Environment::GnuIlp32
+                                            | Environment::Gnueabihf
+                                            | Environment::GnuLlvm => true,
                                             // Rust 1.49.0 changed all android targets to have the
                                             // gnu environment
-                                            env::Android | env::Androideabi
-                                                if self.operating_system == os::Linux =>
+                                            Environment::Android | Environment::Androideabi
+                                                if self.operating_system
+                                                    == OperatingSystem::Linux =>
                                             {
                                                 true
                                             }
-                                            env::Kernel => self.operating_system == os::Linux,
-                                            _ => self.architecture == arch::Avr,
+                                            Environment::Kernel => {
+                                                self.operating_system == OperatingSystem::Linux
+                                            }
+                                            _ => false,
                                         }
                                     } else if env == &targ::Env::musl {
                                         matches!(
                                             self.environment,
-                                            env::Musl
-                                                | env::Musleabi
-                                                | env::Musleabihf
-                                                | env::Muslabi64
+                                            Environment::Musl
+                                                | Environment::Musleabi
+                                                | Environment::Musleabihf
+                                                | Environment::Muslabi64
                                         )
                                     } else if env == &targ::Env::uclibc {
                                         matches!(
                                             self.environment,
-                                            env::Uclibc | env::Uclibceabi | env::Uclibceabihf
+                                            Environment::Uclibc
+                                                | Environment::Uclibceabi
+                                                | Environment::Uclibceabihf
                                         )
                                     } else if env == &targ::Env::newlib {
-                                        matches!(self.operating_system, os::Horizon | os::Espidf)
-                                            || self.vendor == RTEMS
+                                        matches!(
+                                            self.operating_system,
+                                            OperatingSystem::Horizon | OperatingSystem::Espidf
+                                        )
                                     } else {
                                         self.environment == e
                                     }
@@ -259,72 +257,62 @@ impl TargetMatcher for target_lexicon::Triple {
                 }
             }
             Family(fam) => {
+                use OperatingSystem::{
+                    Aix, AmdHsa, Bitrig, Cloudabi, Cuda, Darwin, Dragonfly, Emscripten, Espidf,
+                    Freebsd, Fuchsia, Haiku, Hermit, Horizon, Illumos, Ios, L4re, Linux, MacOSX,
+                    Nebulet, Netbsd, None_, Openbsd, Redox, Solaris, Tvos, Uefi, Unknown, VxWorks,
+                    Wasi, Watchos, Windows,
+                };
                 match self.operating_system {
-                    os::AmdHsa
-                    | os::Bitrig
-                    | os::Cloudabi
-                    | os::Cuda
-                    | os::Hermit
-                    | os::Nebulet
-                    | os::None_
-                    | os::Uefi => false,
-                    os::Aix
-                    | os::Darwin(_)
-                    | os::Dragonfly
-                    | os::Espidf
-                    | os::Freebsd
-                    | os::Fuchsia
-                    | os::Haiku
-                    | os::Hurd
-                    | os::Illumos
-                    | os::IOS(_)
-                    | os::L4re
-                    | os::MacOSX { .. }
-                    | os::Horizon
-                    | os::Netbsd
-                    | os::Openbsd
-                    | os::Redox
-                    | os::Solaris
-                    | os::TvOS(_)
-                    | os::VisionOS(_)
-                    | os::VxWorks
-                    | os::WatchOS(_) => fam == &crate::targets::Family::unix,
-                    os::Emscripten => {
+                    AmdHsa | Bitrig | Cloudabi | Cuda | Hermit | Nebulet | None_ | Uefi => false,
+                    Aix
+                    | Darwin
+                    | Dragonfly
+                    | Espidf
+                    | Freebsd
+                    | Fuchsia
+                    | Haiku
+                    | Illumos
+                    | Ios
+                    | L4re
+                    | MacOSX { .. }
+                    | Horizon
+                    | Netbsd
+                    | Openbsd
+                    | Redox
+                    | Solaris
+                    | Tvos
+                    | VxWorks
+                    | Watchos => fam == &crate::targets::Family::unix,
+                    Emscripten => {
                         match self.architecture {
                             // asmjs, wasm32 and wasm64 are part of both the wasm and unix families
-                            arch::Asmjs | arch::Wasm32 => {
+                            Architecture::Asmjs | Architecture::Wasm32 => {
                                 fam == &crate::targets::Family::wasm
                                     || fam == &crate::targets::Family::unix
                             }
                             _ => false,
                         }
                     }
-                    os::Unknown if self.vendor == NUTTX || self.vendor == RTEMS => {
-                        fam == &crate::targets::Family::unix
-                    }
-                    os::Unknown => {
+                    Unknown => {
                         // asmjs, wasm32 and wasm64 are part of the wasm family.
                         match self.architecture {
-                            arch::Asmjs | arch::Wasm32 | arch::Wasm64 => {
+                            Architecture::Asmjs | Architecture::Wasm32 | Architecture::Wasm64 => {
                                 fam == &crate::targets::Family::wasm
                             }
                             _ => false,
                         }
                     }
-                    os::Linux if self.vendor == WALI => {
-                        fam == &crate::targets::Family::wasm || fam == &crate::targets::Family::unix
-                    }
-                    os::Linux => {
+                    Linux => {
                         // The 'kernel' environment is treated specially as not-unix
-                        if self.environment != env::Kernel {
+                        if self.environment != Environment::Kernel {
                             fam == &crate::targets::Family::unix
                         } else {
                             false
                         }
                     }
-                    os::Wasi | os::WasiP1 | os::WasiP2 => fam == &crate::targets::Family::wasm,
-                    os::Windows => fam == &crate::targets::Family::windows,
-                    os::Cygwin => fam == &crate::targets::Family::unix,
+                    Wasi => fam == &crate::targets::Family::wasm,
+                    Windows => fam == &crate::targets::Family::windows,
                     // I really dislike non-exhaustive :(
                     _ => false,
                 }
@@ -334,54 +322,35 @@ impl TargetMatcher for target_lexicon::Triple {
                 // this.
                 false
             }
-            Os(os) => {
-                if os == &targ::Os::wasi
-                    && (matches!(self.operating_system, os::WasiP1 | os::WasiP2)
-                        || self.vendor == WASIP3)
-                    || (os == &targ::Os::nuttx && self.vendor == NUTTX)
-                    || (os == &targ::Os::rtems && self.vendor == RTEMS)
-                {
-                    return true;
-                }
-
-                match os.0.parse::<os>() {
-                    Ok(o) => match self.environment {
-                        env::HermitKernel => os == &targ::Os::hermit,
-                        _ => self.operating_system == o,
-                    },
-                    Err(_) => {
-                        // Handle special case for darwin/macos, where the triple is
-                        // "darwin", but rustc identifies the OS as "macos"
-                        if os == &targ::Os::macos && matches!(self.operating_system, os::Darwin(_))
-                        {
-                            true
-                        } else {
-                            // For android, the os is still linux, but the environment is android
-                            os == &targ::Os::android
-                                && self.operating_system == os::Linux
-                                && (self.environment == env::Android
-                                    || self.environment == env::Androideabi)
-                        }
+            Os(os) => match os.0.parse::<OperatingSystem>() {
+                Ok(o) => match self.environment {
+                    Environment::HermitKernel => os == &targ::Os::hermit,
+                    _ => self.operating_system == o,
+                },
+                Err(_) => {
+                    // Handle special case for darwin/macos, where the triple is
+                    // "darwin", but rustc identifies the OS as "macos"
+                    if os == &targ::Os::macos && self.operating_system == OperatingSystem::Darwin {
+                        true
+                    } else {
+                        // For android, the os is still linux, but the environment is android
+                        os == &targ::Os::android
+                            && self.operating_system == OperatingSystem::Linux
+                            && (self.environment == Environment::Android
+                                || self.environment == Environment::Androideabi)
                     }
                 }
-            }
+            },
             Panic(_) => {
                 // panic support depends on the OS. Assume false for this.
                 false
             }
             Vendor(ven) => match ven.0.parse::<target_lexicon::Vendor>() {
                 Ok(v) => {
-                    if self.vendor == v
-                        || ((self.vendor == NUTTX
-                            || self.vendor == RTEMS
-                            || self.vendor == WALI
-                            || self.vendor == WASIP3)
-                            && ven == &targ::Vendor::unknown)
-                    {
+                    if self.vendor == v {
                         true
-                    } else if let tl::Vendor::Custom(custom) = &self.vendor {
-                        matches!(custom.as_str(), "esp" | "esp32" | "esp32s2" | "esp32s3")
-                            && (v == tl::Vendor::Espressif || v == tl::Vendor::Unknown)
+                    } else if let target_lexicon::Vendor::Custom(custom) = &self.vendor {
+                        custom.as_str() == "esp" && v == target_lexicon::Vendor::Espressif
                     } else {
                         false
                     }
@@ -391,7 +360,10 @@ impl TargetMatcher for target_lexicon::Triple {
             PointerWidth(pw) => {
                 // The gnux32 environment is a special case, where it has an
                 // x86_64 architecture, but a 32-bit pointer width
-                if !matches!(self.environment, env::Gnux32 | env::GnuIlp32) {
+                if !matches!(
+                    self.environment,
+                    Environment::Gnux32 | Environment::GnuIlp32
+                ) {
                     *pw == match self.pointer_width() {
                         Ok(pw) => pw.bits(),
                         Err(_) => return false,
@@ -463,7 +435,7 @@ pub enum Predicate<'a> {
     /// when compiling without optimizations.
     DebugAssertions,
     /// [Enabled](https://doc.rust-lang.org/reference/conditional-compilation.html#proc_macro) for
-    /// crates of the `proc_macro` type.
+    /// crates of the proc_macro type.
     ProcMacro,
     /// A [`feature = "<name>"`](https://doc.rust-lang.org/nightly/cargo/reference/features.html)
     Feature(&'a str),
@@ -625,7 +597,7 @@ impl Expression {
     {
         let mut result_stack = SmallVec::<[T; 8]>::new();
 
-        // We store the expression as postfix, so just evaluate each component
+        // We store the expression as postfix, so just evaluate each license
         // requirement in the order it comes, and then combining the previous
         // results according to each operator as it comes
         for node in self.expr.iter() {
@@ -705,20 +677,6 @@ impl Expression {
 impl PartialEq for Expression {
     fn eq(&self, other: &Self) -> bool {
         self.original.eq(&other.original)
-    }
-}
-
-impl std::str::FromStr for Expression {
-    type Err = crate::error::ParseError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Expression::parse(s)
-    }
-}
-
-impl std::fmt::Display for Expression {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(&self.original)
     }
 }
 

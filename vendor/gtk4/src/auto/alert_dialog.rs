@@ -2,7 +2,7 @@
 // from gir-files (https://github.com/gtk-rs/gir-files)
 // DO NOT EDIT
 
-use crate::{ffi, Window};
+use crate::Window;
 use glib::{
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
@@ -110,14 +110,12 @@ impl AlertDialog {
 
     #[doc(alias = "gtk_alert_dialog_get_cancel_button")]
     #[doc(alias = "get_cancel_button")]
-    #[doc(alias = "cancel-button")]
     pub fn cancel_button(&self) -> i32 {
         unsafe { ffi::gtk_alert_dialog_get_cancel_button(self.to_glib_none().0) }
     }
 
     #[doc(alias = "gtk_alert_dialog_get_default_button")]
     #[doc(alias = "get_default_button")]
-    #[doc(alias = "default-button")]
     pub fn default_button(&self) -> i32 {
         unsafe { ffi::gtk_alert_dialog_get_default_button(self.to_glib_none().0) }
     }
@@ -136,13 +134,11 @@ impl AlertDialog {
 
     #[doc(alias = "gtk_alert_dialog_get_modal")]
     #[doc(alias = "get_modal")]
-    #[doc(alias = "modal")]
     pub fn is_modal(&self) -> bool {
         unsafe { from_glib(ffi::gtk_alert_dialog_get_modal(self.to_glib_none().0)) }
     }
 
     #[doc(alias = "gtk_alert_dialog_set_buttons")]
-    #[doc(alias = "buttons")]
     pub fn set_buttons(&self, labels: &[&str]) {
         unsafe {
             ffi::gtk_alert_dialog_set_buttons(self.to_glib_none().0, labels.to_glib_none().0);
@@ -150,7 +146,6 @@ impl AlertDialog {
     }
 
     #[doc(alias = "gtk_alert_dialog_set_cancel_button")]
-    #[doc(alias = "cancel-button")]
     pub fn set_cancel_button(&self, button: i32) {
         unsafe {
             ffi::gtk_alert_dialog_set_cancel_button(self.to_glib_none().0, button);
@@ -158,7 +153,6 @@ impl AlertDialog {
     }
 
     #[doc(alias = "gtk_alert_dialog_set_default_button")]
-    #[doc(alias = "default-button")]
     pub fn set_default_button(&self, button: i32) {
         unsafe {
             ffi::gtk_alert_dialog_set_default_button(self.to_glib_none().0, button);
@@ -166,7 +160,6 @@ impl AlertDialog {
     }
 
     #[doc(alias = "gtk_alert_dialog_set_detail")]
-    #[doc(alias = "detail")]
     pub fn set_detail(&self, detail: &str) {
         unsafe {
             ffi::gtk_alert_dialog_set_detail(self.to_glib_none().0, detail.to_glib_none().0);
@@ -174,7 +167,6 @@ impl AlertDialog {
     }
 
     #[doc(alias = "gtk_alert_dialog_set_message")]
-    #[doc(alias = "message")]
     pub fn set_message(&self, message: &str) {
         unsafe {
             ffi::gtk_alert_dialog_set_message(self.to_glib_none().0, message.to_glib_none().0);
@@ -182,7 +174,6 @@ impl AlertDialog {
     }
 
     #[doc(alias = "gtk_alert_dialog_set_modal")]
-    #[doc(alias = "modal")]
     pub fn set_modal(&self, modal: bool) {
         unsafe {
             ffi::gtk_alert_dialog_set_modal(self.to_glib_none().0, modal.into_glib());
@@ -216,7 +207,7 @@ impl AlertDialog {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::buttons\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_buttons_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -241,7 +232,7 @@ impl AlertDialog {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::cancel-button\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_cancel_button_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -266,7 +257,7 @@ impl AlertDialog {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::default-button\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_default_button_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -291,7 +282,7 @@ impl AlertDialog {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::detail\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_detail_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -316,7 +307,7 @@ impl AlertDialog {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::message\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_message_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -341,7 +332,7 @@ impl AlertDialog {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::modal\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_modal_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -426,7 +417,6 @@ impl AlertDialogBuilder {
     /// Build the [`AlertDialog`].
     #[must_use = "Building the object from the builder is usually expensive and is not expected to have side effects"]
     pub fn build(self) -> AlertDialog {
-        assert_initialized_main_thread!();
         self.builder.build()
     }
 }

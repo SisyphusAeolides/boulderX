@@ -1,6 +1,5 @@
 // Take a look at the license at the top of the repository in the LICENSE file.
 
-mod async_test;
 mod boxed_derive;
 mod clone;
 mod clone_old;
@@ -11,7 +10,8 @@ mod downgrade_derive;
 mod enum_derive;
 mod error_domain_derive;
 mod flags_attribute;
-mod object_impl_attributes;
+mod object_interface_attribute;
+mod object_subclass_attribute;
 mod properties;
 mod shared_boxed_derive;
 mod value_delegate_derive;
@@ -75,12 +75,9 @@ use utils::{parse_nested_meta_items_from_stream, NestedMetaItem};
 /// use std::rc::Rc;
 ///
 /// let v = Rc::new(1);
-/// let closure = clone!(
-///     #[strong] v,
-///     move |x| {
-///         println!("v: {}, x: {}", v, x);
-///     },
-/// );
+/// let closure = clone!(@strong v => move |x| {
+///     println!("v: {}, x: {}", v, x);
+/// });
 ///
 /// closure(2);
 /// ```
@@ -93,13 +90,9 @@ use utils::{parse_nested_meta_items_from_stream, NestedMetaItem};
 /// use std::rc::Rc;
 ///
 /// let u = Rc::new(2);
-/// let closure = clone!(
-///     #[weak]
-///     u,
-///     move |x| {
-///         println!("u: {}, x: {}", u, x);
-///     },
-/// );
+/// let closure = clone!(@weak u => move |x| {
+///     println!("u: {}, x: {}", u, x);
+/// });
 ///
 /// closure(3);
 /// ```
@@ -107,7 +100,7 @@ use utils::{parse_nested_meta_items_from_stream, NestedMetaItem};
 /// #### Allowing a nullable weak reference
 ///
 /// In some cases, even if the weak references can't be retrieved, you might want to still have
-/// your closure called. In this case, you need to use `#[weak_allow_none]` instead of `#[weak]`:
+/// your closure called. In this case, you need to use `@weak-allow-none`:
 ///
 /// ```
 /// use glib;
@@ -118,15 +111,11 @@ use utils::{parse_nested_meta_items_from_stream, NestedMetaItem};
 ///     // This `Rc` won't be available in the closure because it's dropped at the end of the
 ///     // current block
 ///     let u = Rc::new(2);
-///     clone!(
-///         #[weak_allow_none]
-///         u,
-///         move |x| {
-///             // We need to use a Debug print for `u` because it'll be an `Option`.
-///             println!("u: {:?}, x: {}", u, x);
-///             true
-///         },
-///     )
+///     clone!(@weak-allow-none u => @default-return false, move |x| {
+///         // We need to use a Debug print for `u` because it'll be an `Option`.
+///         println!("u: {:?}, x: {}", u, x);
+///         true
+///     })
 /// };
 ///
 /// assert_eq!(closure(3), true);
@@ -139,13 +128,10 @@ use utils::{parse_nested_meta_items_from_stream, NestedMetaItem};
 /// use glib_macros::clone;
 ///
 /// let v = "123";
-/// let closure = clone!(
-///     #[to_owned] v,
-///     move |x| {
-///         // v is passed as `String` here
-///         println!("v: {}, x: {}", v, x);
-///     },
-/// );
+/// let closure = clone!(@to-owned v => move |x| {
+///     // v is passed as `String` here
+///     println!("v: {}, x: {}", v, x);
+/// });
 ///
 /// closure(2);
 /// ```
@@ -159,28 +145,18 @@ use utils::{parse_nested_meta_items_from_stream, NestedMetaItem};
 ///
 /// let v = Rc::new(1);
 /// let u = Rc::new(2);
-/// let closure = clone!(
-///     #[strong(rename_to = y)]
-///     v,
-///     #[weak] u,
-///     move |x| {
-///         println!("v as y: {}, u: {}, x: {}", y, u, x);
-///     },
-/// );
+/// let closure = clone!(@strong v as y, @weak u => move |x| {
+///     println!("v as y: {}, u: {}, x: {}", y, u, x);
+/// });
 ///
 /// closure(3);
 /// ```
 ///
-/// ### Providing a return value if upgrading a weak reference fails
+/// ### Providing a default return value if upgrading a weak reference fails
 ///
-/// By default, `()` is returned if upgrading a weak reference fails. This behaviour can be
-/// adjusted in two different ways:
+/// You can do it in two different ways:
 ///
-/// Either by providing the value yourself using one of
-///
-///   * `#[upgrade_or]`: Requires an expression that returns a `Copy` value of the expected return type,
-///   * `#[upgrade_or_else]`: Requires a closure that returns a value of the expected return type,
-///   * `#[upgrade_or_default]`: Requires that the return type implements `Default` and returns that.
+/// Either by providing the value yourself using `@default-return`:
 ///
 /// ```
 /// use glib;
@@ -188,15 +164,10 @@ use utils::{parse_nested_meta_items_from_stream, NestedMetaItem};
 /// use std::rc::Rc;
 ///
 /// let v = Rc::new(1);
-/// let closure = clone!(
-///     #[weak] v,
-///     #[upgrade_or]
-///     false,
-///     move |x| {
-///         println!("v: {}, x: {}", v, x);
-///         true
-///     },
-/// );
+/// let closure = clone!(@weak v => @default-return false, move |x| {
+///     println!("v: {}, x: {}", v, x);
+///     true
+/// });
 ///
 /// // Drop value so that the weak reference can't be upgraded.
 /// drop(v);
@@ -204,21 +175,17 @@ use utils::{parse_nested_meta_items_from_stream, NestedMetaItem};
 /// assert_eq!(closure(2), false);
 /// ```
 ///
-/// Or by using `#[upgrade_or_panic]`: If the value fails to get upgraded, it'll panic.
+/// Or by using `@default-panic` (if the value fails to get upgraded, it'll panic):
 ///
 /// ```should_panic
 /// # use glib;
 /// # use glib_macros::clone;
 /// # use std::rc::Rc;
 /// # let v = Rc::new(1);
-/// let closure = clone!(
-///     #[weak] v,
-///     #[upgrade_or_panic]
-///     move |x| {
-///         println!("v: {}, x: {}", v, x);
-///         true
-///     },
-/// );
+/// let closure = clone!(@weak v => @default-panic, move |x| {
+///     println!("v: {}, x: {}", v, x);
+///     true
+/// });
 /// # drop(v);
 /// # assert_eq!(closure(2), false);
 /// ```
@@ -227,7 +194,7 @@ use utils::{parse_nested_meta_items_from_stream, NestedMetaItem};
 ///
 /// Here is a list of errors you might encounter:
 ///
-/// **Missing `#[weak]` or `#[strong]`**:
+/// **Missing `@weak` or `@strong`**:
 ///
 /// ```compile_fail
 /// # use glib;
@@ -235,10 +202,7 @@ use utils::{parse_nested_meta_items_from_stream, NestedMetaItem};
 /// # use std::rc::Rc;
 /// let v = Rc::new(1);
 ///
-/// let closure = clone!(
-///     v,
-///     move |x| println!("v: {}, x: {}", v, x),
-/// );
+/// let closure = clone!(v => move |x| println!("v: {}, x: {}", v, x));
 /// # drop(v);
 /// # closure(2);
 /// ```
@@ -254,12 +218,9 @@ use utils::{parse_nested_meta_items_from_stream, NestedMetaItem};
 ///
 /// impl Foo {
 ///     fn foo(&self) {
-///         let closure = clone!(
-///             #[strong] self,
-///             move |x| {
-///                 println!("self: {:?}", self);
-///             },
-///         );
+///         let closure = clone!(@strong self => move |x| {
+///             println!("self: {:?}", self);
+///         });
 ///         # closure(2);
 ///     }
 /// }
@@ -276,13 +237,9 @@ use utils::{parse_nested_meta_items_from_stream, NestedMetaItem};
 ///
 /// impl Foo {
 ///     fn foo(&self) {
-///         let closure = clone!(
-///             #[strong(rename_to = this)]
-///             self,
-///             move |x| {
-///                 println!("self: {:?}", this);
-///             },
-///         );
+///         let closure = clone!(@strong self as this => move |x| {
+///             println!("self: {:?}", this);
+///         });
 ///         # closure(2);
 ///     }
 /// }
@@ -301,12 +258,9 @@ use utils::{parse_nested_meta_items_from_stream, NestedMetaItem};
 ///
 /// impl Foo {
 ///     fn foo(&self) {
-///         let closure = clone!(
-///             #[strong] self.v,
-///             move |x| {
-///                 println!("self.v: {:?}", v);
-///             },
-///         );
+///         let closure = clone!(@strong self.v => move |x| {
+///             println!("self.v: {:?}", v);
+///         });
 ///         # closure(2);
 ///     }
 /// }
@@ -323,30 +277,30 @@ use utils::{parse_nested_meta_items_from_stream, NestedMetaItem};
 /// # }
 /// impl Foo {
 ///     fn foo(&self) {
-///         let closure = clone!(
-///             #[strong(rename_to = v)]
-///             self.v,
-///             move |x| {
-///                 println!("self.v: {}", v);
-///             },
-///         );
+///         let closure = clone!(@strong self.v as v => move |x| {
+///             println!("self.v: {}", v);
+///         });
 ///         # closure(2);
 ///     }
 /// }
 /// ```
 #[proc_macro]
 pub fn clone(item: TokenStream) -> TokenStream {
-    // Check if this is an old-style clone macro invocation.
-    // These always start with an '@' punctuation.
-    let Some(first) = item.clone().into_iter().next() else {
-        return syn::Error::new(Span::call_site(), "expected a closure or async block")
-            .to_compile_error()
-            .into();
-    };
+    if cfg!(feature = "unstable-clone-syntax") {
+        // Check if this is an old-style clone macro invocation.
+        // These always start with an '@' punctuation.
+        let Some(first) = item.clone().into_iter().next() else {
+            return syn::Error::new(Span::call_site(), "expected a closure or async block")
+                .to_compile_error()
+                .into();
+        };
 
-    match first {
-        TokenTree::Punct(ref p) if p.to_string() == "@" => clone_old::clone_inner(item),
-        _ => clone::clone_inner(item),
+        match first {
+            TokenTree::Punct(ref p) if p.to_string() == "@" => clone_old::clone_inner(item),
+            _ => clone::clone_inner(item),
+        }
+    } else {
+        clone_old::clone_inner(item)
     }
 }
 
@@ -363,20 +317,16 @@ pub fn clone(item: TokenStream) -> TokenStream {
 ///
 /// Similarly to [`clone!`](crate::clone!), this macro can be useful in combination with signal
 /// handlers to reduce boilerplate when passing references. Unique to `Closure` objects is the
-/// ability to watch an object using the `#[watch]` attribute. Only an [`Object`] value can be
-/// passed to `#[watch]`, and only one object can be watched per closure. When an object is watched,
+/// ability to watch an object using a the `@watch` directive. Only an [`Object`] value can be
+/// passed to `@watch`, and only one object can be watched per closure. When an object is watched,
 /// a weak reference to the object is held in the closure. When the object is destroyed, the
 /// closure will become invalidated: all signal handlers connected to the closure will become
 /// disconnected, and any calls to [`Closure::invoke`] on the closure will be silently ignored.
 /// Internally, this is accomplished using [`Object::watch_closure`] on the watched object.
 ///
-/// The `#[weak]`, `#[weak_allow_none]`, `#[strong]`, `#[to_owned]` captures are also supported and
-/// behave the same as in [`clone!`](crate::clone!), as is aliasing captures via `rename_to`.
-/// Similarly, upgrade failure of weak references can be adjusted via `#[upgrade_or]`,
-/// `#[upgrade_or_else]`, `#[upgrade_or_default]` and `#[upgrade_or_panic]`.
-///
-/// Notably, these captures are able to reference `Rc` and `Arc` values in addition to `Object`
-/// values.
+/// The `@weak-allow-none` and `@strong` captures are also supported and behave the same as in
+/// [`clone!`](crate::clone!), as is aliasing captures with the `as` keyword. Notably, these
+/// captures are able to reference `Rc` and `Arc` values in addition to `Object` values.
 ///
 /// [`Closure`]: ../glib/closure/struct.Closure.html
 /// [`Closure::new`]: ../glib/closure/struct.Closure.html#method.new
@@ -435,12 +385,9 @@ pub fn clone(item: TokenStream) -> TokenStream {
 ///
 /// let closure = {
 ///     let obj = glib::Object::new::<glib::Object>();
-///     let closure = closure_local!(
-///         #[watch] obj,
-///         move || {
-///             obj.type_().name()
-///         },
-///     );
+///     let closure = closure_local!(@watch obj => move || {
+///         obj.type_().name()
+///     });
 ///     assert_eq!(closure.invoke::<String>(&[]), "GObject");
 ///     closure
 /// };
@@ -448,7 +395,7 @@ pub fn clone(item: TokenStream) -> TokenStream {
 /// closure.invoke::<()>(&[]);
 /// ```
 ///
-/// `#[watch]` has special behavior when connected to a signal:
+/// `@watch` has special behavior when connected to a signal:
 ///
 /// ```
 /// use glib;
@@ -460,15 +407,10 @@ pub fn clone(item: TokenStream) -> TokenStream {
 ///     let other = glib::Object::new::<glib::Object>();
 ///     obj.connect_closure(
 ///         "notify", false,
-///         closure_local!(
-///             #[watch(rename_to = b)]
-///             other,
-///             move |a: glib::Object, pspec: glib::ParamSpec| {
-///                 let value = a.property_value(pspec.name());
-///                 b.set_property(pspec.name(), &value);
-///             },
-///         ),
-///     );
+///         closure_local!(@watch other as b => move |a: glib::Object, pspec: glib::ParamSpec| {
+///             let value = a.property_value(pspec.name());
+///             b.set_property(pspec.name(), &value);
+///         }));
 ///     // The signal handler will disconnect automatically at the end of this
 ///     // block when `other` is dropped.
 /// }
@@ -486,17 +428,10 @@ pub fn clone(item: TokenStream) -> TokenStream {
 ///     let a = Arc::new(String::from("Hello"));
 ///     let b = Arc::new(String::from("World"));
 ///     let c = "!";
-///     let closure = closure!(
-///         #[strong] a,
-///         #[weak_allow_none]
-///         b,
-///         #[to_owned]
-///         c,
-///         move || {
-///             // `a` is Arc<String>, `b` is Option<Arc<String>>, `c` is a `String`
-///             format!("{} {}{}", a, b.as_ref().map(|b| b.as_str()).unwrap_or_else(|| "Moon"), c)
-///         },
-///     );
+///     let closure = closure!(@strong a, @weak-allow-none b, @to-owned c => move || {
+///         // `a` is Arc<String>, `b` is Option<Arc<String>>, `c` is a `String`
+///         format!("{} {}{}", a, b.as_ref().map(|b| b.as_str()).unwrap_or_else(|| "Moon"), c)
+///     });
 ///     assert_eq!(closure.invoke::<String>(&[]), "Hello World!");
 ///     closure
 /// };
@@ -505,17 +440,23 @@ pub fn clone(item: TokenStream) -> TokenStream {
 /// ```
 #[proc_macro]
 pub fn closure(item: TokenStream) -> TokenStream {
-    // Check if this is an old-style closure macro invocation.
-    // These always start with an '@' punctuation.
-    let Some(first) = item.clone().into_iter().next() else {
-        return syn::Error::new(Span::call_site(), "expected a closure")
-            .to_compile_error()
-            .into();
-    };
+    if cfg!(feature = "unstable-clone-syntax") {
+        // Check if this is an old-style closure macro invocation.
+        // These always start with an '@' punctuation.
+        let Some(first) = item.clone().into_iter().next() else {
+            return syn::Error::new(Span::call_site(), "expected a closure")
+                .to_compile_error()
+                .into();
+        };
 
-    match first {
-        TokenTree::Punct(ref p) if p.to_string() == "@" => closure_old::closure_inner(item, "new"),
-        _ => closure::closure_inner(item, "new"),
+        match first {
+            TokenTree::Punct(ref p) if p.to_string() == "@" => {
+                closure_old::closure_inner(item, "new")
+            }
+            _ => closure::closure_inner(item, "new"),
+        }
+    } else {
+        closure_old::closure_inner(item, "new")
     }
 }
 
@@ -526,24 +467,28 @@ pub fn closure(item: TokenStream) -> TokenStream {
 /// [`Closure::new_local`]: ../glib/closure/struct.Closure.html#method.new_local
 #[proc_macro]
 pub fn closure_local(item: TokenStream) -> TokenStream {
-    // Check if this is an old-style closure macro invocation.
-    // These always start with an '@' punctuation.
-    let Some(first) = item.clone().into_iter().next() else {
-        return syn::Error::new(Span::call_site(), "expected a closure")
-            .to_compile_error()
-            .into();
-    };
+    if cfg!(feature = "unstable-clone-syntax") {
+        // Check if this is an old-style closure macro invocation.
+        // These always start with an '@' punctuation.
+        let Some(first) = item.clone().into_iter().next() else {
+            return syn::Error::new(Span::call_site(), "expected a closure")
+                .to_compile_error()
+                .into();
+        };
 
-    match first {
-        TokenTree::Punct(ref p) if p.to_string() == "@" => {
-            closure_old::closure_inner(item, "new_local")
+        match first {
+            TokenTree::Punct(ref p) if p.to_string() == "@" => {
+                closure_old::closure_inner(item, "new_local")
+            }
+            _ => closure::closure_inner(item, "new_local"),
         }
-        _ => closure::closure_inner(item, "new_local"),
+    } else {
+        closure_old::closure_inner(item, "new_local")
     }
 }
 
-/// Derive macro to register a Rust enum in the GLib type system and derive the
-/// [`glib::Value`] traits.
+/// Derive macro for register a Rust enum in the GLib type system and derive the
+/// the [`glib::Value`] traits.
 ///
 /// # Example
 ///
@@ -562,13 +507,8 @@ pub fn closure_local(item: TokenStream) -> TokenStream {
 /// }
 /// ```
 ///
-/// When using the [`Properties`] macro with enums that derive [`Enum`], the default value must be
-/// explicitly set via the `builder` parameter of the `#[property]` attribute. See
-/// [here](Properties#supported-types) for details.
-///
 /// An enum can be registered as a dynamic type by setting the derive macro
 /// helper attribute `enum_dynamic`:
-///
 /// ```ignore
 /// use glib::prelude::*;
 /// use glib::subclass::prelude::*;
@@ -582,7 +522,7 @@ pub fn closure_local(item: TokenStream) -> TokenStream {
 /// ```
 ///
 /// As a dynamic type, an enum must be explicitly registered when the system
-/// loads the implementation (see [`TypePlugin`] and [`TypeModule`]).
+/// loads the implementation (see [`TypePlugin`] and [`TypeModule`].
 /// Therefore, whereas an enum can be registered only once as a static type,
 /// it can be registered several times as a dynamic type.
 ///
@@ -596,10 +536,9 @@ pub fn closure_local(item: TokenStream) -> TokenStream {
 /// when registering an enum as a dynamic type:
 ///
 /// - lazy registration: by default an enum is registered as a dynamic type
-///   when the system loads the implementation (e.g. when the module is loaded).
-///   Optionally setting `lazy_registration` to `true` postpones registration on
-///   the first use (when `static_type()` is called for the first time):
-///
+/// when the system loads the implementation (e.g. when the module is loaded).
+/// Optionally setting `lazy_registration` to `true` postpones registration on
+/// the first use (when `static_type()` is called for the first time):
 /// ```ignore
 /// #[derive(Debug, Copy, Clone, PartialEq, Eq, glib::Enum)]
 /// #[enum_type(name = "MyEnum")]
@@ -610,9 +549,8 @@ pub fn closure_local(item: TokenStream) -> TokenStream {
 /// ```
 ///
 /// - registration within [`TypeModule`] subclass or within [`TypePlugin`]
-///   subclass: an enum is usually registered as a dynamic type within a
-///   [`TypeModule`] subclass:
-///
+/// subclass: an enum is usually registered as a dynamic type within a
+/// [`TypeModule`] subclass:
 /// ```ignore
 /// #[derive(Debug, Copy, Clone, PartialEq, Eq, glib::Enum)]
 /// #[enum_type(name = "MyModuleEnum")]
@@ -637,7 +575,6 @@ pub fn closure_local(item: TokenStream) -> TokenStream {
 ///
 /// Optionally setting `plugin_type` allows to register an enum as a dynamic
 /// type within a [`TypePlugin`] subclass that is not a [`TypeModule`]:
-///
 /// ```ignore
 /// #[derive(Debug, Copy, Clone, PartialEq, Eq, glib::Enum)]
 /// #[enum_type(name = "MyPluginEnum")]
@@ -680,7 +617,7 @@ pub fn enum_derive(input: TokenStream) -> TokenStream {
 /// Default name is the flag identifier in CamelCase and default nick
 /// is the identifier in kebab-case.
 /// Combined flags should not be registered with the `GType` system
-/// and so need to be tagged with the `#[flags_value(skip)]` attribute.
+/// and so needs to be tagged with the `#[flags_value(skip)]` attribute.
 ///
 /// # Example
 ///
@@ -714,7 +651,7 @@ pub fn enum_derive(input: TokenStream) -> TokenStream {
 /// ```
 ///
 /// As a dynamic type, the flags must be explicitly registered when the system
-/// loads the implementation (see [`TypePlugin`] and [`TypeModule`]).
+/// loads the implementation (see [`TypePlugin`] and [`TypeModule`].
 /// Therefore, whereas the flags can be registered only once as a static type,
 /// they can be registered several times as a dynamic type.
 ///
@@ -728,10 +665,9 @@ pub fn enum_derive(input: TokenStream) -> TokenStream {
 /// registering the flags as a dynamic type:
 ///
 /// - lazy registration: by default the flags are registered as a dynamic type
-///   when the system loads the implementation (e.g. when the module is loaded).
-///   Optionally setting `lazy_registration` to `true` postpones registration on
-///   the first use (when `static_type()` is called for the first time):
-///
+/// when the system loads the implementation (e.g. when the module is loaded).
+/// Optionally setting `lazy_registration` to `true` postpones registration on
+/// the first use (when `static_type()` is called for the first time):
 /// ```ignore
 /// #[glib::flags(name = "MyFlags")]
 /// #[flags_dynamic(lazy_registration = true)]
@@ -741,9 +677,8 @@ pub fn enum_derive(input: TokenStream) -> TokenStream {
 /// ```
 ///
 /// - registration within [`TypeModule`] subclass or within [`TypePlugin`]
-///   subclass: the flags are usually registered as a dynamic type within a
-///   [`TypeModule`] subclass:
-///
+/// subclass: the flags are usually registered as a dynamic type within a
+/// [`TypeModule`] subclass:
 /// ```ignore
 /// #[glib::flags(name = "MyModuleFlags")]
 /// #[flags_dynamic]
@@ -796,25 +731,13 @@ pub fn flags(attr: TokenStream, item: TokenStream) -> TokenStream {
     let mut name = NestedMetaItem::<syn::LitStr>::new("name")
         .required()
         .value_required();
-    let mut allow_name_conflict_attr =
-        NestedMetaItem::<syn::LitBool>::new("allow_name_conflict").value_optional();
 
-    if let Err(e) = parse_nested_meta_items_from_stream(
-        attr.into(),
-        &mut [&mut name, &mut allow_name_conflict_attr],
-    ) {
+    if let Err(e) = parse_nested_meta_items_from_stream(attr.into(), &mut [&mut name]) {
         return e.to_compile_error().into();
     }
 
-    let allow_name_conflict = allow_name_conflict_attr.found
-        || allow_name_conflict_attr
-            .value
-            .map(|b| b.value())
-            .unwrap_or(false);
-
     let attr_meta = AttrInput {
         enum_name: name.value.unwrap(),
-        allow_name_conflict,
     };
 
     syn::parse::<syn::ItemEnum>(item)
@@ -931,7 +854,7 @@ pub fn shared_boxed_derive(input: TokenStream) -> TokenStream {
 /// type Interfaces = ();
 /// ```
 ///
-/// If no `new()` or `with_class()` method is provided, the macro adds a `new()`
+/// If no `new()` or `with_class()` method is provide, the macro adds a `new()`
 /// implementation calling `Default::default()`. So the type needs to implement
 /// `Default`, or this should be overridden.
 ///
@@ -943,7 +866,6 @@ pub fn shared_boxed_derive(input: TokenStream) -> TokenStream {
 ///
 /// An object subclass can be registered as a dynamic type by setting the macro
 /// helper attribute `object_class_dynamic`:
-///
 /// ```ignore
 /// #[derive(Default)]
 /// pub struct MyType;
@@ -954,7 +876,7 @@ pub fn shared_boxed_derive(input: TokenStream) -> TokenStream {
 /// ```
 ///
 /// As a dynamic type, an object subclass must be explicitly registered when
-/// the system loads the implementation (see [`TypePlugin`] and [`TypeModule`]).
+/// the system loads the implementation (see [`TypePlugin`] and [`TypeModule`].
 /// Therefore, whereas an object subclass can be registered only once as a
 /// static type, it can be registered several times as a dynamic type.
 ///
@@ -968,11 +890,10 @@ pub fn shared_boxed_derive(input: TokenStream) -> TokenStream {
 /// when registering an object subclass as a dynamic type:
 ///
 /// - lazy registration: by default an object subclass is registered as a
-///   dynamic type when the system loads the implementation (e.g. when the module
-///   is loaded). Optionally setting `lazy_registration` to `true` postpones
-///   registration on the first use (when `static_type()` is called for the first
-///   time):
-///
+/// dynamic type when the system loads the implementation (e.g. when the module
+/// is loaded). Optionally setting `lazy_registration` to `true` postpones
+/// registration on the first use (when `static_type()` is called for the first
+/// time):
 /// ```ignore
 /// #[derive(Default)]
 /// pub struct MyType;
@@ -983,9 +904,8 @@ pub fn shared_boxed_derive(input: TokenStream) -> TokenStream {
 /// ```
 ///
 /// - registration within [`TypeModule`] subclass or within [`TypePlugin`]
-///   subclass: an object subclass is usually registered as a dynamic type within
-///   a [`TypeModule`] subclass:
-///
+/// subclass: an object subclass is usually registered as a dynamic type within
+/// a [`TypeModule`] subclass:
 /// ```ignore
 /// #[derive(Default)]
 /// pub struct MyModuleType;
@@ -1010,7 +930,6 @@ pub fn shared_boxed_derive(input: TokenStream) -> TokenStream {
 ///
 /// Optionally setting `plugin_type` allows to register an object subclass as a
 /// dynamic type within a [`TypePlugin`] subclass that is not a [`TypeModule`]:
-///
 /// ```ignore
 /// #[derive(Default)]
 /// pub struct MyPluginType;
@@ -1038,8 +957,16 @@ pub fn shared_boxed_derive(input: TokenStream) -> TokenStream {
 /// [`TypePluginExt::unuse`]: ../glib/gobject/type_plugin/trait.TypePluginExt.html#method.unuse
 #[proc_macro_attribute]
 pub fn object_subclass(_attr: TokenStream, item: TokenStream) -> TokenStream {
-    let input = parse_macro_input!(item with object_impl_attributes::Input::parse_subclass);
-    object_impl_attributes::subclass::impl_object_subclass(input).into()
+    syn::parse::<syn::ItemImpl>(item)
+        .map_err(|_| {
+            syn::Error::new(
+                Span::call_site(),
+                object_subclass_attribute::WRONG_PLACE_MSG,
+            )
+        })
+        .and_then(|mut input| object_subclass_attribute::impl_object_subclass(&mut input))
+        .unwrap_or_else(syn::Error::into_compile_error)
+        .into()
 }
 
 /// Macro for boilerplate of [`ObjectInterface`] implementations.
@@ -1047,10 +974,10 @@ pub fn object_subclass(_attr: TokenStream, item: TokenStream) -> TokenStream {
 /// This adds implementations for the `get_type()` method, which should probably never be defined
 /// differently.
 ///
-/// It provides default values for the `Prerequisites` type parameter. If this is present, the macro
+/// It provides default values for the `Prerequisites` type parameter. If this present, the macro
 /// will use the provided value instead of the default.
 ///
-/// `Prerequisites` are interfaces for types that require a specific base class or interfaces.
+/// `Prerequisites` is interfaces for types that require a specific base class or interfaces.
 ///
 /// ```ignore
 /// type Prerequisites = ();
@@ -1068,7 +995,7 @@ pub fn object_subclass(_attr: TokenStream, item: TokenStream) -> TokenStream {
 /// ```
 ///
 /// As a dynamic type, an object interface must be explicitly registered when
-/// the system loads the implementation (see [`TypePlugin`] and [`TypeModule`]).
+/// the system loads the implementation (see [`TypePlugin`] and [`TypeModule`].
 /// Therefore, whereas an object interface can be registered only once as a
 /// static type, it can be registered several times as a dynamic type.
 ///
@@ -1082,10 +1009,9 @@ pub fn object_subclass(_attr: TokenStream, item: TokenStream) -> TokenStream {
 /// behaviors when registering an object interface as a dynamic type:
 ///
 /// - lazy registration: by default an object interface is registered as a
-///   dynamic type when the system loads the implementation (e.g. when the module
-///   is loaded). Optionally setting `lazy_registration` to `true` postpones
-///   registration on the first use (when `type_()` is called for the first time):
-///
+/// dynamic type when the system loads the implementation (e.g. when the module
+/// is loaded). Optionally setting `lazy_registration` to `true` postpones
+/// registration on the first use (when `type_()` is called for the first time):
 /// ```ignore
 /// pub struct MyInterface {
 ///     parent: glib::gobject_ffi::GTypeInterface,
@@ -1096,9 +1022,8 @@ pub fn object_subclass(_attr: TokenStream, item: TokenStream) -> TokenStream {
 /// ```
 ///
 /// - registration within [`TypeModule`] subclass or within [`TypePlugin`]
-///   subclass: an object interface is usually registered as a dynamic type
-///   within a [`TypeModule`] subclass:
-///
+/// subclass: an object interface is usually registered as a dynamic type
+/// within a [`TypeModule`] subclass:
 /// ```ignore
 /// pub struct MyModuleInterface {
 ///     parent: glib::gobject_ffi::GTypeInterface,
@@ -1123,7 +1048,6 @@ pub fn object_subclass(_attr: TokenStream, item: TokenStream) -> TokenStream {
 ///
 /// Optionally setting `plugin_type` allows to register an object interface as
 /// a dynamic type within a [`TypePlugin`] subclass that is not a [`TypeModule`]:
-///
 /// ```ignore
 /// pub struct MyPluginInterface {
 ///     parent: glib::gobject_ffi::GTypeInterface,
@@ -1151,8 +1075,16 @@ pub fn object_subclass(_attr: TokenStream, item: TokenStream) -> TokenStream {
 /// [`TypePluginExt::unuse`]: ../glib/gobject/type_plugin/trait.TypePluginExt.html#method.unuse///
 #[proc_macro_attribute]
 pub fn object_interface(_attr: TokenStream, item: TokenStream) -> TokenStream {
-    let input = parse_macro_input!(item with object_impl_attributes::Input::parse_interface);
-    object_impl_attributes::interface::impl_object_interface(input).into()
+    syn::parse::<syn::ItemImpl>(item)
+        .map_err(|_| {
+            syn::Error::new(
+                Span::call_site(),
+                object_interface_attribute::WRONG_PLACE_MSG,
+            )
+        })
+        .and_then(|mut input| object_interface_attribute::impl_object_interface(&mut input))
+        .unwrap_or_else(syn::Error::into_compile_error)
+        .into()
 }
 
 /// Macro for deriving implementations of [`glib::clone::Downgrade`] and
@@ -1178,13 +1110,7 @@ pub fn object_interface(_attr: TokenStream, item: TokenStream) -> TokenStream {
 ///
 /// let fancy_label = FancyLabel::new("Look at me!");
 /// let button = gtk::ButtonBuilder::new().label("Click me!").build();
-/// button.connect_clicked(
-///     clone!(
-///         #[weak]
-///         fancy_label,
-///         move || fancy_label.flip(),
-///     ),
-/// );
+/// button.connect_clicked(clone!(@weak fancy_label => move || fancy_label.flip()));
 /// ```
 ///
 /// ## Generic New Type
@@ -1267,16 +1193,16 @@ pub fn downgrade(input: TokenStream) -> TokenStream {
 /// enum variant, or just `s` if this is a C-style enum. Some additional attributes are supported
 /// for enums:
 /// - `#[variant_enum(repr)]` to serialize the enum variant as an integer type instead of `s`.  The
-///   `#[repr]` attribute must also be specified on the enum with a sized integer type, and the type
-///   must implement `Copy`.
+/// `#[repr]` attribute must also be specified on the enum with a sized integer type, and the type
+/// must implement `Copy`.
 /// - `#[variant_enum(enum)]` uses [`EnumClass`] to serialize/deserialize as nicks. Meant for use
-///   with [`glib::Enum`](Enum).
+/// with [`glib::Enum`](Enum).
 /// - `#[variant_enum(flags)]` uses [`FlagsClass`] to serialize/deserialize as nicks. Meant for use
-///   with [`glib::flags`](macro@flags).
+/// with [`glib::flags`](macro@flags).
 /// - `#[variant_enum(enum, repr)]` serializes as `i32`. Meant for use with [`glib::Enum`](Enum).
-///   The type must also implement `Copy`.
+/// The type must also implement `Copy`.
 /// - `#[variant_enum(flags, repr)]` serializes as `u32`. Meant for use with
-///   [`glib::flags`](macro@flags).
+/// [`glib::flags`](macro@flags).
 ///
 /// # Example
 ///
@@ -1385,10 +1311,6 @@ pub fn cstr_bytes(item: TokenStream) -> TokenStream {
 /// * `connect_$property_notify()`
 /// * `notify_$property()`
 ///
-/// # Documentation
-///
-/// Doc comments preceding a `#[property]` attribute will be copied to the generated getter and setter methods. You can specify different comments by the getter and setter by using `# Getter` and `# Setter` headings. The text under the header will be copied to the respective method.
-///
 /// ## Extension trait
 /// You can choose to move the method definitions to a trait by using `#[properties(wrapper_type = super::MyType, ext_trait = MyTypePropertiesExt)]`.
 /// The trait name is optional, and defaults to `MyTypePropertiesExt`, where `MyType` is extracted from the wrapper type.
@@ -1406,9 +1328,6 @@ pub fn cstr_bytes(item: TokenStream) -> TokenStream {
 /// The type `Option<T>` is supported as a property only if `Option<T>` implements [`ToValueOptional`].
 /// Optional types also require the `nullable` attribute: without it, the generated setter on the wrapper type
 /// will take `T` instead of `Option<T>`, preventing the user from ever calling the setter with a `None` value.
-///
-/// Notice: For enums that derive [`Enum`] or are C-style enums, you must explicitly specify the
-/// default value of the enum using the `builder` parameter in the `#[property]` attribute.
 ///
 /// ## Adding support for custom types
 /// ### Types wrapping an existing <code>T: [ToValue] + [HasParamSpec]</code>
@@ -1434,7 +1353,7 @@ pub fn cstr_bytes(item: TokenStream) -> TokenStream {
 ///
 /// # Example
 /// ```
-/// use std::cell::{Cell, RefCell};
+/// use std::cell::RefCell;
 /// use glib::prelude::*;
 /// use glib::subclass::prelude::*;
 /// use glib_macros::Properties;
@@ -1443,14 +1362,6 @@ pub fn cstr_bytes(item: TokenStream) -> TokenStream {
 /// struct Author {
 ///     name: String,
 ///     nick: String,
-/// }
-///
-/// #[derive(Debug, Copy, Clone, PartialEq, Eq, glib::Enum, Default)]
-/// #[enum_type(name = "MyEnum")]
-/// pub enum MyEnum {
-///     #[default]
-///     Val,
-///     OtherVal
 /// }
 ///
 /// pub mod imp {
@@ -1463,9 +1374,7 @@ pub fn cstr_bytes(item: TokenStream) -> TokenStream {
 ///     pub struct Foo {
 ///         #[property(get, set = Self::set_fizz)]
 ///         fizz: RefCell<String>,
-///         /// The author's name
 ///         #[property(name = "author-name", get, set, type = String, member = name)]
-///         /// The author's childhood nickname
 ///         #[property(name = "author-nick", get, set, type = String, member = nick)]
 ///         author: RefCell<Author>,
 ///         #[property(get, set, explicit_notify, lax_validation)]
@@ -1478,17 +1387,6 @@ pub fn cstr_bytes(item: TokenStream) -> TokenStream {
 ///         optional: RefCell<Option<String>>,
 ///         #[property(get, set)]
 ///         smart_pointer: Rc<RefCell<String>>,
-///         #[property(get, set, builder(MyEnum::Val))]
-///         my_enum: Cell<MyEnum>,
-///         /// # Getter
-///         ///
-///         /// Get the value of the property `extra_comments`
-///         ///
-///         /// # Setter
-///         ///
-///         /// This is the comment for the setter of the `extra_comments` field.
-///         #[property(get, set)]
-///         extra_comments: RefCell<bool>,
 ///     }
 ///     
 ///     #[glib::derived_properties]
@@ -1636,23 +1534,4 @@ pub fn derived_properties(_attr: TokenStream, item: TokenStream) -> TokenStream 
 pub fn derive_value_delegate(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as value_delegate_derive::ValueDelegateInput);
     value_delegate_derive::impl_value_delegate(input).unwrap()
-}
-
-/// An attribute macro for writing asynchronous test functions.
-///
-/// This macro is designed to wrap an asynchronous test function and ensure that
-/// it runs within a `glib::MainContext`. It helps in writing async tests that
-/// require the use of an event loop for the asynchronous execution.
-///
-/// # Example
-///
-/// ```
-/// #[glib::async_test]
-/// async fn my_async_test() {
-///     // Test code that runs asynchronously
-/// }
-/// ```
-#[proc_macro_attribute]
-pub fn async_test(args: TokenStream, item: TokenStream) -> TokenStream {
-    async_test::async_test(args, item)
 }

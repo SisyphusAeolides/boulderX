@@ -6,7 +6,7 @@ use crate::{EventType, TouchEvent};
 
 define_event! {
     TouchEvent,
-    crate::ffi::GdkTouchEvent,
+    ffi::GdkTouchEvent,
     &[EventType::TouchBegin, EventType::TouchUpdate, EventType::TouchEnd, EventType::TouchCancel]
 }
 

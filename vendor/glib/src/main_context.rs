@@ -2,7 +2,7 @@
 
 use std::mem;
 
-use crate::ffi::{self, gboolean, gpointer};
+use ffi::{gboolean, gpointer};
 
 use crate::{source::Priority, translate::*, MainContext, Source, SourceId};
 
@@ -161,7 +161,7 @@ impl MainContext {
     ///
     /// This will fail if the main context is owned already by another thread.
     #[doc(alias = "g_main_context_acquire")]
-    pub fn acquire(&self) -> Result<MainContextAcquireGuard<'_>, crate::BoolError> {
+    pub fn acquire(&self) -> Result<MainContextAcquireGuard, crate::BoolError> {
         unsafe {
             let ret: bool = from_glib(ffi::g_main_context_acquire(self.to_glib_none().0));
             if ret {
@@ -176,7 +176,7 @@ impl MainContext {
 #[must_use = "if unused the main context will be released immediately"]
 pub struct MainContextAcquireGuard<'a>(&'a MainContext);
 
-impl Drop for MainContextAcquireGuard<'_> {
+impl<'a> Drop for MainContextAcquireGuard<'a> {
     #[doc(alias = "g_main_context_release")]
     #[inline]
     fn drop(&mut self) {
@@ -188,8 +188,8 @@ impl Drop for MainContextAcquireGuard<'_> {
 
 struct ThreadDefaultContext<'a>(&'a MainContext);
 
-impl ThreadDefaultContext<'_> {
-    fn new(ctx: &MainContext) -> ThreadDefaultContext<'_> {
+impl<'a> ThreadDefaultContext<'a> {
+    fn new(ctx: &MainContext) -> ThreadDefaultContext {
         unsafe {
             ffi::g_main_context_push_thread_default(ctx.to_glib_none().0);
         }
@@ -197,7 +197,7 @@ impl ThreadDefaultContext<'_> {
     }
 }
 
-impl Drop for ThreadDefaultContext<'_> {
+impl<'a> Drop for ThreadDefaultContext<'a> {
     #[inline]
     fn drop(&mut self) {
         unsafe {
@@ -218,13 +218,11 @@ mod tests {
         let l = crate::MainLoop::new(Some(&c), false);
 
         let l_clone = l.clone();
-        let join_handle = thread::spawn(move || {
+        thread::spawn(move || {
             c.invoke(move || l_clone.quit());
         });
 
         l.run();
-
-        join_handle.join().unwrap();
     }
 
     fn is_same_context(a: &MainContext, b: &MainContext) -> bool {

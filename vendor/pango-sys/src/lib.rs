@@ -14,15 +14,14 @@
 use glib_sys as glib;
 use gobject_sys as gobject;
 
+#[allow(unused_imports)]
+use libc::{
+    c_char, c_double, c_float, c_int, c_long, c_short, c_uchar, c_uint, c_ulong, c_ushort, c_void,
+    intptr_t, off_t, size_t, ssize_t, time_t, uintptr_t, FILE,
+};
 #[cfg(unix)]
 #[allow(unused_imports)]
 use libc::{dev_t, gid_t, pid_t, socklen_t, uid_t};
-#[allow(unused_imports)]
-use libc::{intptr_t, off_t, size_t, ssize_t, time_t, uintptr_t, FILE};
-#[allow(unused_imports)]
-use std::ffi::{
-    c_char, c_double, c_float, c_int, c_long, c_short, c_uchar, c_uint, c_ulong, c_ushort, c_void,
-};
 
 #[allow(unused_imports)]
 use glib::{gboolean, gconstpointer, gpointer, GType};
@@ -348,9 +347,6 @@ pub type PangoWrapMode = c_int;
 pub const PANGO_WRAP_WORD: PangoWrapMode = 0;
 pub const PANGO_WRAP_CHAR: PangoWrapMode = 1;
 pub const PANGO_WRAP_WORD_CHAR: PangoWrapMode = 2;
-#[cfg(feature = "v1_56")]
-#[cfg_attr(docsrs, doc(cfg(feature = "v1_56")))]
-pub const PANGO_WRAP_NONE: PangoWrapMode = 3;
 
 // Constants
 pub const PANGO_ANALYSIS_FLAG_CENTERED_BASELINE: c_int = 1;
@@ -372,12 +368,7 @@ pub const PANGO_FONT_MASK_WEIGHT: PangoFontMask = 8;
 pub const PANGO_FONT_MASK_STRETCH: PangoFontMask = 16;
 pub const PANGO_FONT_MASK_SIZE: PangoFontMask = 32;
 pub const PANGO_FONT_MASK_GRAVITY: PangoFontMask = 64;
-#[cfg(feature = "v1_42")]
-#[cfg_attr(docsrs, doc(cfg(feature = "v1_42")))]
 pub const PANGO_FONT_MASK_VARIATIONS: PangoFontMask = 128;
-#[cfg(feature = "v1_56")]
-#[cfg_attr(docsrs, doc(cfg(feature = "v1_56")))]
-pub const PANGO_FONT_MASK_FEATURES: PangoFontMask = 256;
 
 pub type PangoLayoutDeserializeFlags = c_uint;
 pub const PANGO_LAYOUT_DESERIALIZE_DEFAULT: PangoLayoutDeserializeFlags = 0;
@@ -538,7 +529,6 @@ impl ::std::fmt::Debug for PangoAttrInt {
 }
 
 #[repr(C)]
-#[allow(dead_code)]
 pub struct PangoAttrIterator {
     _data: [u8; 0],
     _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
@@ -568,7 +558,6 @@ impl ::std::fmt::Debug for PangoAttrLanguage {
 }
 
 #[repr(C)]
-#[allow(dead_code)]
 pub struct PangoAttrList {
     _data: [u8; 0],
     _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
@@ -676,7 +665,6 @@ impl ::std::fmt::Debug for PangoColor {
 }
 
 #[repr(C)]
-#[allow(dead_code)]
 pub struct _PangoContextClass {
     _data: [u8; 0],
     _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
@@ -721,7 +709,6 @@ impl ::std::fmt::Debug for PangoFontClass {
 }
 
 #[repr(C)]
-#[allow(dead_code)]
 pub struct PangoFontDescription {
     _data: [u8; 0],
     _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
@@ -890,7 +877,6 @@ impl ::std::fmt::Debug for PangoFontsetClass {
 }
 
 #[repr(C)]
-#[allow(dead_code)]
 pub struct _PangoFontsetSimpleClass {
     _data: [u8; 0],
     _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
@@ -1038,7 +1024,6 @@ impl ::std::fmt::Debug for PangoItem {
 }
 
 #[repr(C)]
-#[allow(dead_code)]
 pub struct PangoLanguage {
     _data: [u8; 0],
     _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
@@ -1052,7 +1037,6 @@ impl ::std::fmt::Debug for PangoLanguage {
 }
 
 #[repr(C)]
-#[allow(dead_code)]
 pub struct _PangoLayoutClass {
     _data: [u8; 0],
     _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
@@ -1061,7 +1045,6 @@ pub struct _PangoLayoutClass {
 pub type PangoLayoutClass = _PangoLayoutClass;
 
 #[repr(C)]
-#[allow(dead_code)]
 pub struct PangoLayoutIter {
     _data: [u8; 0],
     _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
@@ -1075,7 +1058,6 @@ impl ::std::fmt::Debug for PangoLayoutIter {
 }
 
 #[repr(C)]
-#[allow(dead_code)]
 pub struct PangoLayoutLine {
     pub layout: *mut PangoLayout,
     pub start_index: c_int,
@@ -1099,7 +1081,6 @@ impl ::std::fmt::Debug for PangoLayoutLine {
 }
 
 #[repr(C)]
-#[allow(dead_code)]
 pub struct PangoLogAttr {
     pub is_line_break: c_uint,
     _truncated_record_marker: c_void,
@@ -1227,7 +1208,6 @@ impl ::std::fmt::Debug for PangoRendererClass {
 }
 
 #[repr(C)]
-#[allow(dead_code)]
 pub struct _PangoRendererPrivate {
     _data: [u8; 0],
     _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
@@ -1236,7 +1216,6 @@ pub struct _PangoRendererPrivate {
 pub type PangoRendererPrivate = _PangoRendererPrivate;
 
 #[repr(C)]
-#[allow(dead_code)]
 pub struct PangoScriptIter {
     _data: [u8; 0],
     _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
@@ -1250,7 +1229,6 @@ impl ::std::fmt::Debug for PangoScriptIter {
 }
 
 #[repr(C)]
-#[allow(dead_code)]
 pub struct PangoTabArray {
     _data: [u8; 0],
     _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
@@ -1265,7 +1243,6 @@ impl ::std::fmt::Debug for PangoTabArray {
 
 // Classes
 #[repr(C)]
-#[allow(dead_code)]
 pub struct PangoContext {
     _data: [u8; 0],
     _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
@@ -1278,7 +1255,6 @@ impl ::std::fmt::Debug for PangoContext {
 }
 
 #[repr(C)]
-#[allow(dead_code)]
 pub struct PangoCoverage {
     _data: [u8; 0],
     _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
@@ -1362,7 +1338,6 @@ impl ::std::fmt::Debug for PangoFontset {
 }
 
 #[repr(C)]
-#[allow(dead_code)]
 pub struct PangoFontsetSimple {
     _data: [u8; 0],
     _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
@@ -1376,7 +1351,6 @@ impl ::std::fmt::Debug for PangoFontsetSimple {
 }
 
 #[repr(C)]
-#[allow(dead_code)]
 pub struct PangoLayout {
     _data: [u8; 0],
     _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
@@ -1407,6 +1381,7 @@ impl ::std::fmt::Debug for PangoRenderer {
     }
 }
 
+#[link(name = "pango-1.0")]
 extern "C" {
 
     //=========================================================================
@@ -1768,9 +1743,6 @@ extern "C" {
     ) -> gboolean;
     pub fn pango_font_description_free(desc: *mut PangoFontDescription);
     pub fn pango_font_description_get_family(desc: *const PangoFontDescription) -> *const c_char;
-    #[cfg(feature = "v1_56")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "v1_56")))]
-    pub fn pango_font_description_get_features(desc: *const PangoFontDescription) -> *const c_char;
     pub fn pango_font_description_get_gravity(desc: *const PangoFontDescription) -> PangoGravity;
     pub fn pango_font_description_get_set_fields(
         desc: *const PangoFontDescription,
@@ -1810,18 +1782,6 @@ extern "C" {
     pub fn pango_font_description_set_family_static(
         desc: *mut PangoFontDescription,
         family: *const c_char,
-    );
-    #[cfg(feature = "v1_56")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "v1_56")))]
-    pub fn pango_font_description_set_features(
-        desc: *mut PangoFontDescription,
-        features: *const c_char,
-    );
-    #[cfg(feature = "v1_56")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "v1_56")))]
-    pub fn pango_font_description_set_features_static(
-        desc: *mut PangoFontDescription,
-        features: *const c_char,
     );
     pub fn pango_font_description_set_gravity(
         desc: *mut PangoFontDescription,
@@ -1994,9 +1954,6 @@ extern "C" {
     pub fn pango_item_apply_attrs(item: *mut PangoItem, iter: *mut PangoAttrIterator);
     pub fn pango_item_copy(item: *mut PangoItem) -> *mut PangoItem;
     pub fn pango_item_free(item: *mut PangoItem);
-    #[cfg(feature = "v1_54")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "v1_54")))]
-    pub fn pango_item_get_char_offset(item: *mut PangoItem) -> c_int;
     pub fn pango_item_split(
         orig: *mut PangoItem,
         split_index: c_int,
@@ -2422,13 +2379,6 @@ extern "C" {
     // PangoFontMap
     //=========================================================================
     pub fn pango_font_map_get_type() -> GType;
-    #[cfg(feature = "v1_56")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "v1_56")))]
-    pub fn pango_font_map_add_font_file(
-        fontmap: *mut PangoFontMap,
-        filename: *const c_char,
-        error: *mut *mut glib::GError,
-    ) -> gboolean;
     pub fn pango_font_map_changed(fontmap: *mut PangoFontMap);
     pub fn pango_font_map_create_context(fontmap: *mut PangoFontMap) -> *mut PangoContext;
     #[cfg(feature = "v1_46")]

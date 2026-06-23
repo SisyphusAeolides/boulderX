@@ -1,6 +1,6 @@
 // Take a look at the license at the top of the repository in the LICENSE file.
 
-use std::{cell::Cell, fmt, iter::FusedIterator, marker::PhantomData, rc::Rc};
+use std::{cell::Cell, iter::FusedIterator, marker::PhantomData, rc::Rc};
 
 use glib::SignalHandlerId;
 
@@ -26,12 +26,13 @@ pub trait ListModelExtManual: sealed::Sealed + IsA<ListModel> + Sized {
 
     // rustdoc-stripper-ignore-next
     /// If `T::static_type().is_a(self.item_type())` then it returns an iterator over the `ListModel` elements,
-    /// else the types are not compatible and it panics.
+    /// else the types are not compatible and returns an `Err(...)`.
     ///
     /// # Panics
     ///
     /// Panics if `T::static_type().is_a(self.item_type())` is not true.
-    fn iter<LT: IsA<glib::Object>>(&self) -> ListModelIter<'_, LT> {
+
+    fn iter<LT: IsA<glib::Object>>(&self) -> ListModelIter<LT> {
         assert!(self.item_type().is_a(LT::static_type()));
 
         let len = self.n_items();
@@ -57,16 +58,9 @@ pub trait ListModelExtManual: sealed::Sealed + IsA<ListModel> + Sized {
 
 impl<T: IsA<ListModel>> ListModelExtManual for T {}
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(thiserror::Error, Debug, PartialEq, Eq)]
+#[error("the list model was mutated during iteration")]
 pub struct ListModelMutatedDuringIter;
-
-impl std::error::Error for ListModelMutatedDuringIter {}
-
-impl fmt::Display for ListModelMutatedDuringIter {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        fmt.write_str("the list model was mutated during iteration")
-    }
-}
 
 // rustdoc-stripper-ignore-next
 /// Iterator of `ListModel`'s items.
@@ -84,7 +78,7 @@ pub struct ListModelIter<'a, T: IsA<glib::Object>> {
     changed: Rc<Cell<bool>>,
     signal_id: Option<SignalHandlerId>,
 }
-impl<T: IsA<glib::Object>> Iterator for ListModelIter<'_, T> {
+impl<'a, T: IsA<glib::Object>> Iterator for ListModelIter<'a, T> {
     type Item = Result<T, ListModelMutatedDuringIter>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -143,11 +137,11 @@ impl<T: IsA<glib::Object>> Iterator for ListModelIter<'_, T> {
     }
 }
 
-impl<T: IsA<glib::Object>> FusedIterator for ListModelIter<'_, T> {}
+impl<'a, T: IsA<glib::Object>> FusedIterator for ListModelIter<'a, T> {}
 
-impl<T: IsA<glib::Object>> ExactSizeIterator for ListModelIter<'_, T> {}
+impl<'a, T: IsA<glib::Object>> ExactSizeIterator for ListModelIter<'a, T> {}
 
-impl<T: IsA<glib::Object>> DoubleEndedIterator for ListModelIter<'_, T> {
+impl<'a, T: IsA<glib::Object>> DoubleEndedIterator for ListModelIter<'a, T> {
     fn next_back(&mut self) -> Option<Self::Item> {
         if self.reverse_pos == self.i {
             return None;
@@ -182,7 +176,7 @@ impl<T: IsA<glib::Object>> DoubleEndedIterator for ListModelIter<'_, T> {
         }
     }
 }
-impl<T: IsA<glib::Object>> Drop for ListModelIter<'_, T> {
+impl<'a, T: IsA<glib::Object>> Drop for ListModelIter<'a, T> {
     #[inline]
     fn drop(&mut self) {
         self.model.disconnect(self.signal_id.take().unwrap());

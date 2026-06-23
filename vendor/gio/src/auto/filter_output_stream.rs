@@ -2,7 +2,7 @@
 // from gir-files (https://github.com/gtk-rs/gir-files)
 // DO NOT EDIT
 
-use crate::{ffi, OutputStream};
+use crate::OutputStream;
 use glib::{
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
@@ -31,7 +31,6 @@ mod sealed {
 pub trait FilterOutputStreamExt: IsA<FilterOutputStream> + sealed::Sealed + 'static {
     #[doc(alias = "g_filter_output_stream_get_base_stream")]
     #[doc(alias = "get_base_stream")]
-    #[doc(alias = "base-stream")]
     fn base_stream(&self) -> OutputStream {
         unsafe {
             from_glib_none(ffi::g_filter_output_stream_get_base_stream(
@@ -42,7 +41,6 @@ pub trait FilterOutputStreamExt: IsA<FilterOutputStream> + sealed::Sealed + 'sta
 
     #[doc(alias = "g_filter_output_stream_get_close_base_stream")]
     #[doc(alias = "get_close_base_stream")]
-    #[doc(alias = "close-base-stream")]
     fn closes_base_stream(&self) -> bool {
         unsafe {
             from_glib(ffi::g_filter_output_stream_get_close_base_stream(

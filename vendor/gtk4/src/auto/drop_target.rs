@@ -3,9 +3,8 @@
 // DO NOT EDIT
 #![allow(deprecated)]
 
-use crate::{ffi, EventController, PropagationLimit, PropagationPhase};
+use crate::{EventController, PropagationLimit, PropagationPhase};
 use glib::{
-    object::ObjectType as _,
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
     translate::*,
@@ -51,7 +50,6 @@ impl DropTarget {
     #[cfg_attr(docsrs, doc(cfg(feature = "v4_4")))]
     #[doc(alias = "gtk_drop_target_get_current_drop")]
     #[doc(alias = "get_current_drop")]
-    #[doc(alias = "current-drop")]
     pub fn current_drop(&self) -> Option<gdk::Drop> {
         unsafe { from_glib_none(ffi::gtk_drop_target_get_current_drop(self.to_glib_none().0)) }
     }
@@ -72,7 +70,6 @@ impl DropTarget {
 
     #[doc(alias = "gtk_drop_target_get_preload")]
     #[doc(alias = "get_preload")]
-    #[doc(alias = "preload")]
     pub fn is_preload(&self) -> bool {
         unsafe { from_glib(ffi::gtk_drop_target_get_preload(self.to_glib_none().0)) }
     }
@@ -91,7 +88,6 @@ impl DropTarget {
     }
 
     #[doc(alias = "gtk_drop_target_set_actions")]
-    #[doc(alias = "actions")]
     pub fn set_actions(&self, actions: gdk::DragAction) {
         unsafe {
             ffi::gtk_drop_target_set_actions(self.to_glib_none().0, actions.into_glib());
@@ -99,7 +95,6 @@ impl DropTarget {
     }
 
     #[doc(alias = "gtk_drop_target_set_preload")]
-    #[doc(alias = "preload")]
     pub fn set_preload(&self, preload: bool) {
         unsafe {
             ffi::gtk_drop_target_set_preload(self.to_glib_none().0, preload.into_glib());
@@ -124,7 +119,7 @@ impl DropTarget {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"accept\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     accept_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -141,8 +136,8 @@ impl DropTarget {
             F: Fn(&DropTarget, f64, f64) -> gdk::DragAction + 'static,
         >(
             this: *mut ffi::GtkDropTarget,
-            x: std::ffi::c_double,
-            y: std::ffi::c_double,
+            x: libc::c_double,
+            y: libc::c_double,
             f: glib::ffi::gpointer,
         ) -> gdk::ffi::GdkDragAction {
             let f: &F = &*(f as *const F);
@@ -153,7 +148,7 @@ impl DropTarget {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"enter\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     enter_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -175,7 +170,7 @@ impl DropTarget {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"leave\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     leave_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -192,8 +187,8 @@ impl DropTarget {
             F: Fn(&DropTarget, f64, f64) -> gdk::DragAction + 'static,
         >(
             this: *mut ffi::GtkDropTarget,
-            x: std::ffi::c_double,
-            y: std::ffi::c_double,
+            x: libc::c_double,
+            y: libc::c_double,
             f: glib::ffi::gpointer,
         ) -> gdk::ffi::GdkDragAction {
             let f: &F = &*(f as *const F);
@@ -204,7 +199,7 @@ impl DropTarget {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"motion\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     motion_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -227,7 +222,7 @@ impl DropTarget {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::actions\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_actions_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -252,7 +247,7 @@ impl DropTarget {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::current-drop\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_current_drop_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -276,7 +271,7 @@ impl DropTarget {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::drop\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_drop_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -299,7 +294,7 @@ impl DropTarget {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::preload\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_preload_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -322,7 +317,7 @@ impl DropTarget {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::value\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_value_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -397,7 +392,6 @@ impl DropTargetBuilder {
     /// Build the [`DropTarget`].
     #[must_use = "Building the object from the builder is usually expensive and is not expected to have side effects"]
     pub fn build(self) -> DropTarget {
-        assert_initialized_main_thread!();
         self.builder.build()
     }
 }

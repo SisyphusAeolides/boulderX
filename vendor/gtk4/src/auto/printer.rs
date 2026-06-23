@@ -2,9 +2,8 @@
 // from gir-files (https://github.com/gtk-rs/gir-files)
 // DO NOT EDIT
 
-use crate::{ffi, PageSetup, PaperSize, PrintCapabilities};
+use crate::{PageSetup, PaperSize, PrintCapabilities};
 use glib::{
-    object::ObjectType as _,
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
     translate::*,
@@ -22,13 +21,11 @@ glib::wrapper! {
 
 impl Printer {
     #[doc(alias = "gtk_printer_accepts_pdf")]
-    #[doc(alias = "accepts-pdf")]
     pub fn accepts_pdf(&self) -> bool {
         unsafe { from_glib(ffi::gtk_printer_accepts_pdf(self.to_glib_none().0)) }
     }
 
     #[doc(alias = "gtk_printer_accepts_ps")]
-    #[doc(alias = "accepts-ps")]
     pub fn accepts_ps(&self) -> bool {
         unsafe { from_glib(ffi::gtk_printer_accepts_ps(self.to_glib_none().0)) }
     }
@@ -122,14 +119,12 @@ impl Printer {
 
     #[doc(alias = "gtk_printer_get_icon_name")]
     #[doc(alias = "get_icon_name")]
-    #[doc(alias = "icon-name")]
     pub fn icon_name(&self) -> glib::GString {
         unsafe { from_glib_none(ffi::gtk_printer_get_icon_name(self.to_glib_none().0)) }
     }
 
     #[doc(alias = "gtk_printer_get_job_count")]
     #[doc(alias = "get_job_count")]
-    #[doc(alias = "job-count")]
     pub fn job_count(&self) -> i32 {
         unsafe { ffi::gtk_printer_get_job_count(self.to_glib_none().0) }
     }
@@ -148,7 +143,6 @@ impl Printer {
 
     #[doc(alias = "gtk_printer_get_state_message")]
     #[doc(alias = "get_state_message")]
-    #[doc(alias = "state-message")]
     pub fn state_message(&self) -> glib::GString {
         unsafe { from_glib_none(ffi::gtk_printer_get_state_message(self.to_glib_none().0)) }
     }
@@ -159,7 +153,6 @@ impl Printer {
     }
 
     #[doc(alias = "gtk_printer_is_accepting_jobs")]
-    #[doc(alias = "accepting-jobs")]
     pub fn is_accepting_jobs(&self) -> bool {
         unsafe { from_glib(ffi::gtk_printer_is_accepting_jobs(self.to_glib_none().0)) }
     }
@@ -175,13 +168,11 @@ impl Printer {
     }
 
     #[doc(alias = "gtk_printer_is_paused")]
-    #[doc(alias = "paused")]
     pub fn is_paused(&self) -> bool {
         unsafe { from_glib(ffi::gtk_printer_is_paused(self.to_glib_none().0)) }
     }
 
     #[doc(alias = "gtk_printer_is_virtual")]
-    #[doc(alias = "is-virtual")]
     pub fn is_virtual(&self) -> bool {
         unsafe { from_glib(ffi::gtk_printer_is_virtual(self.to_glib_none().0)) }
     }
@@ -217,7 +208,7 @@ impl Printer {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"details-acquired\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     details_acquired_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -240,7 +231,7 @@ impl Printer {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::accepting-jobs\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_accepting_jobs_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -263,7 +254,7 @@ impl Printer {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::icon-name\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_icon_name_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -286,7 +277,7 @@ impl Printer {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::job-count\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_job_count_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -309,7 +300,7 @@ impl Printer {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::location\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_location_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -332,7 +323,7 @@ impl Printer {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::paused\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_paused_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -355,7 +346,7 @@ impl Printer {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::state-message\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_state_message_trampoline::<F> as *const (),
                 )),
                 Box_::into_raw(f),

@@ -207,7 +207,7 @@ impl Component for App {
                 #[local_ref]
                 tab_view -> adw::TabView {
                     connect_close_page => |_, _| {
-                        gtk::glib::signal::Propagation::Stop
+                        true
                     }
                 }
             }

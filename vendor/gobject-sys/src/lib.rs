@@ -13,15 +13,14 @@
 
 use glib_sys as glib;
 
+#[allow(unused_imports)]
+use libc::{
+    c_char, c_double, c_float, c_int, c_long, c_short, c_uchar, c_uint, c_ulong, c_ushort, c_void,
+    intptr_t, off_t, size_t, ssize_t, time_t, uintptr_t, FILE,
+};
 #[cfg(unix)]
 #[allow(unused_imports)]
 use libc::{dev_t, gid_t, pid_t, socklen_t, uid_t};
-#[allow(unused_imports)]
-use libc::{intptr_t, off_t, size_t, ssize_t, time_t, uintptr_t, FILE};
-#[allow(unused_imports)]
-use std::ffi::{
-    c_char, c_double, c_float, c_int, c_long, c_short, c_uchar, c_uint, c_ulong, c_ushort, c_void,
-};
 
 #[allow(unused_imports)]
 use glib::{gboolean, gconstpointer, gpointer, GType};
@@ -114,8 +113,6 @@ pub const G_SIGNAL_ACTION: GSignalFlags = 32;
 pub const G_SIGNAL_NO_HOOKS: GSignalFlags = 64;
 pub const G_SIGNAL_MUST_COLLECT: GSignalFlags = 128;
 pub const G_SIGNAL_DEPRECATED: GSignalFlags = 256;
-#[cfg(feature = "v2_68")]
-#[cfg_attr(docsrs, doc(cfg(feature = "v2_68")))]
 pub const G_SIGNAL_ACCUMULATOR_FIRST_RUN: GSignalFlags = 131072;
 
 pub type GSignalMatchType = c_uint;
@@ -269,7 +266,6 @@ pub type GWeakNotify = Option<unsafe extern "C" fn(gpointer, *mut GObject)>;
 
 // Records
 #[repr(C)]
-#[allow(dead_code)]
 pub struct GCClosure {
     _truncated_record_marker: c_void,
     // /*Ignored*/field closure has incomplete type
@@ -282,7 +278,6 @@ impl ::std::fmt::Debug for GCClosure {
 }
 
 #[repr(C)]
-#[allow(dead_code)]
 pub struct GClosure {
     pub ref_count: c_uint,
     _truncated_record_marker: c_void,
@@ -538,7 +533,6 @@ impl ::std::fmt::Debug for GParamSpecClass {
 }
 
 #[repr(C)]
-#[allow(dead_code)]
 pub struct _GParamSpecPool {
     _data: [u8; 0],
     _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
@@ -863,7 +857,6 @@ impl ::std::fmt::Debug for GWeakRef {
 
 // Classes
 #[repr(C)]
-#[allow(dead_code)]
 pub struct GBinding {
     _data: [u8; 0],
     _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
@@ -876,7 +869,6 @@ impl ::std::fmt::Debug for GBinding {
 }
 
 #[repr(C)]
-#[allow(dead_code)]
 pub struct GBindingGroup {
     _data: [u8; 0],
     _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
@@ -1211,7 +1203,6 @@ impl ::std::fmt::Debug for GParamSpecPointer {
 }
 
 #[repr(C)]
-#[allow(dead_code)]
 pub struct GParamSpecString {
     pub parent_instance: GParamSpec,
     pub default_value: *mut c_char,
@@ -1370,7 +1361,6 @@ impl ::std::fmt::Debug for GParamSpecVariant {
 }
 
 #[repr(C)]
-#[allow(dead_code)]
 pub struct GSignalGroup {
     _data: [u8; 0],
     _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
@@ -1406,7 +1396,6 @@ impl ::std::fmt::Debug for GTypeModule {
 
 // Interfaces
 #[repr(C)]
-#[allow(dead_code)]
 pub struct GTypePlugin {
     _data: [u8; 0],
     _marker: core::marker::PhantomData<(*mut u8, core::marker::PhantomPinned)>,
@@ -1418,6 +1407,7 @@ impl ::std::fmt::Debug for GTypePlugin {
     }
 }
 
+#[link(name = "gobject-2.0")]
 extern "C" {
 
     //=========================================================================
@@ -1776,9 +1766,6 @@ extern "C" {
         g_class: gpointer,
         private_size_or_offset: *mut c_int,
     );
-    #[cfg(feature = "v2_84")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "v2_84")))]
-    pub fn g_type_class_get(type_: GType) -> gpointer;
     pub fn g_type_class_peek(type_: GType) -> gpointer;
     pub fn g_type_class_peek_static(type_: GType) -> gpointer;
     pub fn g_type_class_ref(type_: GType) -> gpointer;
@@ -2784,9 +2771,6 @@ extern "C" {
     pub fn g_type_check_value_holds(value: *const GValue, type_: GType) -> gboolean;
     pub fn g_type_children(type_: GType, n_children: *mut c_uint) -> *mut GType;
     pub fn g_type_create_instance(type_: GType) -> *mut GTypeInstance;
-    #[cfg(feature = "v2_84")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "v2_84")))]
-    pub fn g_type_default_interface_get(g_type: GType) -> gpointer;
     pub fn g_type_default_interface_peek(g_type: GType) -> gpointer;
     pub fn g_type_default_interface_ref(g_type: GType) -> gpointer;
     pub fn g_type_default_interface_unref(g_iface: gpointer);

@@ -15,12 +15,12 @@ impl SimpleComponent for AppModel {
     #[allow(unreachable_code)]
     fn init(
         _: (),
-        _root: Self::Root,
-        _sender: ComponentSender<Self>,
+        root: Self::Root,
+        sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = Self;
 
-        let widgets = AppModelWidgets {};
+        let widgets = todo!();
 
         ComponentParts { model, widgets }
     }

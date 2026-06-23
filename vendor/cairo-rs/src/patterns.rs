@@ -5,14 +5,15 @@ use std::{ops::Deref, ptr};
 use libc::{c_double, c_int, c_uint};
 
 use crate::{
-    ffi, utils::status_to_result, Error, Extend, Filter, Matrix, MeshCorner, Path, PatternType,
-    Surface,
+    ffi::{cairo_pattern_t, cairo_surface_t},
+    utils::status_to_result,
+    Error, Extend, Filter, Matrix, MeshCorner, Path, PatternType, Surface,
 };
 
 // See https://cairographics.org/manual/bindings-patterns.html for more info
 #[derive(Debug)]
 pub struct Pattern {
-    pointer: *mut ffi::cairo_pattern_t,
+    pointer: *mut cairo_pattern_t,
 }
 
 impl Pattern {
@@ -22,18 +23,18 @@ impl Pattern {
     }
 
     #[inline]
-    pub fn to_raw_none(&self) -> *mut ffi::cairo_pattern_t {
+    pub fn to_raw_none(&self) -> *mut cairo_pattern_t {
         self.pointer
     }
 
     #[inline]
-    pub unsafe fn from_raw_none(pointer: *mut ffi::cairo_pattern_t) -> Pattern {
+    pub unsafe fn from_raw_none(pointer: *mut cairo_pattern_t) -> Pattern {
         ffi::cairo_pattern_reference(pointer);
         Self::from_raw_full(pointer)
     }
 
     #[inline]
-    pub unsafe fn from_raw_full(pointer: *mut ffi::cairo_pattern_t) -> Pattern {
+    pub unsafe fn from_raw_full(pointer: *mut cairo_pattern_t) -> Pattern {
         Self { pointer }
     }
 
@@ -383,7 +384,7 @@ impl SurfacePattern {
     #[doc(alias = "get_surface")]
     pub fn surface(&self) -> Result<Surface, Error> {
         unsafe {
-            let mut surface_ptr: *mut ffi::cairo_surface_t = ptr::null_mut();
+            let mut surface_ptr: *mut cairo_surface_t = ptr::null_mut();
             let status = ffi::cairo_pattern_get_surface(self.pointer, &mut surface_ptr);
             status_to_result(status)?;
             Ok(Surface::from_raw_none(surface_ptr))

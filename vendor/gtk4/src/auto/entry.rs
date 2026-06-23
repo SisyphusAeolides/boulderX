@@ -4,12 +4,11 @@
 #![allow(deprecated)]
 
 use crate::{
-    ffi, Accessible, AccessibleRole, Align, Buildable, CellEditable, ConstraintTarget, Editable,
+    Accessible, AccessibleRole, Align, Buildable, CellEditable, ConstraintTarget, Editable,
     EntryBuffer, EntryCompletion, EntryIconPosition, ImageType, InputHints, InputPurpose,
     LayoutManager, Overflow, Widget,
 };
 use glib::{
-    object::ObjectType as _,
     prelude::*,
     signal::{connect_raw, SignalHandlerId},
     translate::*,
@@ -434,14 +433,6 @@ impl EntryBuilder {
         }
     }
 
-    #[cfg(feature = "v4_18")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "v4_18")))]
-    pub fn limit_events(self, limit_events: bool) -> Self {
-        Self {
-            builder: self.builder.property("limit-events", limit_events),
-        }
-    }
-
     pub fn margin_bottom(self, margin_bottom: i32) -> Self {
         Self {
             builder: self.builder.property("margin-bottom", margin_bottom),
@@ -592,7 +583,6 @@ impl EntryBuilder {
     /// Build the [`Entry`].
     #[must_use = "Building the object from the builder is usually expensive and is not expected to have side effects"]
     pub fn build(self) -> Entry {
-        assert_initialized_main_thread!();
         self.builder.build()
     }
 }
@@ -605,7 +595,6 @@ mod sealed {
 pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
     #[doc(alias = "gtk_entry_get_activates_default")]
     #[doc(alias = "get_activates_default")]
-    #[doc(alias = "activates-default")]
     fn activates_default(&self) -> bool {
         unsafe {
             from_glib(ffi::gtk_entry_get_activates_default(
@@ -656,7 +645,6 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
 
     #[doc(alias = "gtk_entry_get_extra_menu")]
     #[doc(alias = "get_extra_menu")]
-    #[doc(alias = "extra-menu")]
     fn extra_menu(&self) -> Option<gio::MenuModel> {
         unsafe {
             from_glib_none(ffi::gtk_entry_get_extra_menu(
@@ -667,7 +655,6 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
 
     #[doc(alias = "gtk_entry_get_has_frame")]
     #[doc(alias = "get_has_frame")]
-    #[doc(alias = "has-frame")]
     fn has_frame(&self) -> bool {
         unsafe { from_glib(ffi::gtk_entry_get_has_frame(self.as_ref().to_glib_none().0)) }
     }
@@ -782,7 +769,6 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
 
     #[doc(alias = "gtk_entry_get_input_hints")]
     #[doc(alias = "get_input_hints")]
-    #[doc(alias = "input-hints")]
     fn input_hints(&self) -> InputHints {
         unsafe {
             from_glib(ffi::gtk_entry_get_input_hints(
@@ -793,7 +779,6 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
 
     #[doc(alias = "gtk_entry_get_input_purpose")]
     #[doc(alias = "get_input_purpose")]
-    #[doc(alias = "input-purpose")]
     fn input_purpose(&self) -> InputPurpose {
         unsafe {
             from_glib(ffi::gtk_entry_get_input_purpose(
@@ -804,14 +789,12 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
 
     #[doc(alias = "gtk_entry_get_max_length")]
     #[doc(alias = "get_max_length")]
-    #[doc(alias = "max-length")]
     fn max_length(&self) -> i32 {
         unsafe { ffi::gtk_entry_get_max_length(self.as_ref().to_glib_none().0) }
     }
 
     #[doc(alias = "gtk_entry_get_overwrite_mode")]
     #[doc(alias = "get_overwrite_mode")]
-    #[doc(alias = "overwrite-mode")]
     fn is_overwrite_mode(&self) -> bool {
         unsafe {
             from_glib(ffi::gtk_entry_get_overwrite_mode(
@@ -822,7 +805,6 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
 
     #[doc(alias = "gtk_entry_get_placeholder_text")]
     #[doc(alias = "get_placeholder_text")]
-    #[doc(alias = "placeholder-text")]
     fn placeholder_text(&self) -> Option<glib::GString> {
         unsafe {
             from_glib_none(ffi::gtk_entry_get_placeholder_text(
@@ -833,14 +815,12 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
 
     #[doc(alias = "gtk_entry_get_progress_fraction")]
     #[doc(alias = "get_progress_fraction")]
-    #[doc(alias = "progress-fraction")]
     fn progress_fraction(&self) -> f64 {
         unsafe { ffi::gtk_entry_get_progress_fraction(self.as_ref().to_glib_none().0) }
     }
 
     #[doc(alias = "gtk_entry_get_progress_pulse_step")]
     #[doc(alias = "get_progress_pulse_step")]
-    #[doc(alias = "progress-pulse-step")]
     fn progress_pulse_step(&self) -> f64 {
         unsafe { ffi::gtk_entry_get_progress_pulse_step(self.as_ref().to_glib_none().0) }
     }
@@ -853,14 +833,12 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
 
     #[doc(alias = "gtk_entry_get_text_length")]
     #[doc(alias = "get_text_length")]
-    #[doc(alias = "text-length")]
     fn text_length(&self) -> u16 {
         unsafe { ffi::gtk_entry_get_text_length(self.as_ref().to_glib_none().0) }
     }
 
     #[doc(alias = "gtk_entry_get_visibility")]
     #[doc(alias = "get_visibility")]
-    #[doc(alias = "visibility")]
     fn is_visible(&self) -> bool {
         unsafe {
             from_glib(ffi::gtk_entry_get_visibility(
@@ -893,7 +871,6 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "gtk_entry_set_activates_default")]
-    #[doc(alias = "activates-default")]
     fn set_activates_default(&self, setting: bool) {
         unsafe {
             ffi::gtk_entry_set_activates_default(
@@ -911,7 +888,6 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "gtk_entry_set_attributes")]
-    #[doc(alias = "attributes")]
     fn set_attributes(&self, attrs: &pango::AttrList) {
         unsafe {
             ffi::gtk_entry_set_attributes(self.as_ref().to_glib_none().0, attrs.to_glib_none().0);
@@ -919,7 +895,6 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "gtk_entry_set_buffer")]
-    #[doc(alias = "buffer")]
     fn set_buffer(&self, buffer: &impl IsA<EntryBuffer>) {
         unsafe {
             ffi::gtk_entry_set_buffer(
@@ -932,7 +907,6 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
     #[cfg_attr(feature = "v4_10", deprecated = "Since 4.10")]
     #[allow(deprecated)]
     #[doc(alias = "gtk_entry_set_completion")]
-    #[doc(alias = "completion")]
     fn set_completion(&self, completion: Option<&EntryCompletion>) {
         unsafe {
             ffi::gtk_entry_set_completion(
@@ -943,7 +917,6 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "gtk_entry_set_extra_menu")]
-    #[doc(alias = "extra-menu")]
     fn set_extra_menu(&self, model: Option<&impl IsA<gio::MenuModel>>) {
         unsafe {
             ffi::gtk_entry_set_extra_menu(
@@ -954,7 +927,6 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "gtk_entry_set_has_frame")]
-    #[doc(alias = "has-frame")]
     fn set_has_frame(&self, setting: bool) {
         unsafe {
             ffi::gtk_entry_set_has_frame(self.as_ref().to_glib_none().0, setting.into_glib());
@@ -1060,7 +1032,6 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "gtk_entry_set_input_hints")]
-    #[doc(alias = "input-hints")]
     fn set_input_hints(&self, hints: InputHints) {
         unsafe {
             ffi::gtk_entry_set_input_hints(self.as_ref().to_glib_none().0, hints.into_glib());
@@ -1068,7 +1039,6 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "gtk_entry_set_input_purpose")]
-    #[doc(alias = "input-purpose")]
     fn set_input_purpose(&self, purpose: InputPurpose) {
         unsafe {
             ffi::gtk_entry_set_input_purpose(self.as_ref().to_glib_none().0, purpose.into_glib());
@@ -1076,7 +1046,6 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "gtk_entry_set_invisible_char")]
-    #[doc(alias = "invisible-char")]
     fn set_invisible_char(&self, ch: Option<char>) {
         unsafe {
             ffi::gtk_entry_set_invisible_char(self.as_ref().to_glib_none().0, ch.into_glib());
@@ -1084,7 +1053,6 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "gtk_entry_set_max_length")]
-    #[doc(alias = "max-length")]
     fn set_max_length(&self, max: i32) {
         unsafe {
             ffi::gtk_entry_set_max_length(self.as_ref().to_glib_none().0, max);
@@ -1092,7 +1060,6 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "gtk_entry_set_overwrite_mode")]
-    #[doc(alias = "overwrite-mode")]
     fn set_overwrite_mode(&self, overwrite: bool) {
         unsafe {
             ffi::gtk_entry_set_overwrite_mode(
@@ -1103,7 +1070,6 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "gtk_entry_set_placeholder_text")]
-    #[doc(alias = "placeholder-text")]
     fn set_placeholder_text(&self, text: Option<&str>) {
         unsafe {
             ffi::gtk_entry_set_placeholder_text(
@@ -1114,7 +1080,6 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "gtk_entry_set_progress_fraction")]
-    #[doc(alias = "progress-fraction")]
     fn set_progress_fraction(&self, fraction: f64) {
         unsafe {
             ffi::gtk_entry_set_progress_fraction(self.as_ref().to_glib_none().0, fraction);
@@ -1122,7 +1087,6 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "gtk_entry_set_progress_pulse_step")]
-    #[doc(alias = "progress-pulse-step")]
     fn set_progress_pulse_step(&self, fraction: f64) {
         unsafe {
             ffi::gtk_entry_set_progress_pulse_step(self.as_ref().to_glib_none().0, fraction);
@@ -1130,7 +1094,6 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "gtk_entry_set_tabs")]
-    #[doc(alias = "tabs")]
     fn set_tabs(&self, tabs: Option<&pango::TabArray>) {
         unsafe {
             ffi::gtk_entry_set_tabs(
@@ -1141,7 +1104,6 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
     }
 
     #[doc(alias = "gtk_entry_set_visibility")]
-    #[doc(alias = "visibility")]
     fn set_visibility(&self, visible: bool) {
         unsafe {
             ffi::gtk_entry_set_visibility(self.as_ref().to_glib_none().0, visible.into_glib());
@@ -1419,7 +1381,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"activate\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     activate_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1455,7 +1417,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"icon-press\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     icon_press_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1487,7 +1449,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"icon-release\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     icon_release_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1513,7 +1475,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::activates-default\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_activates_default_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1536,7 +1498,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::attributes\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_attributes_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1559,7 +1521,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::buffer\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_buffer_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1583,7 +1545,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::completion\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_completion_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1612,7 +1574,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::enable-emoji-completion\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_enable_emoji_completion_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1635,7 +1597,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::extra-menu\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_extra_menu_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1658,7 +1620,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::has-frame\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_has_frame_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1681,7 +1643,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::im-module\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_im_module_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1704,7 +1666,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::input-hints\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_input_hints_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1727,7 +1689,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::input-purpose\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_input_purpose_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1753,7 +1715,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::invisible-char\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_invisible_char_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1779,7 +1741,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::invisible-char-set\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_invisible_char_set_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1802,7 +1764,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::max-length\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_max_length_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1828,7 +1790,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::overwrite-mode\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_overwrite_mode_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1854,7 +1816,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::placeholder-text\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_placeholder_text_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1883,7 +1845,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::primary-icon-activatable\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_primary_icon_activatable_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1909,7 +1871,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::primary-icon-gicon\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_primary_icon_gicon_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1935,7 +1897,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::primary-icon-name\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_primary_icon_name_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1964,7 +1926,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::primary-icon-paintable\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_primary_icon_paintable_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -1993,7 +1955,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::primary-icon-sensitive\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_primary_icon_sensitive_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -2022,7 +1984,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::primary-icon-storage-type\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_primary_icon_storage_type_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -2051,7 +2013,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::primary-icon-tooltip-markup\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_primary_icon_tooltip_markup_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -2080,7 +2042,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::primary-icon-tooltip-text\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_primary_icon_tooltip_text_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -2106,7 +2068,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::progress-fraction\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_progress_fraction_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -2132,7 +2094,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::progress-pulse-step\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_progress_pulse_step_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -2155,7 +2117,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::scroll-offset\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_scroll_offset_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -2184,7 +2146,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::secondary-icon-activatable\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_secondary_icon_activatable_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -2210,7 +2172,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::secondary-icon-gicon\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_secondary_icon_gicon_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -2236,7 +2198,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::secondary-icon-name\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_secondary_icon_name_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -2265,7 +2227,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::secondary-icon-paintable\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_secondary_icon_paintable_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -2294,7 +2256,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::secondary-icon-sensitive\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_secondary_icon_sensitive_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -2323,7 +2285,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::secondary-icon-storage-type\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_secondary_icon_storage_type_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -2352,7 +2314,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::secondary-icon-tooltip-markup\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_secondary_icon_tooltip_markup_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -2381,7 +2343,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::secondary-icon-tooltip-text\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_secondary_icon_tooltip_text_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -2407,7 +2369,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::show-emoji-icon\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_show_emoji_icon_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -2430,7 +2392,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::tabs\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_tabs_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -2453,7 +2415,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::text-length\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_text_length_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -2479,7 +2441,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::truncate-multiline\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_truncate_multiline_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
@@ -2502,7 +2464,7 @@ pub trait EntryExt: IsA<Entry> + sealed::Sealed + 'static {
             connect_raw(
                 self.as_ptr() as *mut _,
                 b"notify::visibility\0".as_ptr() as *const _,
-                Some(std::mem::transmute::<*const (), unsafe extern "C" fn()>(
+                Some(std::mem::transmute::<_, unsafe extern "C" fn()>(
                     notify_visibility_trampoline::<Self, F> as *const (),
                 )),
                 Box_::into_raw(f),
