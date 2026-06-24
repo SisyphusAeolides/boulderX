@@ -1,4 +1,5 @@
 mod config;
+mod theme;
 
 use config::Settings;
 use futures::prelude::*;
@@ -21,64 +22,21 @@ const DEFAULT_CHANNELS: &[&str] = &[
     "#rockylinux-social",
 ];
 
-const GRUVBOX_CSS: &str = "
-    window { background-color: #282828; }
-    label { color: #ebdbb2; font-family: monospace; }
+#[derive(Copy, Clone)]
+enum LineStyle {
+    Normal,
+    SelfMsg,
+    System,
+    Mention,
+}
 
-    .sidebar { background-color: #1d2021; }
-    .sidebar-title { font-weight: bold; color: #10B981; }
-    .sidebar-subtitle { font-weight: bold; color: #b8bb26; font-size: 0.9em; }
-    .status-connected { color: #b8bb26; }
-    .status-connecting { color: #fabd2f; }
-    .status-offline { color: #928374; }
+#[derive(Clone)]
+struct ChatLine {
+    text: String,
+    style: LineStyle,
+}
 
-    button {
-        background-color: #3c3836; color: #b8bb26;
-        border: 1px solid #504945; border-radius: 4px;
-        padding: 6px 12px; font-family: monospace;
-    }
-    button:hover { background-color: #504945; }
-    button.destructive { color: #fb4934; }
-
-    entry {
-        background-color: #3c3836; color: #ebdbb2;
-        border: 1px solid #504945; border-radius: 4px;
-        padding: 8px; font-family: monospace;
-    }
-    entry:focus { border: 1px solid #fe8019; }
-
-    textview {
-        background-color: #282828; color: #ebdbb2;
-        font-family: monospace; padding: 8px;
-    }
-    textview text { background-color: #282828; color: #ebdbb2; }
-
-    .user-btn {
-        background-color: transparent; color: #83a598; border: none; box-shadow: none;
-        padding: 4px 12px; font-family: monospace;
-    }
-    .user-btn:hover { background-color: #3c3836; color: #ebdbb2; }
-
-    .fav-btn {
-        background-color: transparent; color: #fabd2f;
-        border: 1px solid transparent; box-shadow: none;
-        padding: 6px 8px; font-family: monospace;
-    }
-    .fav-btn:hover {
-        background-color: #3c3836; border: 1px solid #504945; color: #fbf1c7;
-    }
-
-    .mute-btn {
-        background-color: transparent; color: #928374;
-        border: 1px solid transparent; box-shadow: none;
-        padding: 4px 8px; font-family: monospace;
-    }
-    .mute-btn:hover {
-        background-color: #3c3836; border: 1px solid #504945; color: #ebdbb2;
-    }
-
-    .muted-user { color: #928374; text-decoration: line-through; }
-";
+const HELP_TEXT: &str = "Commands: /join #chan, /part [#chan], /msg nick text, /clear, /nick name, /help\n";
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum ConnectionState {
@@ -98,6 +56,8 @@ pub enum AppInput {
     NetworkConnected(irc::client::Sender),
     SelectChannel(String),
     JoinChannel(String),
+    PartChannel(String),
+    ClearChannel(String),
     ToggleFavorite(String),
     ToggleMute { channel: String, user: String },
     ReceiveMessage { channel: String, user: String, body: String },
@@ -117,7 +77,7 @@ struct AppModel {
     channels: Vec<String>,
     favorite_channels: Vec<String>,
     muted_users: HashMap<String, Vec<String>>,
-    chat_histories: HashMap<String, String>,
+    chat_histories: HashMap<String, Vec<ChatLine>>,
     channel_users: HashMap<String, Vec<String>>,
     irc_sender: Option<irc::client::Sender>,
     nickname: String,
@@ -153,7 +113,78 @@ impl AppModel {
             server: self.server.clone(),
             password: self.password.clone(),
             favorites: self.favorite_channels.clone(),
+            last_channel: self.active_channel.clone(),
         }
+    }
+
+    fn style_tag(style: LineStyle) -> &'static str {
+        match style {
+            LineStyle::Normal => "normal",
+            LineStyle::SelfMsg => "self-msg",
+            LineStyle::System => "system",
+            LineStyle::Mention => "mention",
+        }
+    }
+
+    fn setup_chat_tags(view: &gtk::TextView) {
+        let buffer = view.buffer();
+        let table = buffer.tag_table();
+
+        for (name, fg, bg) in [
+            ("normal", "#ebdbb2", None),
+            ("self-msg", "#10B981", None),
+            ("system", "#928374", None),
+            ("mention", "#fe8019", Some("#3c3836")),
+        ] {
+            let tag = gtk::TextTag::new(Some(name));
+            tag.set_foreground(Some(fg));
+            if let Some(bg) = bg {
+                tag.set_background(Some(bg));
+            }
+            table.add(&tag);
+        }
+    }
+
+    fn message_style(&self, user: &str, body: &str) -> LineStyle {
+        if user == "System" {
+            return LineStyle::System;
+        }
+        let clean = Self::normalized_nick(user);
+        if clean.eq_ignore_ascii_case(&self.nickname) {
+            return LineStyle::SelfMsg;
+        }
+        if body.contains(&self.nickname) {
+            return LineStyle::Mention;
+        }
+        LineStyle::Normal
+    }
+
+    fn append_line(&mut self, channel: &str, line: &str, style: LineStyle) {
+        let history = self
+            .chat_histories
+            .entry(channel.to_string())
+            .or_insert_with(Vec::new);
+        history.push(ChatLine {
+            text: line.to_string(),
+            style,
+        });
+
+        if self.active_channel == channel {
+            self.append_styled_to_chat_view(line, style);
+        }
+    }
+
+    fn append_styled_to_chat_view(&self, line: &str, style: LineStyle) {
+        let buffer = self.chat_view.buffer();
+        let mut end = buffer.end_iter();
+        buffer.insert_with_tags_by_name(&mut end, line, &[Self::style_tag(style)]);
+
+        let mark = buffer.create_mark(None, &buffer.end_iter(), false);
+        self.chat_view.scroll_to_mark(&mark, 0.0, false, 0.0, 0.0);
+    }
+
+    fn append_to_chat_view(&self, line: &str) {
+        self.append_styled_to_chat_view(line, LineStyle::Normal);
     }
 
     fn persist_settings(&self) {
@@ -162,37 +193,15 @@ impl AppModel {
         }
     }
 
-    fn append_line(&mut self, channel: &str, line: &str) {
-        let history = self
-            .chat_histories
-            .entry(channel.to_string())
-            .or_insert_with(String::new);
-        history.push_str(line);
-
-        if self.active_channel == channel {
-            self.append_to_chat_view(line);
-        }
-    }
-
-    fn append_to_chat_view(&self, line: &str) {
-        let buffer = self.chat_view.buffer();
-        let mut end = buffer.end_iter();
-        buffer.insert(&mut end, line);
-
-        let mark = buffer.create_mark(None, &buffer.end_iter(), false);
-        self.chat_view.scroll_to_mark(&mark, 0.0, false, 0.0, 0.0);
-    }
-
     fn show_channel_history(&self) {
-        let history = self
-            .chat_histories
-            .get(&self.active_channel)
-            .cloned()
-            .unwrap_or_default();
-        self.chat_view.buffer().set_text(&history);
         let buffer = self.chat_view.buffer();
-        let mark = buffer.create_mark(None, &buffer.end_iter(), false);
-        self.chat_view.scroll_to_mark(&mark, 0.0, false, 0.0, 0.0);
+        buffer.set_text("");
+
+        if let Some(lines) = self.chat_histories.get(&self.active_channel) {
+            for line in lines {
+                self.append_styled_to_chat_view(&line.text, line.style);
+            }
+        }
     }
 
     fn refresh_channels(&self, sender: &ComponentSender<Self>) {
@@ -241,6 +250,21 @@ impl AppModel {
 
             row.append(&select_btn);
             row.append(&fav_btn);
+
+            if channel.starts_with('#') {
+                let part_btn = gtk::Button::with_label("×");
+                part_btn.add_css_class("part-btn");
+                part_btn.set_tooltip_text(Some("Leave channel"));
+
+                let s3 = sender.clone();
+                let ch3 = channel.clone();
+                part_btn.connect_clicked(move |_| {
+                    s3.input(AppInput::PartChannel(ch3.clone()));
+                });
+
+                row.append(&part_btn);
+            }
+
             self.channel_box.append(&row);
         }
     }
@@ -304,7 +328,6 @@ impl SimpleComponent for AppModel {
 
     view! {
         gtk::Window {
-            set_title: Some("Boulder Relay — Rocky Linux IRC"),
             set_default_size: (1200, 700),
 
             connect_close_request[sender] => move |_| {
@@ -397,6 +420,7 @@ impl SimpleComponent for AppModel {
                     #[wrap(Some)]
                     set_start_child = &gtk::Box {
                         set_orientation: gtk::Orientation::Vertical, set_spacing: 12, set_margin_all: 16, set_width_request: 300,
+                        add_css_class: "chat-panel",
 
                         gtk::Label { #[watch] set_label: &format!("Active Context: {}", model.active_channel), set_halign: gtk::Align::Start },
 
@@ -440,7 +464,9 @@ impl SimpleComponent for AppModel {
         }
     }
 
-    fn init(_init: Self::Init, _root: Self::Root, sender: ComponentSender<Self>) -> ComponentParts<Self> {
+    fn init(_init: Self::Init, root: Self::Root, sender: ComponentSender<Self>) -> ComponentParts<Self> {
+        theme::attach_window(&root);
+
         let settings = Settings::load();
         let server_tab = String::from(SERVER_TAB);
         let rocky_channels: Vec<String> = DEFAULT_CHANNELS.iter().map(|c| c.to_string()).collect();
@@ -448,16 +474,32 @@ impl SimpleComponent for AppModel {
         let mut chat_histories = HashMap::new();
         chat_histories.insert(
             server_tab.clone(),
-            String::from(
-                "[System]: Ready for Libera.Chat. Register with NickServ and connect.\n\
-                 [System]: Rocky channels require a registered nick (wiki.rockylinux.org/irc).\n\
-                 [System]: Settings are saved to ~/.config/boulder-relay/settings.conf\n",
-            ),
+            vec![
+                ChatLine {
+                    text: String::from(
+                        "[System]: Ready for Libera.Chat. Register with NickServ and connect.\n",
+                    ),
+                    style: LineStyle::System,
+                },
+                ChatLine {
+                    text: String::from(
+                        "[System]: Rocky channels require a registered nick (wiki.rockylinux.org/irc).\n",
+                    ),
+                    style: LineStyle::System,
+                },
+                ChatLine {
+                    text: String::from(
+                        "[System]: Settings are saved to ~/.config/boulder-relay/settings.conf\n",
+                    ),
+                    style: LineStyle::System,
+                },
+            ],
         );
 
         let channel_box = gtk::Box::new(gtk::Orientation::Vertical, 6);
         let user_box = gtk::Box::new(gtk::Orientation::Vertical, 0);
         let chat_view = gtk::TextView::new();
+        Self::setup_chat_tags(&chat_view);
 
         let mut channels = vec![server_tab.clone()];
         channels.extend(rocky_channels.clone());
@@ -468,10 +510,18 @@ impl SimpleComponent for AppModel {
             settings.favorites.clone()
         };
 
+        let active_channel = if settings.last_channel.is_empty()
+            || !channels.contains(&settings.last_channel)
+        {
+            server_tab.clone()
+        } else {
+            settings.last_channel
+        };
+
         let model = AppModel {
             connection: ConnectionState::Offline,
             status: String::from("Offline"),
-            active_channel: server_tab.clone(),
+            active_channel,
             channels,
             favorite_channels: favorites,
             muted_users: HashMap::new(),
@@ -719,6 +769,7 @@ impl SimpleComponent for AppModel {
                             "{}[System]: Disconnected by user.\n",
                             Self::timestamp_prefix()
                         ),
+                        LineStyle::System,
                     );
                 }
             }
@@ -743,6 +794,7 @@ impl SimpleComponent for AppModel {
                         self.server,
                         self.nickname
                     ),
+                    LineStyle::System,
                 );
             }
 
@@ -750,6 +802,7 @@ impl SimpleComponent for AppModel {
                 self.active_channel = channel;
                 self.show_channel_history();
                 self.refresh_users(&sender);
+                self.persist_settings();
             }
 
             AppInput::JoinChannel(target) => {
@@ -757,7 +810,10 @@ impl SimpleComponent for AppModel {
                     self.channels.push(target.clone());
                     self.chat_histories.insert(
                         target.clone(),
-                        format!("[System]: Tracking {target}\n"),
+                        vec![ChatLine {
+                            text: format!("[System]: Tracking {target}\n"),
+                            style: LineStyle::System,
+                        }],
                     );
                     self.refresh_channels(&sender);
 
@@ -771,6 +827,38 @@ impl SimpleComponent for AppModel {
                 self.active_channel = target;
                 self.show_channel_history();
                 self.refresh_users(&sender);
+                self.persist_settings();
+            }
+
+            AppInput::PartChannel(channel) => {
+                if channel == SERVER_TAB || !channel.starts_with('#') {
+                    return;
+                }
+
+                if let Some(irc_tx) = &self.irc_sender {
+                    let _ = irc_tx.send_part(&channel);
+                }
+
+                self.channels.retain(|c| c != &channel);
+                self.chat_histories.remove(&channel);
+                self.channel_users.remove(&channel);
+                self.muted_users.remove(&channel);
+
+                if self.active_channel == channel {
+                    self.active_channel = String::from(SERVER_TAB);
+                    self.show_channel_history();
+                }
+
+                self.refresh_channels(&sender);
+                self.refresh_users(&sender);
+                self.persist_settings();
+            }
+
+            AppInput::ClearChannel(channel) => {
+                self.chat_histories.insert(channel.clone(), Vec::new());
+                if self.active_channel == channel {
+                    self.chat_view.buffer().set_text("");
+                }
             }
 
             AppInput::ToggleFavorite(channel) => {
@@ -798,6 +886,7 @@ impl SimpleComponent for AppModel {
                             Self::timestamp_prefix(),
                             user
                         ),
+                        LineStyle::System,
                     );
                 } else {
                     list.push(user.clone());
@@ -809,6 +898,7 @@ impl SimpleComponent for AppModel {
                             Self::timestamp_prefix(),
                             user
                         ),
+                        LineStyle::System,
                     );
                 }
 
@@ -827,18 +917,19 @@ impl SimpleComponent for AppModel {
                     self.refresh_channels(&sender);
                 }
 
+                let style = self.message_style(&user, &body);
                 let line = format!(
                     "{}<{}> {}\n",
                     Self::timestamp_prefix(),
                     user,
                     body
                 );
-                self.append_line(&channel, &line);
+                self.append_line(&channel, &line, style);
             }
 
             AppInput::ReceiveServerMessage(body) => {
                 let line = format!("{}{}\n", Self::timestamp_prefix(), body);
-                self.append_line(SERVER_TAB, &line);
+                self.append_line(SERVER_TAB, &line, LineStyle::System);
             }
 
             AppInput::BatchAddUsers { channel, users } => {
@@ -915,7 +1006,7 @@ impl SimpleComponent for AppModel {
                                             self.nickname,
                                             body
                                         );
-                                        self.append_line(target, &line);
+                                        self.append_line(target, &line, LineStyle::SelfMsg);
                                     }
                                 } else {
                                     sender.input(AppInput::JoinChannel(target.to_string()));
@@ -934,8 +1025,26 @@ impl SimpleComponent for AppModel {
                                         Self::timestamp_prefix(),
                                         self.nickname
                                     ),
+                                    LineStyle::System,
                                 );
                             }
+                            return;
+                        }
+                        "/part" => {
+                            let target = parts
+                                .next()
+                                .map(str::to_string)
+                                .unwrap_or_else(|| self.active_channel.clone());
+                            sender.input(AppInput::PartChannel(target));
+                            return;
+                        }
+                        "/clear" => {
+                            sender.input(AppInput::ClearChannel(self.active_channel.clone()));
+                            return;
+                        }
+                        "/help" => {
+                            let channel = self.active_channel.clone();
+                            self.append_line(&channel, HELP_TEXT, LineStyle::System);
                             return;
                         }
                         _ => {}
@@ -949,6 +1058,7 @@ impl SimpleComponent for AppModel {
                             "{}[System]: Select a channel or DM before sending.\n",
                             Self::timestamp_prefix()
                         ),
+                        LineStyle::System,
                     );
                     return;
                 }
@@ -962,7 +1072,7 @@ impl SimpleComponent for AppModel {
                             self.nickname,
                             text
                         );
-                        self.append_line(&channel, &line);
+                        self.append_line(&channel, &line, LineStyle::SelfMsg);
                     }
                 } else {
                     let channel = self.active_channel.clone();
@@ -972,6 +1082,7 @@ impl SimpleComponent for AppModel {
                             "{}[System]: Cannot send message, not connected.\n",
                             Self::timestamp_prefix()
                         ),
+                        LineStyle::System,
                     );
                 }
             }
@@ -980,17 +1091,7 @@ impl SimpleComponent for AppModel {
 }
 
 fn main() {
+    theme::install();
     let app = RelmApp::new("org.Sisyphus.BoulderRelay");
-
-    let provider = gtk::CssProvider::new();
-    provider.load_from_data(GRUVBOX_CSS);
-    if let Some(display) = gtk::gdk::Display::default() {
-        gtk::style_context_add_provider_for_display(
-            &display,
-            &provider,
-            gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
-        );
-    }
-
     app.run::<AppModel>(());
 }

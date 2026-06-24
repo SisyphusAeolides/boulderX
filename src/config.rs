@@ -11,6 +11,7 @@ pub struct Settings {
     pub server: String,
     pub password: String,
     pub favorites: Vec<String>,
+    pub last_channel: String,
 }
 
 impl Default for Settings {
@@ -24,6 +25,7 @@ impl Default for Settings {
                 String::from("#rockylinux"),
                 String::from("#rockylinux-devel"),
             ],
+            last_channel: String::from("#rockylinux-devel"),
         }
     }
 }
@@ -54,6 +56,9 @@ impl Settings {
                 .map(str::to_string)
                 .collect();
         }
+        if let Some(last_channel) = values.remove("last_channel") {
+            settings.last_channel = last_channel;
+        }
 
         settings
     }
@@ -66,11 +71,12 @@ impl Settings {
 
         let favorites = self.favorites.join("|");
         let body = format!(
-            "nickname={}\nserver={}\npassword={}\nfavorites={}\n",
+            "nickname={}\nserver={}\npassword={}\nfavorites={}\nlast_channel={}\n",
             escape_value(&self.nickname),
             escape_value(&self.server),
             escape_value(&self.password),
             escape_value(&favorites),
+            escape_value(&self.last_channel),
         );
         fs::write(path, body)
     }
@@ -137,6 +143,7 @@ mod tests {
             server: String::from("irc.libera.chat"),
             password: String::from("sec\\ret"),
             favorites: vec![String::from("#rockylinux")],
+            last_channel: String::from("#rockylinux-devel"),
         };
         let encoded = format!(
             "nickname={}\npassword={}\n",
