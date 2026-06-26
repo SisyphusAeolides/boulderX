@@ -630,7 +630,7 @@ impl SimpleComponent for AppModel {
                 },
                 ChatLine {
                     text: String::from(
-                        "[System]: #fedora, #fedora-devel, and #rhel-devel require a registered nick.\n",
+                        "[System]: #fedora, #fedora-devel, and #rhel require a registered nick.\n",
                     ),
                     style: LineStyle::System,
                 },
@@ -673,7 +673,7 @@ impl SimpleComponent for AppModel {
                 server_tab.clone(),
                 String::from("#rockylinux-devel"),
                 String::from("#fedora-devel"),
-                String::from("#rhel-devel"),
+                String::from("#rhel"),
             ]
         } else {
             settings.favorites.clone()

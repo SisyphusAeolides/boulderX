@@ -15,7 +15,7 @@
     </p>
     <p>
       Default channels include Rocky Linux (#rockylinux*), Fedora (#fedora,
-      #fedora-devel), and RHEL (#rhel-devel). Settings are saved between
+      #fedora-devel), and RHEL (#rhel). Settings are saved between
       sessions, chat includes timestamps and nick highlights, and slash
       commands such as /join, /part, /clear, and /msg are supported.
     </p>
@@ -49,6 +49,11 @@
   <content_rating type="oars-1.1"/>
 
   <releases>
+    <release version="0.2.6" date="2026-06-26">
+      <description>
+        <p>Fix RHEL default channel to #rhel on Libera.Chat.</p>
+      </description>
+    </release>
     <release version="0.2.5" date="2026-06-26">
       <description>
         <p>Window icon fix, background mode on close, and desktop notifications for IRC messages.</p>

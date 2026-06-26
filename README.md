@@ -27,7 +27,7 @@ On connect, the client joins community channels on `irc.libera.chat`:
 | `#rockylinux-social` | Rocky Linux | Off-topic and social chat |
 | `#fedora` | Fedora | General Fedora support and discussion |
 | `#fedora-devel` | Fedora | Development, packaging, and infrastructure |
-| `#rhel-devel` | RHEL | Enterprise Linux development and engineering |
+| `#rhel` | RHEL | RHEL support and enterprise Linux discussion |
 
 See the [Rocky Linux IRC wiki](https://wiki.rockylinux.org/irc/) and [Fedora communications docs](https://docs.fedoraproject.org/en-US/project/communications/) for registration and channel details.
 

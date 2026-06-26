@@ -27,7 +27,7 @@ impl Default for Settings {
                 String::from("Server"),
                 String::from("#rockylinux-devel"),
                 String::from("#fedora-devel"),
-                String::from("#rhel-devel"),
+                String::from("#rhel"),
             ],
             extra_channels: Vec::new(),
             last_channel: String::from("#fedora-devel"),

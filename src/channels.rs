@@ -38,8 +38,8 @@ pub const DEFAULT_CHANNELS: &[ChannelDef] = &[
         community: Community::Fedora,
     },
     ChannelDef {
-        name: "#rhel-devel",
-        description: "RHEL development and enterprise Linux engineering",
+        name: "#rhel",
+        description: "RHEL support and enterprise Linux discussion",
         community: Community::Fedora,
     },
 ];
@@ -132,7 +132,7 @@ mod tests {
     #[test]
     fn includes_requested_channels() {
         let names: Vec<_> = default_channel_names();
-        for expected in ["#fedora", "#fedora-devel", "#rhel-devel"] {
+        for expected in ["#fedora", "#fedora-devel", "#rhel"] {
             assert!(names.contains(&expected.to_string()), "missing {expected}");
         }
     }
