@@ -1,5 +1,5 @@
 Name:           boulder-relay
-Version:        0.2.4
+Version:        0.2.5
 Release:        1%{?dist}
 Summary:        GTK4 IRC client for Fedora, RHEL, and Rocky Linux on Libera.Chat
 
@@ -54,6 +54,11 @@ appstream-util validate-relax --nonet packaging/org.Sisyphus.BoulderRelay.metain
 %{_metainfodir}/org.Sisyphus.BoulderRelay.metainfo.xml
 
 %changelog
+* Fri Jun 26 2026 Kenny Glowner <sisyphuscode@fedoraproject.org> - 0.2.5-1
+- Set window/taskbar icon and fix StartupWMClass for desktop integration
+- Add background mode on close with desktop notifications for IRC messages
+- Add Quit button and notification/background preferences in settings
+
 * Fri Jun 26 2026 Kenny Glowner <sisyphuscode@fedoraproject.org> - 0.2.4-1
 - Persist user-added channels between sessions
 - Improve join box and /join parsing for arbitrary channels

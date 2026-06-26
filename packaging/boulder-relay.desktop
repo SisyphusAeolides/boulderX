@@ -8,4 +8,4 @@ Type=Application
 Categories=Network;Chat;GTK;
 Keywords=IRC;Fedora;RHEL;Rocky;Libera;Chat;Rust;GTK;Development;
 StartupNotify=true
-StartupWMClass=Boulder Relay
+StartupWMClass=org.Sisyphus.BoulderRelay

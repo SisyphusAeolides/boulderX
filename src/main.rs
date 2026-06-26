@@ -1,5 +1,6 @@
 mod channels;
 mod config;
+mod notify;
 mod theme;
 
 use channels::{Community, COMMUNITY_ORDER};
@@ -17,7 +18,7 @@ const DEFAULT_NICKNAME: &str = "SisyphusCode";
 const DEFAULT_PORT: u16 = 6697;
 const SERVER_TAB: &str = "Server";
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 enum LineStyle {
     Normal,
     SelfMsg,
@@ -34,7 +35,7 @@ struct ChatLine {
 const HELP_TEXT: &str = "Commands: /join chan, /j chan, /part [#chan], /msg nick text, /clear, /nick name, /help\n\
 Join box: type #channel to join, or a nick for a DM. Any channel is supported.\n";
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum ConnectionState {
     Offline,
     Connecting,
@@ -64,6 +65,9 @@ pub enum AppInput {
     UserQuit { user: String },
     SendMessage(String),
     JoinEntry(String),
+    UpdateNotificationsEnabled(bool),
+    UpdateBackgroundOnClose(bool),
+    Quit,
     SaveSettings,
 }
 
@@ -83,6 +87,9 @@ struct AppModel {
     channel_box: gtk::Box,
     user_box: gtk::Box,
     chat_view: gtk::TextView,
+    window: gtk::Window,
+    notifications_enabled: bool,
+    background_on_close: bool,
 }
 
 impl AppModel {
@@ -124,7 +131,22 @@ impl AppModel {
             favorites: self.favorite_channels.clone(),
             extra_channels: self.extra_channels(),
             last_channel: self.active_channel.clone(),
+            notifications_enabled: self.notifications_enabled,
+            background_on_close: self.background_on_close,
         }
+    }
+
+    fn should_notify(&self, channel: &str, user: &str, style: LineStyle) -> bool {
+        if !self.notifications_enabled || user == "System" || style == LineStyle::SelfMsg {
+            return false;
+        }
+
+        let hidden = !self.window.is_visible();
+        let inactive = channel != self.active_channel;
+        let dm = !channels::is_channel_target(channel);
+        let mention = style == LineStyle::Mention;
+
+        hidden || inactive || dm || mention
     }
 
     fn send_irc_join(&self, target: &str) {
@@ -407,9 +429,14 @@ impl SimpleComponent for AppModel {
             set_default_size: (1200, 700),
             add_css_class: "boulder-relay",
 
-            connect_close_request[sender] => move |_| {
+            connect_close_request[sender] => move |window| {
                 sender.input(AppInput::SaveSettings);
-                glib::Propagation::Proceed
+                if model.background_on_close && model.connection == ConnectionState::Connected {
+                    window.set_visible(false);
+                    glib::Propagation::Stop
+                } else {
+                    glib::Propagation::Proceed
+                }
             },
 
             gtk::Paned {
@@ -485,6 +512,29 @@ impl SimpleComponent for AppModel {
                             set_sensitive: model.connection == ConnectionState::Connected,
                             connect_clicked => AppInput::Disconnect,
                         },
+                        gtk::Button {
+                            set_label: "Quit",
+                            add_css_class: "destructive",
+                            connect_clicked => AppInput::Quit,
+                        },
+                    },
+                    gtk::CheckButton {
+                        set_label: Some("Run in background when closed"),
+                        set_active: model.background_on_close,
+                        set_margin_start: 12,
+                        set_margin_end: 12,
+                        connect_toggled[sender] => move |check| {
+                            sender.input(AppInput::UpdateBackgroundOnClose(check.is_active()));
+                        }
+                    },
+                    gtk::CheckButton {
+                        set_label: Some("Desktop notifications"),
+                        set_active: model.notifications_enabled,
+                        set_margin_start: 12,
+                        set_margin_end: 12,
+                        connect_toggled[sender] => move |check| {
+                            sender.input(AppInput::UpdateNotificationsEnabled(check.is_active()));
+                        }
                     },
 
                     gtk::Separator { set_orientation: gtk::Orientation::Horizontal },
@@ -661,6 +711,9 @@ impl SimpleComponent for AppModel {
             channel_box: channel_box.clone(),
             user_box: user_box.clone(),
             chat_view: chat_view.clone(),
+            window: root.clone(),
+            notifications_enabled: settings.notifications_enabled,
+            background_on_close: settings.background_on_close,
         };
 
         let channel_box_ref = &model.channel_box;
@@ -680,6 +733,22 @@ impl SimpleComponent for AppModel {
             AppInput::UpdateNickname(nick) => self.nickname = nick,
             AppInput::UpdateServer(srv) => self.server = srv,
             AppInput::UpdatePassword(pwd) => self.password = pwd,
+            AppInput::UpdateNotificationsEnabled(enabled) => {
+                self.notifications_enabled = enabled;
+                self.persist_settings();
+            }
+            AppInput::UpdateBackgroundOnClose(enabled) => {
+                self.background_on_close = enabled;
+                self.persist_settings();
+            }
+
+            AppInput::Quit => {
+                self.persist_settings();
+                if let Some(irc_tx) = self.irc_sender.take() {
+                    let _ = irc_tx.send_quit("Boulder Relay signing off");
+                }
+                relm4::main_application().quit();
+            }
 
             AppInput::SaveSettings => self.persist_settings(),
 
@@ -1041,6 +1110,10 @@ impl SimpleComponent for AppModel {
                     body
                 );
                 self.append_line(&channel, &line, style);
+
+                if self.should_notify(&channel, &user, style) {
+                    notify::send_message_notification(&channel, &user, &body);
+                }
             }
 
             AppInput::ReceiveServerMessage(body) => {
@@ -1231,7 +1304,8 @@ impl SimpleComponent for AppModel {
 }
 
 fn main() {
-    let app = RelmApp::new("org.Sisyphus.BoulderRelay");
+    let app = RelmApp::new(notify::APP_ID);
     theme::load_css();
+    notify::setup_application_icon();
     app.run::<AppModel>(());
 }

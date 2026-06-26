@@ -49,6 +49,11 @@
   <content_rating type="oars-1.1"/>
 
   <releases>
+    <release version="0.2.5" date="2026-06-26">
+      <description>
+        <p>Window icon fix, background mode on close, and desktop notifications for IRC messages.</p>
+      </description>
+    </release>
     <release version="0.2.4" date="2026-06-26">
       <description>
         <p>Persist custom channels, improve join parsing for any Libera channel, and add Fedora 44 COPR builds.</p>

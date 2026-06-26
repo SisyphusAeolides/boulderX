@@ -13,6 +13,8 @@ pub struct Settings {
     pub favorites: Vec<String>,
     pub extra_channels: Vec<String>,
     pub last_channel: String,
+    pub notifications_enabled: bool,
+    pub background_on_close: bool,
 }
 
 impl Default for Settings {
@@ -29,6 +31,8 @@ impl Default for Settings {
             ],
             extra_channels: Vec::new(),
             last_channel: String::from("#fedora-devel"),
+            notifications_enabled: true,
+            background_on_close: true,
         }
     }
 }
@@ -69,6 +73,12 @@ impl Settings {
         if let Some(last_channel) = values.remove("last_channel") {
             settings.last_channel = last_channel;
         }
+        if let Some(notifications_enabled) = values.remove("notifications_enabled") {
+            settings.notifications_enabled = parse_bool(&notifications_enabled, true);
+        }
+        if let Some(background_on_close) = values.remove("background_on_close") {
+            settings.background_on_close = parse_bool(&background_on_close, true);
+        }
 
         settings
     }
@@ -82,13 +92,15 @@ impl Settings {
         let favorites = self.favorites.join("|");
         let extra_channels = self.extra_channels.join("|");
         let body = format!(
-            "nickname={}\nserver={}\npassword={}\nfavorites={}\nextra_channels={}\nlast_channel={}\n",
+            "nickname={}\nserver={}\npassword={}\nfavorites={}\nextra_channels={}\nlast_channel={}\nnotifications_enabled={}\nbackground_on_close={}\n",
             escape_value(&self.nickname),
             escape_value(&self.server),
             escape_value(&self.password),
             escape_value(&favorites),
             escape_value(&extra_channels),
             escape_value(&self.last_channel),
+            if self.notifications_enabled { "true" } else { "false" },
+            if self.background_on_close { "true" } else { "false" },
         );
         fs::write(path, body)
     }
@@ -117,6 +129,14 @@ fn parse_key_values(content: &str) -> HashMap<String, String> {
             Some((key.trim().to_string(), unescape_value(value.trim())))
         })
         .collect()
+}
+
+fn parse_bool(value: &str, default: bool) -> bool {
+    match value.trim().to_lowercase().as_str() {
+        "1" | "true" | "yes" | "on" => true,
+        "0" | "false" | "no" | "off" => false,
+        _ => default,
+    }
 }
 
 fn escape_value(value: &str) -> String {
@@ -157,6 +177,8 @@ mod tests {
             favorites: vec![String::from("#rockylinux")],
             extra_channels: vec![String::from("#archlinux")],
             last_channel: String::from("#rockylinux-devel"),
+            notifications_enabled: true,
+            background_on_close: false,
         };
         let encoded = format!(
             "nickname={}\npassword={}\n",
