@@ -278,6 +278,6 @@ pub fn attach_adw_window(window: &adw::Window) {
     window.add_css_class("boulder-relay");
     // For adw, we can use AdwHeaderBar but keep custom for Gruvbox
     window.set_titlebar(Some(&build_titlebar()));
-    window.set_title("");
-    window.set_icon_name("boulder-relay");
+    window.set_title(Some(""));
+    window.set_icon_name(Some("boulder-relay"));
 }

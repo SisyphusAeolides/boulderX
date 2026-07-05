@@ -391,7 +391,9 @@ impl AppModel {
             .entry(channel.to_string())
             .or_insert_with(Vec::new);
         history.push(ChatLine {
-            text: line,
+            timestamp: ts.clone(),
+            user: Some(user.to_string()),
+            body: body.to_string(),
             style,
         });
 
@@ -548,7 +550,7 @@ impl AppModel {
                 .halign(gtk::Align::Start)
                 .margin_start(12)
                 .margin_top(4)
-                .add_css_class("channel-section")
+                .css_classes(["channel-section"])
                 .build();
             let row = gtk::ListBoxRow::new();
             row.set_activatable(false);
@@ -590,7 +592,7 @@ impl AppModel {
         let header = gtk::Label::builder()
             .label(format!("{} channels found — type to filter", sorted.len()))
             .halign(gtk::Align::Start)
-            .add_css_class("sidebar-subtitle")
+            .css_classes(["sidebar-subtitle"])
             .build();
         vbox.append(&header);
 
@@ -1142,7 +1144,8 @@ impl SimpleComponent for AppModel {
                 }
             },
 
-            gtk::Paned {
+            #[wrap(Some)]
+            set_content = &gtk::Paned {
                 set_orientation: gtk::Orientation::Horizontal,
                 set_position: 240,
 
@@ -1466,6 +1469,13 @@ impl SimpleComponent for AppModel {
         };
 
         let mut model = AppModel {
+            servers: Vec::new(),
+            current_server: String::new(),
+            senders: HashMap::new(),
+            server_states: HashMap::new(),
+            accounts: HashMap::new(),
+            pending_register_email: None,
+            ignored_users: std::collections::HashSet::new(),
             connection: ConnectionState::Offline,
             status: String::from("Offline"),
             active_channel,
@@ -1894,7 +1904,7 @@ impl SimpleComponent for AppModel {
                                 }
                                 Command::CAP(_, sub, _, params) => {
                                     if is_sasl {
-                                        if sub == irc::proto::caps::CapSubCommand::ACK {
+                                        if sub == irc::proto::CapSubCommand::ACK {
                                             if let Some(exts) = params {
                                                 if exts.contains("sasl") {
                                                     if is_sasl_plain {
@@ -2326,7 +2336,7 @@ impl SimpleComponent for AppModel {
                                     let _ = irc_tx.send_privmsg(&self.active_channel, &full);
                                 }
                                 let me_user = format!("* {}", self.nickname);
-                                self.append_message(&self.active_channel, &me_user, action, LineStyle::SelfMsg);
+                                self.append_message(&self.active_channel, &me_user, &action, LineStyle::SelfMsg);
                             }
                             return;
                         }
@@ -2338,7 +2348,7 @@ impl SimpleComponent for AppModel {
                             if let Some(target) = parts.next() {
                                 let clean = Self::normalized_nick(target);
                                 self.ignored_users.insert(clean.clone());
-                                self.append_line(&self.active_channel, &format!("[System]: Ignoring {}\n", clean), LineStyle::System);
+                                self.append_message(&self.active_channel, "System", &format!("Ignoring {}", clean), LineStyle::System);
                             }
                             return;
                         }
@@ -2346,7 +2356,7 @@ impl SimpleComponent for AppModel {
                             if let Some(target) = parts.next() {
                                 let clean = Self::normalized_nick(target);
                                 self.ignored_users.remove(&clean);
-                                self.append_line(&self.active_channel, &format!("[System]: Unignored {}\n", clean), LineStyle::System);
+                                self.append_message(&self.active_channel, "System", &format!("Unignored {}", clean), LineStyle::System);
                             }
                             return;
                         }

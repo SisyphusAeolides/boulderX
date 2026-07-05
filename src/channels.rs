@@ -51,55 +51,7 @@ pub fn parse_join_entry(raw: &str) -> Option<JoinTarget> {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum JoinTarget {
-    Channel(String),
-    DirectMessage(String),
-}
 
-pub fn is_channel_target(name: &str) -> bool {
-    let name = name.trim();
-    name.starts_with('#')
-        || name.starts_with('&')
-        || name.starts_with('+')
-        || name.starts_with('!')
-}
-
-pub fn normalize_channel_name(raw: &str) -> String {
-    let trimmed = raw.trim();
-    if trimmed.is_empty() {
-        return String::new();
-    }
-    if is_channel_target(trimmed) {
-        trimmed.to_string()
-    } else {
-        format!("#{trimmed}")
-    }
-}
-
-/// Parse a `/join` argument (always treated as a channel).
-pub fn parse_join_command(raw: &str) -> Option<String> {
-    let raw = raw.trim();
-    if raw.is_empty() {
-        None
-    } else {
-        Some(normalize_channel_name(raw))
-    }
-}
-
-/// Parse the sidebar join entry: `#channel` joins a channel, plain text opens a DM.
-pub fn parse_join_entry(raw: &str) -> Option<JoinTarget> {
-    let raw = raw.trim();
-    if raw.is_empty() {
-        return None;
-    }
-
-    if is_channel_target(raw) {
-        Some(JoinTarget::Channel(raw.to_string()))
-    } else {
-        Some(JoinTarget::DirectMessage(raw.to_string()))
-    }
-}
 
 #[cfg(test)]
 mod tests {
