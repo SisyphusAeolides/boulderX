@@ -8,6 +8,7 @@ use futures::prelude::*;
 use adw;
 use gtk::glib::{self, DateTime};
 use gtk::prelude::*;
+use adw::prelude::*;
 use irc::client::prelude::*;
 use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent};
 use std::collections::HashMap;
@@ -561,13 +562,9 @@ impl AppModel {
 
     fn show_channel_list_dialog(&self, results: Vec<(String, u32, String)>, sender: &ComponentSender<Self>) {
         if results.is_empty() {
-            self.append_line(
-                SERVER_TAB,
-                self.timestamp_prefix(),
-                None,
-                "No channels returned by server (or LIST not supported).".to_string(),
-                LineStyle::System,
-            );
+            sender.input(AppInput::ReceiveServerMessage(
+                "No channels returned by server (or LIST not supported).".to_string()
+            ));
             return;
         }
 
@@ -928,8 +925,10 @@ impl AppModel {
         let e_e2 = email_entry.clone();
         let nick_e2 = nick_entry.clone();
         forgot_btn.connect_clicked(move |_| {
-            let email = e_e2.text().to_string().trim();
-            let nick = nick_e2.text().to_string().trim();
+            let email_str = e_e2.text().to_string();
+            let email = email_str.trim();
+            let nick_str = nick_e2.text().to_string();
+            let nick = nick_str.trim();
             if email.is_empty() && nick.is_empty() {
                 status3.set_label("Enter email or nick for recovery.");
                 return;
@@ -974,19 +973,19 @@ impl AppModel {
 
             let change_btn = gtk::Button::with_label("Change Pass");
             let s = sender.clone();
-            let srv_c = srv.clone();
-            let nick_c = acc.nick.clone();
+            let service_c = acc.service.clone();
             change_btn.connect_clicked(move |_| {
                 // Simple: open prompt via input or note
-                s.input(AppInput::SendRawPrivmsg { target: acc.service.clone(), msg: format!("SET PASSWORD <old> <new> (use /msg for now)") });
+                s.input(AppInput::SendRawPrivmsg { target: service_c.clone(), msg: format!("SET PASSWORD <old> <new> (use /msg for now)") });
             });
             row.append(&change_btn);
 
             let ghost_btn = gtk::Button::with_label("Ghost");
             let s2 = sender.clone();
-            let srv_c2 = srv.clone();
+            let nick_c = acc.nick.clone();
+            let service_c2 = acc.service.clone();
             ghost_btn.connect_clicked(move |_| {
-                s2.input(AppInput::SendRawPrivmsg { target: acc.service.clone(), msg: format!("GHOST {} <pass>", nick_c) });
+                s2.input(AppInput::SendRawPrivmsg { target: service_c2.clone(), msg: format!("GHOST {} <pass>", nick_c) });
             });
             row.append(&ghost_btn);
 
@@ -1049,7 +1048,7 @@ impl AppModel {
             let buf = tv_clone.buffer();
             let text = buf.text(&buf.start_iter(), &buf.end_iter(), false);
             if let Some(pos) = text.to_lowercase().find(&query) {
-                let start = buf.iter_at_offset(pos as i32);
+                let mut start = buf.iter_at_offset(pos as i32);
                 let end = buf.iter_at_offset((pos + query.len()) as i32);
                 buf.select_range(&start, &end);
                 tv_clone.scroll_to_iter(&mut start, 0.0, false, 0.0, 0.0);
@@ -1473,9 +1472,6 @@ impl SimpleComponent for AppModel {
             current_server: String::new(),
             senders: HashMap::new(),
             server_states: HashMap::new(),
-            accounts: HashMap::new(),
-            pending_register_email: None,
-            ignored_users: std::collections::HashSet::new(),
             connection: ConnectionState::Offline,
             status: String::from("Offline"),
             active_channel,
@@ -1531,16 +1527,19 @@ impl SimpleComponent for AppModel {
         match message {
             AppInput::UpdateNickname(nick) => {
                 self.nickname = nick;
-                self.sync_account_for_server(&self.server);
+                let srv = self.server.clone();
+                self.sync_account_for_server(&srv);
             },
             AppInput::UpdateServer(srv) => {
-                self.sync_account_for_server(&self.server);
+                let current_srv = self.server.clone();
+                self.sync_account_for_server(&current_srv);
                 self.load_account_for_server(&srv);
                 self.server = srv;
             },
             AppInput::UpdatePassword(pwd) => {
                 self.password = pwd;
-                self.sync_account_for_server(&self.server);
+                let srv = self.server.clone();
+                self.sync_account_for_server(&srv);
             },
             AppInput::UpdateNotificationsEnabled(enabled) => {
                 self.notifications_enabled = enabled;
@@ -1674,7 +1673,8 @@ impl SimpleComponent for AppModel {
             AppInput::UpdateAccountService(service) => {
                 if !service.is_empty() {
                     self.account_service = service;
-                    self.sync_account_for_server(&self.server);
+                let srv = self.server.clone();
+                self.sync_account_for_server(&srv);
                     self.persist_settings();
                 }
             }
@@ -1682,7 +1682,8 @@ impl SimpleComponent for AppModel {
             AppInput::UpdateAuthMethod(method) => {
                 if !method.is_empty() {
                     self.auth_method = method;
-                    self.sync_account_for_server(&self.server);
+                let srv = self.server.clone();
+                self.sync_account_for_server(&srv);
                     self.persist_settings();
                 }
             }
@@ -1712,7 +1713,8 @@ impl SimpleComponent for AppModel {
 
             AppInput::SwitchServer(srv) => {
                 if self.servers.contains(&srv) {
-                    self.sync_account_for_server(&self.current_server);
+                let curr = self.current_server.clone();
+                self.sync_account_for_server(&curr);
                     self.current_server = srv.clone();
                     self.server = srv.clone();
                     self.load_account_for_server(&srv);
@@ -2289,7 +2291,8 @@ impl SimpleComponent for AppModel {
                                 if !body.is_empty() {
                                     if let Some(irc_tx) = &self.irc_sender {
                                         let _ = irc_tx.send_privmsg(target, body);
-                                        self.append_message(target, &self.nickname, body, LineStyle::SelfMsg);
+                                        let my_nick = self.nickname.clone();
+                        self.append_message(target, &my_nick, body, LineStyle::SelfMsg);
                                     }
                                 } else {
                                     sender.input(AppInput::JoinChannel(target.to_string()));
@@ -2336,7 +2339,8 @@ impl SimpleComponent for AppModel {
                                     let _ = irc_tx.send_privmsg(&self.active_channel, &full);
                                 }
                                 let me_user = format!("* {}", self.nickname);
-                                self.append_message(&self.active_channel, &me_user, &action, LineStyle::SelfMsg);
+                                let chan = self.active_channel.clone();
+                                self.append_message(&chan, &me_user, &action, LineStyle::SelfMsg);
                             }
                             return;
                         }
@@ -2348,7 +2352,8 @@ impl SimpleComponent for AppModel {
                             if let Some(target) = parts.next() {
                                 let clean = Self::normalized_nick(target);
                                 self.ignored_users.insert(clean.clone());
-                                self.append_message(&self.active_channel, "System", &format!("Ignoring {}", clean), LineStyle::System);
+                                let chan = self.active_channel.clone();
+                                self.append_message(&chan, "System", &format!("Ignoring {}", clean), LineStyle::System);
                             }
                             return;
                         }
@@ -2356,7 +2361,8 @@ impl SimpleComponent for AppModel {
                             if let Some(target) = parts.next() {
                                 let clean = Self::normalized_nick(target);
                                 self.ignored_users.remove(&clean);
-                                self.append_message(&self.active_channel, "System", &format!("Unignored {}", clean), LineStyle::System);
+                                let chan = self.active_channel.clone();
+                                self.append_message(&chan, "System", &format!("Unignored {}", clean), LineStyle::System);
                             }
                             return;
                         }
@@ -2378,7 +2384,8 @@ impl SimpleComponent for AppModel {
                 if let Some(irc_tx) = &self.irc_sender {
                     if irc_tx.send_privmsg(&self.active_channel, text).is_ok() {
                         let channel = self.active_channel.clone();
-                        self.append_message(&channel, &self.nickname, text, LineStyle::SelfMsg);
+                        let my_nick = self.nickname.clone();
+                        self.append_message(&channel, &my_nick, text, LineStyle::SelfMsg);
                     }
                 } else {
                     let channel = self.active_channel.clone();
