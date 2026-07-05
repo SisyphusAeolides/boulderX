@@ -131,7 +131,7 @@ struct AppModel {
     channel_box: gtk::ListBox,
     user_box: gtk::ListBox,
     chat_view: gtk::TextView,
-    window: gtk::ApplicationWindow,
+    window: adw::Window,
     notifications_enabled: bool,
     background_on_close: bool,
     channel_filter: String,
@@ -1129,7 +1129,7 @@ impl SimpleComponent for AppModel {
     type Output = ();
 
     view! {
-        gtk::ApplicationWindow {
+        adw::Window {
             set_default_size: (1200, 700),
             add_css_class: "boulder-relay",
 
@@ -1144,12 +1144,16 @@ impl SimpleComponent for AppModel {
             },
 
             #[wrap(Some)]
-            set_child = &gtk::Paned {
-                set_orientation: gtk::Orientation::Horizontal,
-                set_position: 240,
+            set_content = &adw::ToolbarView {
+                add_top_bar = &theme::build_titlebar(),
 
                 #[wrap(Some)]
-                set_start_child = &gtk::Box {
+                set_content = &gtk::Paned {
+                    set_orientation: gtk::Orientation::Horizontal,
+                    set_position: 240,
+
+                    #[wrap(Some)]
+                    set_start_child = &gtk::Box {
                     set_orientation: gtk::Orientation::Vertical, set_spacing: 12, set_width_request: 200,
                     add_css_class: "sidebar", set_margin_all: 0,
 

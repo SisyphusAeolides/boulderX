@@ -269,7 +269,6 @@ pub fn build_titlebar() -> gtk::HeaderBar {
 
 pub fn attach_window(window: &gtk::Window) {
     window.add_css_class("boulder-relay");
-    window.set_titlebar(Some(&build_titlebar()));
     window.set_title(Some(""));
     window.set_icon_name(Some("boulder-relay"));
 }
