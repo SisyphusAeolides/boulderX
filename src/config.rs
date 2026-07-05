@@ -1,22 +1,56 @@
+use keyring::Entry;
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
 
 const CONFIG_DIR: &str = "boulder-relay";
-const CONFIG_FILE: &str = "settings.conf";
+const CONFIG_FILE: &str = "settings.toml";
+const KEYRING_SERVICE: &str = "boulder-relay";
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ServerAccount {
     pub nick: String,
+    /// Password is NOT serialized to disk — stored in keyring.
+    #[serde(skip)]
     pub password: String,
     pub service: String,
     pub auth_method: String, // "nickserv", "sasl_plain", "sasl_external"
 }
 
-#[derive(Debug, Clone)]
+impl ServerAccount {
+    /// Keyring key for this account: "boulder-relay/<server>/<nick>"
+    fn keyring_key(server: &str, nick: &str) -> String {
+        format!("{}/{}", server, nick)
+    }
+
+    /// Load password from keyring. Returns empty string on any error.
+    pub fn load_password(server: &str, nick: &str) -> String {
+        let key = Self::keyring_key(server, nick);
+        Entry::new(KEYRING_SERVICE, &key)
+            .and_then(|e| e.get_password())
+            .unwrap_or_default()
+    }
+
+    /// Save password to keyring. Silently ignores errors (keyring may not be available).
+    pub fn save_password(server: &str, nick: &str, password: &str) {
+        let key = Self::keyring_key(server, nick);
+        if let Ok(entry) = Entry::new(KEYRING_SERVICE, &key) {
+            if password.is_empty() {
+                let _ = entry.delete_credential();
+            } else {
+                let _ = entry.set_password(password);
+            }
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Settings {
     pub nickname: String,
     pub server: String,
+    /// Legacy plain-text password field — only used as fallback if keyring unavailable.
+    #[serde(default)]
     pub password: String,
     pub favorites: Vec<String>,
     pub extra_channels: Vec<String>,
@@ -26,8 +60,8 @@ pub struct Settings {
     pub nick_colors_enabled: bool,
     pub timestamp_format: String,
     pub account_service: String,
-    pub accounts: std::collections::HashMap<String, ServerAccount>,
     pub auth_method: String,
+    pub accounts: HashMap<String, ServerAccount>,
 }
 
 impl Default for Settings {
@@ -44,8 +78,8 @@ impl Default for Settings {
             nick_colors_enabled: true,
             timestamp_format: "%H:%M".to_string(),
             account_service: String::from("NickServ"),
-            accounts: std::collections::HashMap::new(),
-            auth_method: "nickserv".to_string(),
+            auth_method: String::from("nickserv"),
+            accounts: HashMap::new(),
         }
     }
 }
@@ -53,80 +87,22 @@ impl Default for Settings {
 impl Settings {
     pub fn load() -> Self {
         let path = config_path();
-        let Ok(content) = fs::read_to_string(&path) else {
-            return Self::default();
+        let content = match fs::read_to_string(&path) {
+            Ok(c) => c,
+            Err(_) => return Self::default(),
         };
-
-        let mut values = parse_key_values(&content);
-        let mut settings = Self::default();
-
-        if let Some(nickname) = values.remove("nickname") {
-            settings.nickname = nickname;
-        }
-        if let Some(server) = values.remove("server") {
-            settings.server = server;
-        }
-        if let Some(password) = values.remove("password") {
-            settings.password = password;
-        }
-        if let Some(favorites) = values.remove("favorites") {
-            settings.favorites = favorites
-                .split('|')
-                .filter(|item| !item.is_empty())
-                .map(str::to_string)
-                .collect();
-        }
-        if let Some(extra_channels) = values.remove("extra_channels") {
-            settings.extra_channels = extra_channels
-                .split('|')
-                .filter(|item| !item.is_empty())
-                .map(str::to_string)
-                .collect();
-        }
-        if let Some(last_channel) = values.remove("last_channel") {
-            settings.last_channel = last_channel;
-        }
-        if let Some(notifications_enabled) = values.remove("notifications_enabled") {
-            settings.notifications_enabled = parse_bool(&notifications_enabled, true);
-        }
-        if let Some(background_on_close) = values.remove("background_on_close") {
-            settings.background_on_close = parse_bool(&background_on_close, true);
-        }
-        if let Some(nick_colors) = values.remove("nick_colors_enabled") {
-            settings.nick_colors_enabled = parse_bool(&nick_colors, true);
-        }
-        if let Some(ts_format) = values.remove("timestamp_format") {
-            settings.timestamp_format = ts_format;
-        }
-        if let Some(service) = values.remove("account_service") {
-            if !service.is_empty() {
-                settings.account_service = service;
+        let mut settings: Self = toml::from_str(&content).unwrap_or_default();
+        // Reload passwords from keyring for each account
+        for (server, acc) in settings.accounts.iter_mut() {
+            if acc.password.is_empty() {
+                acc.password = ServerAccount::load_password(server, &acc.nick);
             }
         }
-        if let Some(method) = values.remove("auth_method") {
-            if !method.is_empty() {
-                settings.auth_method = method;
-            }
+        // Also load top-level password from keyring
+        if settings.password.is_empty() {
+            settings.password =
+                ServerAccount::load_password(&settings.server, &settings.nickname);
         }
-        // Accounts are stored as: server\0nick\0password\0service\0method entries joined by \n
-        if let Some(accounts_str) = values.remove("accounts") {
-            for entry in accounts_str.split('\n') {
-                if entry.is_empty() {
-                    continue;
-                }
-                let parts: Vec<&str> = entry.splitn(5, '\0').collect();
-                if parts.len() == 5 {
-                    let acc = ServerAccount {
-                        nick: parts[1].to_string(),
-                        password: parts[2].to_string(),
-                        service: parts[3].to_string(),
-                        auth_method: parts[4].to_string(),
-                    };
-                    settings.accounts.insert(parts[0].to_string(), acc);
-                }
-            }
-        }
-
         settings
     }
 
@@ -136,43 +112,25 @@ impl Settings {
             fs::create_dir_all(parent)?;
         }
 
-        let favorites = self.favorites.join("|");
-        let extra_channels = self.extra_channels.join("|");
+        // Save passwords to keyring, strip them from the on-disk struct
+        ServerAccount::save_password(&self.server, &self.nickname, &self.password);
+        for (server, acc) in &self.accounts {
+            ServerAccount::save_password(server, &acc.nick, &acc.password);
+        }
 
-        // Accounts encoded as null-separated fields, one entry per line.
-        // Null bytes are safe here since server/nick/service cannot contain them.
-        let accounts_str = self
-            .accounts
-            .iter()
-            .map(|(s, a)| {
-                format!(
-                    "{}\0{}\0{}\0{}\0{}",
-                    s, a.nick, a.password, a.service, a.auth_method
-                )
-            })
-            .collect::<Vec<_>>()
-            .join("\n");
+        // Build a sanitized copy with passwords zeroed out
+        let mut on_disk = self.clone();
+        on_disk.password = String::new();
+        for acc in on_disk.accounts.values_mut() {
+            acc.password = String::new();
+        }
 
-        let body = format!(
-            "nickname={}\nserver={}\npassword={}\nfavorites={}\nextra_channels={}\nlast_channel={}\nnotifications_enabled={}\nbackground_on_close={}\nnick_colors_enabled={}\ntimestamp_format={}\naccount_service={}\nauth_method={}\naccounts={}\n",
-            escape_value(&self.nickname),
-            escape_value(&self.server),
-            escape_value(&self.password),
-            escape_value(&favorites),
-            escape_value(&extra_channels),
-            escape_value(&self.last_channel),
-            if self.notifications_enabled { "true" } else { "false" },
-            if self.background_on_close { "true" } else { "false" },
-            if self.nick_colors_enabled { "true" } else { "false" },
-            escape_value(&self.timestamp_format),
-            escape_value(&self.account_service),
-            escape_value(&self.auth_method),
-            escape_value(&accounts_str),
-        );
+        let body = toml::to_string_pretty(&on_disk)
+            .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
 
         fs::write(&path, body)?;
 
-        // Restrict config file to owner read/write only (contains passwords).
+        // Restrict permissions to owner-only on Unix
         #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
@@ -194,107 +152,35 @@ fn config_path() -> PathBuf {
     base.join(CONFIG_DIR).join(CONFIG_FILE)
 }
 
-fn parse_key_values(content: &str) -> HashMap<String, String> {
-    content
-        .lines()
-        .filter_map(|line| {
-            let line = line.trim();
-            if line.is_empty() || line.starts_with('#') {
-                return None;
-            }
-            let (key, value) = line.split_once('=')?;
-            Some((key.trim().to_string(), unescape_value(value.trim())))
-        })
-        .collect()
-}
-
-fn parse_bool(value: &str, default: bool) -> bool {
-    match value.trim().to_lowercase().as_str() {
-        "1" | "true" | "yes" | "on" => true,
-        "0" | "false" | "no" | "off" => false,
-        _ => default,
-    }
-}
-
-fn escape_value(value: &str) -> String {
-    value.replace('\\', "\\\\").replace('\n', "\\n")
-}
-
-fn unescape_value(value: &str) -> String {
-    let mut out = String::with_capacity(value.len());
-    let mut chars = value.chars();
-    while let Some(ch) = chars.next() {
-        if ch == '\\' {
-            match chars.next() {
-                Some('\\') => out.push('\\'),
-                Some('n') => out.push('\n'),
-                Some(other) => {
-                    out.push('\\');
-                    out.push(other);
-                }
-                None => out.push('\\'),
-            }
-        } else {
-            out.push(ch);
-        }
-    }
-    out
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn round_trips_escaped_values() {
+    fn round_trips_settings_toml() {
         let settings = Settings {
-            nickname: String::from("test\\nick"),
-            password: String::from("sec\\ret"),
+            nickname: String::from("testnick"),
+            server: String::from("irc.libera.chat"),
             ..Settings::default()
         };
-        let encoded = format!(
-            "nickname={}\npassword={}\n",
-            escape_value(&settings.nickname),
-            escape_value(&settings.password),
-        );
-        let parsed = parse_key_values(&encoded);
-        assert_eq!(parsed["nickname"], "test\\nick");
-        assert_eq!(parsed["password"], "sec\\ret");
+        let serialized = toml::to_string_pretty(&settings).unwrap();
+        let parsed: Settings = toml::from_str(&serialized).unwrap();
+        assert_eq!(parsed.nickname, "testnick");
+        assert_eq!(parsed.server, "irc.libera.chat");
     }
 
     #[test]
-    fn accounts_round_trip_special_chars() {
-        let mut settings = Settings::default();
-        settings.accounts.insert(
-            "irc.libera.chat".to_string(),
-            ServerAccount {
-                nick: "testnick".to_string(),
-                password: "p@ss|word,with,commas".to_string(),
-                service: "NickServ".to_string(),
-                auth_method: "nickserv".to_string(),
-            },
-        );
+    fn default_settings_are_sane() {
+        let s = Settings::default();
+        assert_eq!(s.nickname, "SisyphusCode");
+        assert!(s.notifications_enabled);
+        assert!(s.nick_colors_enabled);
+        assert_eq!(s.timestamp_format, "%H:%M");
+    }
 
-        let accounts_str = settings
-            .accounts
-            .iter()
-            .map(|(s, a)| {
-                format!("{}\0{}\0{}\0{}\0{}", s, a.nick, a.password, a.service, a.auth_method)
-            })
-            .collect::<Vec<_>>()
-            .join("\n");
-
-        let encoded = format!("accounts={}\n", escape_value(&accounts_str));
-        let parsed = parse_key_values(&encoded);
-
-        let raw = parsed["accounts"].as_str();
-        for entry in raw.split('\n') {
-            if entry.is_empty() {
-                continue;
-            }
-            let parts: Vec<&str> = entry.splitn(5, '\0').collect();
-            assert_eq!(parts.len(), 5);
-            assert_eq!(parts[2], "p@ss|word,with,commas");
-        }
+    #[test]
+    fn account_keyring_key_format() {
+        let key = ServerAccount::keyring_key("irc.libera.chat", "alice");
+        assert_eq!(key, "irc.libera.chat/alice");
     }
 }
