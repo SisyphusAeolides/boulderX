@@ -131,7 +131,7 @@ struct AppModel {
     channel_box: gtk::ListBox,
     user_box: gtk::ListBox,
     chat_view: gtk::TextView,
-    window: adw::Window,
+    window: gtk::ApplicationWindow,
     notifications_enabled: bool,
     background_on_close: bool,
     channel_filter: String,
@@ -1144,7 +1144,7 @@ impl SimpleComponent for AppModel {
             },
 
             #[wrap(Some)]
-            set_content = &gtk::Paned {
+            set_child = &gtk::Paned {
                 set_orientation: gtk::Orientation::Horizontal,
                 set_position: 240,
 
