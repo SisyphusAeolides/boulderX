@@ -1509,7 +1509,8 @@ impl SimpleComponent for AppModel {
             pending_register_email: None,
             ignored_users: std::collections::HashSet::new(),
         };
-        model.load_account_for_server(&model.server);
+        let srv_init = model.server.clone();
+        model.load_account_for_server(&srv_init);
 
         let channel_box_ref = &model.channel_box;
         let user_box_ref = &model.user_box;
