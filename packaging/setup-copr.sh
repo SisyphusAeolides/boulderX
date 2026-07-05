@@ -26,7 +26,6 @@ COMMITTISH="${COPR_COMMIT:-main}"
 DISABLE_OLD=false
 
 COPR_CHROOTS=(
-    epel-9-x86_64
     epel-10-x86_64
     centos-stream-10-x86_64
     fedora-44-x86_64
