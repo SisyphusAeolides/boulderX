@@ -1376,7 +1376,7 @@ impl SimpleComponent for AppModel {
                             set_vexpand: true, set_hexpand: true, set_propagate_natural_height: true,
                             #[local_ref] chat_view_ref -> gtk::TextView {
                                 set_editable: false,
-                                set_cursor_visible: false,
+                                set_cursor_visible: true,
                                 set_wrap_mode: gtk::WrapMode::Word,
                                 set_vexpand: true,
                             }
