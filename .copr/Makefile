@@ -3,6 +3,8 @@
 VERSION ?= 0.3.0
 
 srpm:
+	@mkdir -p .copr
+	@echo "VERSION=$(VERSION)" > .copr/version.txt
 	@set -euo pipefail; \
 	STAGING=$$(mktemp -d); \
 	SRC_DIR="$$STAGING/boulder-relay-$(VERSION)"; \
