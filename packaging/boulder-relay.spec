@@ -39,7 +39,6 @@ install -Dm755 target/release/boulder-relay %{buildroot}%{_bindir}/boulder-relay
 install -Dm644 packaging/boulder-relay.desktop %{buildroot}%{_datadir}/applications/boulder-relay.desktop
 install -Dm644 assets/boulder-relay-128.png %{buildroot}%{_datadir}/icons/hicolor/128x128/apps/boulder-relay.png
 install -Dm644 assets/boulder-relay-256.png %{buildroot}%{_datadir}/icons/hicolor/256x256/apps/boulder-relay.png
-install -Dm644 assets/boulder-relay.svg %{buildroot}%{_datadir}/icons/hicolor/scalable/apps/boulder-relay.svg
 install -Dm644 packaging/org.Sisyphus.BoulderRelay.metainfo.xml %{buildroot}%{_metainfodir}/org.Sisyphus.BoulderRelay.metainfo.xml
 
 %check
@@ -53,7 +52,6 @@ appstream-util validate-relax --nonet packaging/org.Sisyphus.BoulderRelay.metain
 %{_datadir}/applications/boulder-relay.desktop
 %{_datadir}/icons/hicolor/128x128/apps/boulder-relay.png
 %{_datadir}/icons/hicolor/256x256/apps/boulder-relay.png
-%{_datadir}/icons/hicolor/scalable/apps/boulder-relay.svg
 %{_metainfodir}/org.Sisyphus.BoulderRelay.metainfo.xml
 
 %changelog
