@@ -95,7 +95,7 @@ if copr-cli list-packages "${OWNER}/${PROJECT}" --output-format json \
         --clone-url "${CLONE_URL}" \
         --commit "${COMMITTISH}" \
         --spec "${SPEC}" \
-        --method rpkg \
+        --method make_srpm \
         --webhook-rebuild on
 else
     echo "==> Adding SCM package ${PACKAGE}..."
@@ -104,7 +104,7 @@ else
         --clone-url "${CLONE_URL}" \
         --commit "${COMMITTISH}" \
         --spec "${SPEC}" \
-        --method rpkg \
+        --method make_srpm \
         --webhook-rebuild on
 fi
 
@@ -113,7 +113,7 @@ BUILD_ID="$(copr-cli buildscm "${OWNER}/${PROJECT}" \
     --clone-url "${CLONE_URL}" \
     --commit "${COMMITTISH}" \
     --spec "${SPEC}" \
-    --method rpkg \
+    --method make_srpm \
     "${CHROOT_ARGS[@]}" \
     --nowait \
     | awk '/Created Build/{print $3}' | tr -d '[:space:]')"
