@@ -1,13 +1,22 @@
 [package]
 name = "boulder-relay"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2021"
 
 [dependencies]
 relm4 = { version = "0.9", default-features = false, features = ["macros"] }
 gtk = { package = "gtk4", version = "0.9", features = ["v4_14"] }
 adw = { package = "libadwaita", version = "0.7", features = ["v1_4"] }
-tokio = { version = "1.32", features = ["full"] }
+tokio = { version = "1", features = ["full"] }
 irc = "0.15"
-futures = "0.3.32"
-base64 = "0.21"
+futures = "0.3"
+base64 = "0.22"
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"
+keyring = "2"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+strip = true
+codegen-units = 1
