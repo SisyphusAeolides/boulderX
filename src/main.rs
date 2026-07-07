@@ -1566,7 +1566,7 @@ impl SimpleComponent for AppModel {
                         }
                         "/nick" => {
                             if let Some(nick) = parts.next() {
-                                if let Some(irc_tx) = &self.irc_sender { let _ = irc_tx.send(Message::from(format!("NICK {}", nick))); }
+                                if let Some(irc_tx) = &self.irc_sender { let _ = irc_tx.send(Message::from(format!("NICK {}", nick).as_str())); }
                                 self.nickname = nick.to_string();
                                 self.persist_settings();
                             }
