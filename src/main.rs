@@ -134,26 +134,7 @@ struct AppModel {
     mention_counts: HashMap<String, u32>,
     chat_histories: HashMap<String, Vec<ChatLine>>,
     channel_users: HashMap<String, Vec<String>>,
-    irc_sender: Option<irc::client::Sender>,
-    nickname: String,
-    server: String,
-    password: String,
-    channel_box: gtk::ListBox,
-    user_box: gtk::ListBox,
-    chat_view: gtk::TextView,
-    window: gtk::Window,
-    notifications_enabled: bool,
-    background_on_close: bool,
-    channel_filter: String,
-    channel_list_results: Vec<(String, u32, String)>,
-    channel_topics: HashMap<String, String>,
-    nick_colors_enabled: bool,
-    timestamp_format: String,
-    account_service: String,
-    auth_method: String,
-    accounts: HashMap<String, config::ServerAccount>,
-    pending_register_email: Option<String>,
-}
+    irc_sender: Option<irc::client::Sender>,\n    nickname: String,\n    server: String,\n    password: String,\n    channel_box: gtk::ListBox,\n    user_box: gtk::ListBox,\n    chat_view: gtk::TextView,\n    window: gtk::Window,\n    notifications_enabled: bool,\n    background_on_close: bool,\n    channel_filter: String,\n    channel_list_results: Vec<(String, u32, String)>,\n    channel_topics: HashMap<String, String>,\n    nick_colors_enabled: bool,\n    timestamp_format: String,\n    account_service: String,\n    auth_method: String,\n    accounts: HashMap<String, config::ServerAccount>,\n    pending_register_email: Option<String>,\n}
 
 impl AppModel {
     fn normalized_nick(user: &str) -> String {
@@ -810,9 +791,16 @@ impl SimpleComponent for AppModel {
                     set_shrink_end_child: false,
 
                     #[wrap(Some)]
-                    set_start_child = &gtk::Box {
-                    set_orientation: gtk::Orientation::Vertical, set_spacing: 12, set_width_request: 200, set_hexpand: true, set_vexpand: true,
-                    add_css_class: "sidebar", set_margin_all: 0,
+                    set_start_child = &gtk::ScrolledWindow {
+                        set_vscrollbar_policy: gtk::PolicyType::Automatic,
+                        set_hscrollbar_policy: gtk::PolicyType::Never,
+                        set_min_content_height: 400,
+                        set_vexpand: true,
+                        
+                        #[wrap(Some)]
+                        set_child = &gtk::Box {
+                            set_orientation: gtk::Orientation::Vertical, set_spacing: 12, set_width_request: 200, set_hexpand: true, set_vexpand: true,
+                            add_css_class: "sidebar", set_margin_all: 0,
 
                     gtk::Label { set_label: "BOULDER RELAY", add_css_class: "sidebar-title", set_margin_top: 16 },
                     gtk::Label { set_label: "GTK4 IRC Client â�� any network, any channel", set_margin_start: 12, set_margin_end: 12 },
@@ -904,6 +892,7 @@ impl SimpleComponent for AppModel {
                     gtk::ScrolledWindow {
                         set_vexpand: true, set_hexpand: true,
                         #[local_ref] channel_box_ref -> gtk::ListBox {}
+                    }
                     }
                 },
 
