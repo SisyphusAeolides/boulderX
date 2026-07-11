@@ -4,9 +4,9 @@ A fast, clean GTK4 + libadwaita IRC client written in **100% Rust** using [relm4
 
 Named for the Sisyphus myth — the conversation you keep pushing uphill.
 
-**The best IRC client for modern distros**: Built for Sisyphus Linux (Gentoo + Catalyst) and any Rust-loving desktop. Supports multiple servers concurrently, modern auth (SASL), per-network accounts, rich UI, and everything you need for daily use without leaving your terminal-less workflow.
+**The best IRC client for modern distros**: Built for Arch-based systems and any Rust-loving desktop. Supports multiple servers concurrently, modern auth (SASL), per-network accounts, rich UI, and everything you need for daily use without leaving your terminal-less workflow.
 
-Uses the Sisyphus logo and branding. Fully generic — no distro defaults.
+Fully generic — no distro defaults.
 
 ## Features
 
@@ -24,7 +24,6 @@ Uses the Sisyphus logo and branding. Fully generic — no distro defaults.
 - **Preferences & Theming**: Nick colors, timestamps, auth method, theme picker (Gruvbox, Sisyphus Blue, Adwaita). Improved CSS with Sisyphus accents, density, fonts.
 - **Logs & Search**: Built-in log viewer with full-text search across history. Auto-saves logs.
 - **Rich UI**: libadwaita + Gruvbox, tray/minimize to background support, spellcheck placeholder in input, IRCv3 metadata basics (typing hints via caps).
-- Sisyphus-specific: Logo, branding in titles/help, distro links.
 - Fully generic — the ultimate Rust IRC client for any distro or desktop.
 
 ## Quick start
@@ -61,25 +60,19 @@ The icon is the official Sisyphus logo.
 - Auto-reconnect, /ignore, per-channel rules.
 - Tray + background mode.
 - Theme picker in Preferences.
-- Sisyphus branding throughout.
 
 ## Install
 
-### Gentoo / Sisyphus Linux (recommended for this project)
-
-Add the Sisyphus overlay (or your local portage overlay) and:
+### Arch Linux
 
 ```bash
-emerge net-irc/boulder-relay   # or -9999 for live
+sudo pacman -S boulder-relay
 ```
 
-See the ebuild in the Sisyphus-Linux portage overlay for exact deps and USE.
-
-### From COPR (Fedora / EL)
+Or from AUR:
 
 ```bash
-sudo dnf copr enable sisyphuscode/boulder-relay
-sudo dnf install boulder-relay
+yay -S boulder-relay-git
 ```
 
 ### From source
@@ -88,29 +81,29 @@ sudo dnf install boulder-relay
 cargo run
 ```
 
-For release RPM (vendored):
+### From source (release build)
 
 ```bash
-./packaging/build-rpm.sh
+cargo build --release
+./target/release/boulder-relay
 ```
 
-## Development (Gentoo-friendly)
+## Development
 
-On Gentoo:
+On Arch Linux:
 
 ```bash
-emerge -av dev-lang/rust gui-libs/libadwaita:1 dev-libs/openssl
+sudo pacman -S rust gtk4 libadwaita openssl
 cargo run
 ```
 
-Modern stack. Supports multi-server, SASL, logs, theming. Run with your Catalyst-built env for full Sisyphus integration. Gruvbox + Sisyphus accents on Adwaita.
+Modern stack. Supports multi-server, SASL, logs, theming. Gruvbox dark theme on Adwaita.
 
 ## Packaging notes
 
 - Full feature set packaged: multi-server, SASL, logs, account tools, modern UI.
-- Icons: Sisyphus logo at multiple sizes.
-- Requires libadwaita. Primary target for Sisyphus Catalyst ISOs and Portage.
-- The ultimate Rust IRC experience for your distro.
+- Icons at multiple sizes (128x128, 256x256).
+- Requires libadwaita and gtk4. Works on any modern Linux distribution.
 
 ## License
 

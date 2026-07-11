@@ -19,8 +19,7 @@ impl ServerAccount {
         String::new()
     }
 
-    pub fn save_password(_server: &str, _nick: &str, _password: &str) {
-    }
+    pub fn save_password(_server: &str, _nick: &str, _password: &str) {}
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -43,7 +42,7 @@ pub struct Settings {
 impl Default for Settings {
     fn default() -> Self {
         Self {
-            nickname: String::from("SisyphusCode"),
+            nickname: String::new(),
             server: String::from("irc.libera.chat"),
             password: String::new(),
             favorites: vec![String::from("Server")],
@@ -122,7 +121,7 @@ mod tests {
     #[test]
     fn default_settings_are_sane() {
         let s = Settings::default();
-        assert_eq!(s.nickname, "SisyphusCode");
+        assert_eq!(s.nickname, "");
         assert!(s.notifications_enabled);
         assert!(s.nick_colors_enabled);
         assert_eq!(s.timestamp_format, "%H:%M");
