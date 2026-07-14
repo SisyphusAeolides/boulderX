@@ -1,6 +1,6 @@
 Name:           boulderX
 Version:        0.6.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        GTK4 + libadwaita IRC/Matrix client in Rust — Element X-style UI
 
 License:        GPL-2.0-or-later

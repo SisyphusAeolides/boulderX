@@ -38,7 +38,7 @@ const CSS: &str = r#"
 .composer-send:hover { background-color: #83a598; }
 
 .users-panel { background-color: #282828; border-left: 1px solid #3c3836; min-width: 160px; }
-.user-btn { background: transparent; border: none; color: #ebdbb2; font-size: 13px; text-align: left; padding: 3px 6px; border-radius: 4px; }
+.user-btn { background: transparent; border: none; color: #ebdbb2; font-size: 13px; padding: 3px 6px; border-radius: 4px; }
 .user-btn:hover { background-color: #3c3836; }
 .muted-user { opacity: 0.4; text-decoration: line-through; }
 .mute-btn { background: transparent; border: none; font-size: 13px; padding: 2px 4px; border-radius: 4px; color: #928374; }

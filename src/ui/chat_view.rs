@@ -6,7 +6,7 @@ pub const NICK_COLORS: [&str; 8] = [
     "#fe8019", "#8ec07c", "#fb4934", "#d79921",
 ];
 
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum LineStyle {
     Normal,
     SelfMsg,
