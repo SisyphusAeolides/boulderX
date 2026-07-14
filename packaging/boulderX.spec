@@ -58,6 +58,11 @@ appstream-util validate-relax --nonet packaging/org.Sisyphus.BoulderX.metainfo.x
 %{_metainfodir}/org.Sisyphus.BoulderX.metainfo.xml
 
 %changelog
+* Tue Jul 14 2026 Kenny Glowner <sisyphuscode@fedoraproject.org> - 0.6.0-2
+- Restore full ApplicationWindow UI (sidebar, chat, composer, header)
+- Fix blank window caused by skeletal AppModel view rewrite
+- Drop invalid GTK CSS text-align property
+
 * Tue Jul 14 2026 Kenny Glowner <sisyphuscode@fedoraproject.org> - 0.6.0-1
 - Rename project from boulder-relay to boulderX
 - Add Matrix protocol support (matrix-sdk 0.10, E2E, SQLite store)
