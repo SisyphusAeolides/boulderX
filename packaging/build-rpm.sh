@@ -1,31 +1,20 @@
 #!/usr/bin/env bash
-# Build boulder-relay RPM on Rocky Linux / RHEL 9 / 10.
+# Build an RPM for Boulder Relay on Fedora.
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-VERSION="$(grep '^version' "$ROOT/Cargo.toml" | head -1 | sed 's/.*"\(.*\)".*/\1/')"
-TARBALL="boulder-relay-${VERSION}.tar.gz"
-RPMBUILD="${RPMBUILD:-$HOME/rpmbuild}"
+VERSION=$(grep '^version' Cargo.toml | head -1 | sed 's/.*= *"//;s/"//')
+ARCHIVE="boulder-relay-${VERSION}.tar.gz"
+SPECFILE="packaging/boulder-relay.spec"
 
-echo "==> Building release binary (offline)..."
-cd "$ROOT"
-cargo build --release --offline
-
-echo "==> Preparing source tarball..."
-STAGING="$(mktemp -d)"
-trap 'rm -rf "$STAGING"' EXIT
-SRC_DIR="$STAGING/boulder-relay-$VERSION"
-mkdir -p "$SRC_DIR"
-tar -C "$ROOT" \
-    --exclude='./target' \
-    --exclude='./.git' \
-    --exclude='./*.tar.gz' \
-    -cf - . | tar -C "$SRC_DIR" -xf -
-
-mkdir -p "$RPMBUILD/SOURCES"
-tar -C "$STAGING" -czf "$RPMBUILD/SOURCES/$TARBALL" "boulder-relay-$VERSION"
-
-echo "==> Building RPM..."
-rpmbuild -ba "$ROOT/packaging/boulder-relay.spec"
-
-echo "==> Done. RPMs are in $RPMBUILD/RPMS/ and $RPMBUILD/SRPMS/"
+echo "==> Building boulder-relay v${VERSION} RPM"
+git archive --prefix="boulder-relay-${VERSION}/" HEAD | gzip > "/tmp/${ARCHIVE}"
+mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+cp "/tmp/${ARCHIVE}" ~/rpmbuild/SOURCES/
+cp "${SPECFILE}" ~/rpmbuild/SPECS/boulder-relay.spec
+echo "==> Installing build dependencies..."
+sudo dnf builddep -y ~/rpmbuild/SPECS/boulder-relay.spec || true
+echo "==> Running rpmbuild..."
+rpmbuild -ba ~/rpmbuild/SPECS/boulder-relay.spec
+echo ""
+echo "==> RPM built:"
+find ~/rpmbuild/RPMS -name "boulder-relay-*.rpm" -print

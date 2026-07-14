@@ -1,270 +1,88 @@
 use gtk::prelude::*;
-use gtk::{gdk, CssProvider, Settings, STYLE_PROVIDER_PRIORITY_USER};
+use relm4::gtk;
+use adw::prelude::*;
+use adw;
 
-pub const GRUVBOX_CSS: &str = r#"
-window.boulder-relay {
-    background-color: #282828;
-    color: #ebdbb2;
-    min-width: 800px;
-    min-height: 500px;
-}
+const CSS: &str = r#"
+/* Boulder Relay — Element X-inspired theme: Gruvbox dark + Sisyphus Blue */
 
-paned {
-    min-width: 50px;
-    min-height: 50px;
-}
+.boulder-relay { background-color: #1d2021; color: #ebdbb2; font-family: "Inter", "Cantarell", sans-serif; font-size: 14px; }
 
-paned > box.sidebar,
-paned > box.chat-panel {
-    min-width: 150px;
-}
+.sidebar { background-color: #282828; border-right: 1px solid #3c3836; min-width: 220px; }
+.sidebar-header { padding: 12px 12px 6px 12px; border-bottom: 1px solid #3c3836; }
+.app-title { font-size: 16px; font-weight: 700; color: #ebdbb2; letter-spacing: 0.02em; }
+.sidebar-section-header { font-size: 11px; font-weight: 700; color: #928374; text-transform: uppercase; letter-spacing: 0.08em; padding: 10px 10px 4px 10px; }
 
-box.sidebar,
-box.chat-panel {
-    min-width: 150px;
-    min-height: 100px;
-}
+.room-row { border-radius: 8px; margin: 1px 6px; padding: 4px 6px; transition: background 120ms ease; }
+.room-row:hover { background-color: #3c3836; }
+.room-row-active { background-color: #504945; border-left: 3px solid #458588; }
+.room-name { font-size: 14px; font-weight: 500; color: #ebdbb2; }
+.room-avatar { min-width: 32px; min-height: 32px; border-radius: 50%; background-color: #458588; color: #1d2021; font-weight: 700; font-size: 13px; padding: 2px; }
 
-headerbar.boulder-header {
-    background-color: #1d2021;
-    background-image: none;
-    color: #ebdbb2;
-    border-bottom: 1px solid #504945;
-    box-shadow: none;
-    min-height: 46px;
-}
+.protocol-badge { font-size: 9px; font-weight: 700; border-radius: 4px; padding: 1px 5px; letter-spacing: 0.05em; }
+.badge-irc { background-color: #d79921; color: #1d2021; }
+.badge-matrix { background-color: #689d6a; color: #1d2021; }
 
-headerbar.boulder-header label,
-headerbar.boulder-header .title {
-    color: #10B981;
-    font-family: monospace;
-    font-weight: bold;
-}
+.unread-badge { background-color: #cc241d; color: #fbf1c7; border-radius: 10px; font-size: 11px; font-weight: 700; min-width: 18px; padding: 0 5px; }
 
-headerbar.boulder-header windowcontrols button,
-headerbar.boulder-header button {
-    color: #ebdbb2;
-    background-color: transparent;
-    background-image: none;
-    border: none;
-    box-shadow: none;
-}
+.chat-panel { background-color: #1d2021; }
+.channel-header { background-color: #282828; border-bottom: 1px solid #3c3836; padding: 8px 16px; }
+.channel-title { font-size: 16px; font-weight: 600; color: #ebdbb2; }
+.channel-topic { font-size: 13px; color: #928374; font-style: italic; }
+.chat-view { background-color: #1d2021; color: #ebdbb2; font-family: "JetBrains Mono", "Fira Code", monospace; font-size: 13.5px; line-height: 1.55; }
 
-headerbar.boulder-header windowcontrols button:hover,
-headerbar.boulder-header button:hover {
-    background-color: #3c3836;
-}
+.composer { background-color: #282828; border-top: 1px solid #3c3836; padding: 8px 12px; }
+.composer-entry { background-color: #32302f; border: 1px solid #504945; border-radius: 20px; color: #ebdbb2; padding: 6px 14px; font-size: 14px; }
+.composer-entry:focus { border-color: #458588; box-shadow: 0 0 0 2px alpha(#458588, 0.25); }
+.composer-send { background-color: #458588; color: #1d2021; border-radius: 50%; min-width: 36px; min-height: 36px; font-size: 16px; font-weight: 700; padding: 0; }
+.composer-send:hover { background-color: #83a598; }
 
-.boulder-relay {
-    background-color: #282828;
-    color: #ebdbb2;
-}
+.users-panel { background-color: #282828; border-left: 1px solid #3c3836; min-width: 160px; }
+.user-btn { background: transparent; border: none; color: #ebdbb2; font-size: 13px; text-align: left; padding: 3px 6px; border-radius: 4px; }
+.user-btn:hover { background-color: #3c3836; }
+.muted-user { opacity: 0.4; text-decoration: line-through; }
+.mute-btn { background: transparent; border: none; font-size: 13px; padding: 2px 4px; border-radius: 4px; color: #928374; }
 
-.boulder-relay .sidebar {
-    background-color: #1d2021;
-    padding: 4px;
-}
+.status-connected { color: #b8bb26; font-size: 12px; font-weight: 600; }
+.status-connecting { color: #fabd2f; font-size: 12px; font-weight: 600; }
+.status-offline { color: #928374; font-size: 12px; }
 
-.boulder-relay .chat-panel {
-    background-color: #282828;
-}
+.fav-btn, .part-btn { background: transparent; border: none; color: #928374; font-size: 13px; padding: 1px 4px; border-radius: 4px; min-width: 0; }
+.fav-btn:hover { color: #fabd2f; }
+.part-btn:hover { color: #fb4934; }
 
-.boulder-relay label {
-    color: #ebdbb2;
-    font-family: monospace;
-}
+.suggested-action { background-color: #458588; color: #1d2021; border-radius: 6px; font-weight: 600; }
+.suggested-action:hover { background-color: #83a598; }
+.destructive-action { background-color: #cc241d; color: #fbf1c7; border-radius: 6px; font-weight: 600; }
+.destructive-action:hover { background-color: #fb4934; }
+.flat { background: transparent; border: none; color: #a89984; font-size: 13px; border-radius: 6px; padding: 4px 8px; }
+.flat:hover { background-color: #3c3836; color: #ebdbb2; }
 
-/* Sidebar title uses Sisyphus blue accent */
-.boulder-relay .sidebar-title {
-    font-weight: bold;
-    color: #3B82F6;
-}
+.dialog-title { font-size: 18px; font-weight: 700; color: #ebdbb2; margin-bottom: 8px; }
 
-.boulder-relay .sidebar-subtitle {
-    font-weight: bold;
-    color: #b8bb26;
-    font-size: 0.9em;
-}
-
-.boulder-relay .channel-section {
-    font-weight: bold;
-    color: #928374;
-    font-size: 0.85em;
-    letter-spacing: 0.04em;
-}
-
-.boulder-relay .channel-topic {
-    color: #928374;
-    font-size: 0.82em;
-    font-style: italic;
-}
-
-.boulder-relay .status-connected  { color: #b8bb26; }
-.boulder-relay .status-connecting { color: #fabd2f; }
-.boulder-relay .status-offline    { color: #928374; }
-
-.boulder-relay button {
-    background-color: #3c3836;
-    color: #b8bb26;
-    border: 1px solid #504945;
-    border-radius: 4px;
-    padding: 4px 8px;
-    font-family: monospace;
-}
-
-.boulder-relay button:hover        { background-color: #504945; }
-.boulder-relay button.destructive  { color: #fb4934; }
-
-.boulder-relay button.part-btn {
-    color: #928374;
-    padding: 4px 8px;
-    min-width: 0;
-}
-.boulder-relay button.part-btn:hover {
-    color: #fb4934;
-    background-color: #3c3836;
-}
-
-.boulder-relay entry {
-    background-color: #3c3836;
-    color: #ebdbb2;
-    border: 1px solid #504945;
-    border-radius: 4px;
-    padding: 4px 8px;
-    font-family: "Monospace", monospace;
-}
-.boulder-relay entry:focus { border: 1px solid #fe8019; }
-
-.boulder-relay scrolledwindow,
-.boulder-relay scrolledwindow viewport,
-.boulder-relay paned,
-.boulder-relay paned > separator {
-    background-color: #282828;
-}
-
-.boulder-relay paned separator {
-    background-color: #504945;
-    min-width: 2px;
-    min-height: 2px;
-}
-
-.boulder-relay separator {
-    background-color: #504945;
-    color: #504945;
-}
-
-.boulder-relay textview {
-    background-color: #282828;
-    color: #ebdbb2;
-    font-family: "Monospace", monospace;
-    font-size: 0.95em;
-    padding: 6px;
-}
-
-.boulder-relay textview text {
-    background-color: #282828;
-    color: #ebdbb2;
-}
-
-.boulder-relay .user-btn {
-    background-color: transparent;
-    color: #83a598;
-    border: none;
-    box-shadow: none;
-    padding: 4px 12px;
-    font-family: monospace;
-}
-.boulder-relay .user-btn:hover {
-    background-color: #3c3836;
-    color: #ebdbb2;
-}
-
-.boulder-relay .fav-btn {
-    background-color: transparent;
-    color: #fabd2f;
-    border: 1px solid transparent;
-    box-shadow: none;
-    padding: 4px 8px;
-    font-family: monospace;
-}
-.boulder-relay .fav-btn:hover {
-    background-color: #3c3836;
-    border: 1px solid #504945;
-    color: #fbf1c7;
-}
-
-.boulder-relay .mute-btn {
-    background-color: transparent;
-    color: #928374;
-    border: 1px solid transparent;
-    box-shadow: none;
-    padding: 4px 8px;
-    font-family: monospace;
-}
-.boulder-relay .mute-btn:hover {
-    background-color: #3c3836;
-    border: 1px solid #504945;
-    color: #ebdbb2;
-}
-
-.boulder-relay .muted-user {
-    color: #928374;
-    text-decoration: line-through;
-}
-
-.boulder-relay .unread-badge {
-    background-color: #fe8019;
-    color: #282828;
-    border-radius: 8px;
-    padding: 1px 5px;
-    font-size: 0.75em;
-    font-weight: bold;
-}
-
-.boulder-relay .mention-badge {
-    background-color: #fb4934;
-    color: #fbf1c7;
-    border-radius: 8px;
-    padding: 1px 5px;
-    font-size: 0.75em;
-    font-weight: bold;
-}
-
-@media (prefers-color-scheme: light) {
-    /* Reserved for future Gruvbox Light variant */
-}
+scrollbar slider { background-color: #504945; border-radius: 4px; min-width: 6px; min-height: 6px; }
+scrollbar slider:hover { background-color: #665c54; }
+scrollbar trough { background-color: transparent; }
 "#;
 
-pub fn apply_gtk_settings() {
-    if let Some(settings) = Settings::default() {
-        settings.set_gtk_application_prefer_dark_theme(true);
+pub fn load_css() {
+    let provider = gtk::CssProvider::new();
+    provider.load_from_data(CSS);
+    if let Some(display) = gtk::gdk::Display::default() {
+        gtk::style_context_add_provider_for_display(
+            &display, &provider,
+            gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
+        );
     }
 }
 
-pub fn load_css() {
-    apply_gtk_settings();
-    let provider = CssProvider::new();
-    provider.load_from_data(GRUVBOX_CSS);
-    let display =
-        gdk::Display::default().expect("GTK display must be initialized before loading CSS");
-    gtk::style_context_add_provider_for_display(&display, &provider, STYLE_PROVIDER_PRIORITY_USER);
-}
-
-pub fn build_titlebar() -> gtk::HeaderBar {
-    let header = gtk::HeaderBar::new();
-    header.add_css_class("boulder-header");
-    header.set_show_title_buttons(true);
-    header.set_decoration_layout(Some("close,minimize,maximize:"));
-    let title = gtk::Label::builder()
-        .label("Boulder Relay")
-        .css_classes(["title"])
-        .build();
-    header.set_title_widget(Some(&title));
-    header
+pub fn build_titlebar() -> adw::HeaderBar {
+    let bar = adw::HeaderBar::new();
+    bar.set_show_end_title_buttons(true);
+    bar.add_css_class("flat");
+    bar
 }
 
 pub fn attach_window(window: &gtk::Window) {
     window.add_css_class("boulder-relay");
-    window.set_title(Some("Boulder Relay"));
-    window.set_icon_name(Some("boulder-relay"));
 }
