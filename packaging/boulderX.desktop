@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=boulderX
+Comment=GTK4 IRC/Matrix client — Element X-style UI
+Exec=boulderX
+Icon=boulderX
+Terminal=false
+Type=Application
+Categories=Network;Chat;InstantMessaging;
+StartupWMClass=boulderX
+Keywords=IRC;Matrix;chat;messaging;

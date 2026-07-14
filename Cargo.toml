@@ -1,11 +1,11 @@
 [package]
-name = "boulder-relay"
+name = "boulderX"
 version = "0.6.0"
 edition = "2021"
 authors = ["SisyphusAeolides"]
 description = "A fast, clean GTK4 + libadwaita IRC/Matrix client written in Rust"
-homepage = "https://github.com/SisyphusAeolides/boulder-relay"
-repository = "https://github.com/SisyphusAeolides/boulder-relay"
+homepage = "https://github.com/SisyphusAeolides/boulderX"
+repository = "https://github.com/SisyphusAeolides/boulderX"
 license = "GPL-2.0-or-later"
 readme = "README.md"
 keywords = ["irc", "matrix", "chat", "gtk4", "libadwaita"]

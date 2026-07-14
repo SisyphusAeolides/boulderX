@@ -1,10 +1,10 @@
-# Boulder Relay
+# boulderX
 
 A fast, clean GTK4 + libadwaita IRC/Matrix client written in **100% Rust** using [relm4](https://relm4.org/).
 
 Named for the Sisyphus myth — the conversation you keep pushing uphill.
 
-**v0.6.0** — now with unified IRC + Matrix support, Element X-inspired UI, Gruvbox dark theme, and Sisyphus Blue accents.
+**v0.6.0** — unified IRC + Matrix support, Element X-inspired UI, Gruvbox dark theme, and Sisyphus Blue accents.
 
 ---
 
@@ -49,8 +49,8 @@ All joined channels, Matrix rooms, and favorites persist between sessions.
 ### Fedora (COPR)
 
 ```bash
-dnf copr enable SisyphusAeolides/boulder-relay
-dnf install boulder-relay
+dnf copr enable SisyphusAeolides/boulderX
+dnf install boulderX
 ```
 
 ### Fedora — From Source
@@ -65,7 +65,7 @@ Build and run:
 
 ```bash
 cargo build --release
-./target/release/boulder-relay
+./target/release/boulderX
 ```
 
 Or just:
@@ -123,9 +123,9 @@ src/
 
 ## Packaging Notes
 
-- Fedora RPM spec in `packaging/boulder-relay.spec`
+- Fedora RPM spec in `packaging/boulderX.spec`
 - COPR automation in `.copr/Makefile`
-- AppStream metainfo in `packaging/org.Sisyphus.BoulderRelay.metainfo.xml`
+- AppStream metainfo in `packaging/org.Sisyphus.BoulderX.metainfo.xml`
 - Icons at 128×128 and 256×256 in `assets/`
 - Requires: `gtk4`, `libadwaita`, `openssl-libs`, `sqlite-libs`
 - Offline vendored build supported (`cargo build --release --offline`)

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Create/update the boulder-relay COPR project and submit a build.
+# Create/update the boulderX COPR project and submit a build.
 #
 # Prerequisites:
 #   1. COPR API token from https://copr.fedorainfracloud.org/api/
@@ -18,10 +18,10 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OWNER="${COPR_OWNER:-sisyphuscode}"
-PROJECT="boulder-relay"
-PACKAGE="boulder-relay"
-CLONE_URL="https://github.com/SisyphusAeolides/boulder-relay.git"
-SPEC="packaging/boulder-relay.spec"
+PROJECT="boulderX"
+PACKAGE="boulderX"
+CLONE_URL="https://github.com/SisyphusAeolides/boulderX.git"
+SPEC="packaging/boulderX.spec"
 COMMITTISH="${COPR_COMMIT:-main}"
 DISABLE_OLD=false
 
@@ -44,7 +44,7 @@ for arg in "$@"; do
 done
 
 if ! command -v copr-cli >/dev/null 2>&1; then
-    echo "copr-cli not found. Install with: pip3 install copr-cli rich" >&2
+    echo "copr-cli not found. Install with: pip3 install copr-cli" >&2
     exit 1
 fi
 
@@ -77,12 +77,12 @@ if copr-cli list "${OWNER}" 2>/dev/null | grep -q "^Name: ${PROJECT}$"; then
     echo "==> Syncing chroots: ${COPR_CHROOTS[*]}"
     copr-cli modify "${PROJECT}" \
         "${CHROOT_ARGS[@]}" \
-        --description "GTK4 IRC client for Fedora, RHEL, and Rocky Linux on Libera.Chat"
+        --description "GTK4 IRC/Matrix client for Fedora — Element X-style UI"
 else
     echo "==> Creating COPR project ${OWNER}/${PROJECT}..."
     copr-cli create "${PROJECT}" \
         "${CHROOT_ARGS[@]}" \
-        --description "GTK4 IRC client for Fedora, RHEL, and Rocky Linux on Libera.Chat" \
+        --description "GTK4 IRC/Matrix client for Fedora — Element X-style UI" \
         --enable-net on
 fi
 
@@ -125,14 +125,14 @@ else
 fi
 
 if [[ "${DISABLE_OLD}" == true ]]; then
-    echo "==> Disabling old rawhide-relay project..."
-    copr-cli modify rawhide-relay \
-        --description "MOVED: use sisyphuscode/boulder-relay instead." \
+    echo "==> Disabling old boulder-relay project..."
+    copr-cli modify boulder-relay \
+        --description "MOVED: use sisyphuscode/boulderX instead." \
         2>/dev/null || true
 fi
 
 echo "==> Done."
 echo "    COPR:  https://copr.fedorainfracloud.org/coprs/${OWNER}/${PROJECT}/"
-echo "    Install on Rocky 9:"
+echo "    Install on Fedora:"
 echo "      sudo dnf copr enable ${OWNER}/${PROJECT}"
-echo "      sudo dnf install boulder-relay"
+echo "      sudo dnf install boulderX"
