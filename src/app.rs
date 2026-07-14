@@ -90,13 +90,21 @@ pub enum AppInput {
     AddServer(String),
     SwitchServer(String),
     OpenAccountManager,
+    OpenIrcLogin,
     OpenLogViewer,
     MarkChannelRead(String),
     Quit,
     SaveSettings,
     // ── Matrix ───────────────────────────────────────────────────────
     OpenMatrixLogin,
-    MatrixLogin { homeserver: String, username: String, password: String },
+    OpenMatrixJoin,
+    MatrixLogin {
+        homeserver: String,
+        username: String,
+        password: String,
+        remember: bool,
+    },
+    ClearMatrixAccount,
     MatrixConnected { user_id: String },
     MatrixRoomJoined { room_id: String, room_name: String },
     MatrixRoomLeft { room_id: String },
@@ -137,6 +145,7 @@ pub struct AppModel {
     pub auth_method: String,
     pub accounts: HashMap<String, crate::config::ServerAccount>,
     pub pending_register_email: Option<String>,
+    pub matrix_account: crate::config::MatrixAccount,
     // Matrix state
     pub matrix_client: Option<MatrixClient>,
     pub matrix_user_id: Option<String>,
@@ -179,6 +188,7 @@ impl AppModel {
             account_service: self.account_service.clone(),
             auth_method: self.auth_method.clone(),
             accounts: self.accounts.clone(),
+            matrix: self.matrix_account.clone(),
         };
         snapshot.accounts.insert(self.server.clone(), crate::config::ServerAccount {
             nick: self.nickname.clone(),
@@ -440,14 +450,20 @@ impl SimpleComponent for AppModel {
                             set_label: "IRC",
                             add_css_class: "badge-irc",
                             set_sensitive: model.connection == ConnectionState::Offline,
-                            set_tooltip_text: Some("Connect to IRC"),
-                            connect_clicked => AppInput::Connect,
+                            set_tooltip_text: Some("Log in / connect to IRC"),
+                            connect_clicked => AppInput::OpenIrcLogin,
                         },
                         gtk::Button {
                             set_label: "MX",
                             add_css_class: "badge-matrix",
                             set_tooltip_text: Some("Sign in to Matrix"),
                             connect_clicked => AppInput::OpenMatrixLogin,
+                        },
+                        gtk::Button {
+                            set_label: "Accounts",
+                            add_css_class: "flat",
+                            set_tooltip_text: Some("Manage IRC and Matrix accounts"),
+                            connect_clicked => AppInput::OpenAccountManager,
                         },
                     },
 
@@ -495,7 +511,7 @@ impl SimpleComponent for AppModel {
                         gtk::Button {
                             set_label: "Join Matrix Room…",
                             add_css_class: "flat",
-                            connect_clicked => AppInput::MatrixJoinRoom(String::new()),
+                            connect_clicked => AppInput::OpenMatrixJoin,
                         },
                         gtk::Button {
                             set_label: "View Logs",
@@ -700,6 +716,7 @@ impl SimpleComponent for AppModel {
             auth_method: if settings.auth_method.is_empty() { "nickserv".to_string() } else { settings.auth_method },
             accounts: settings.accounts,
             pending_register_email: None,
+            matrix_account: settings.matrix,
             matrix_client: None,
             matrix_user_id: None,
             matrix_rooms: RoomRegistry::new(),
@@ -837,7 +854,9 @@ impl SimpleComponent for AppModel {
             }
             AppInput::UpdateNickColorsEnabled(v) => { self.nick_colors_enabled = v; self.persist_settings(); }
             AppInput::UpdateTimestampFormat(f) => { self.timestamp_format = f; self.persist_settings(); }
-            AppInput::OpenRegisterDialog => {}
+            AppInput::OpenRegisterDialog => {
+                dialogs::show_register_dialog(&self.window, &sender, &self.nickname);
+            }
             AppInput::SubmitRegistration { nick, password, email } => {
                 self.nickname = nick.clone();
                 self.password = password.clone();
@@ -895,7 +914,29 @@ impl SimpleComponent for AppModel {
                     self.refresh_users(&sender);
                 }
             }
-            AppInput::OpenAccountManager => {}
+            AppInput::OpenAccountManager => {
+                dialogs::show_account_manager(
+                    &self.window,
+                    &sender,
+                    &self.server,
+                    &self.nickname,
+                    &self.password,
+                    &self.auth_method,
+                    &self.account_service,
+                    &self.matrix_account.homeserver,
+                    &self.matrix_account.username,
+                );
+            }
+            AppInput::OpenIrcLogin => {
+                dialogs::show_irc_login_dialog(
+                    &self.window,
+                    &sender,
+                    &self.server,
+                    &self.nickname,
+                    &self.password,
+                    &self.auth_method,
+                );
+            }
             AppInput::OpenLogViewer => {
                 let dialog = gtk::Window::builder()
                     .transient_for(&self.window).modal(true).title("Log Viewer")
@@ -1227,26 +1268,69 @@ impl SimpleComponent for AppModel {
             }
             // ── Matrix handlers ──────────────────────────────────────
             AppInput::OpenMatrixLogin => {
-                dialogs::show_matrix_login_dialog(&self.window, &sender);
+                dialogs::show_matrix_login_dialog(
+                    &self.window,
+                    &sender,
+                    &self.matrix_account.homeserver,
+                    &self.matrix_account.username,
+                );
             }
-            AppInput::MatrixLogin { homeserver, username, password } => {
-                self.append_message(SERVER_TAB, "System", &format!("Connecting to Matrix ({})…", homeserver), chat_view::LineStyle::System);
+            AppInput::OpenMatrixJoin => {
+                dialogs::show_matrix_join_dialog(&self.window, &sender);
+            }
+            AppInput::ClearMatrixAccount => {
+                self.matrix_account = crate::config::MatrixAccount::default();
+                self.persist_settings();
+                self.append_message(
+                    SERVER_TAB,
+                    "System",
+                    "Cleared saved Matrix account.",
+                    chat_view::LineStyle::System,
+                );
+            }
+            AppInput::MatrixLogin {
+                homeserver,
+                username,
+                password,
+                remember,
+            } => {
+                if remember {
+                    self.matrix_account = crate::config::MatrixAccount {
+                        homeserver: homeserver.clone(),
+                        username: username.clone(),
+                        password: password.clone(),
+                    };
+                    self.persist_settings();
+                }
+                self.append_message(
+                    SERVER_TAB,
+                    "System",
+                    &format!("Connecting to Matrix ({})…", homeserver),
+                    chat_view::LineStyle::System,
+                );
                 let s = sender.clone();
                 tokio::spawn(async move {
                     match MatrixClient::new(&homeserver).await {
                         Ok(client) => {
                             match client.login_password(&username, &password).await {
                                 Ok(()) => {
-                                    let user_id = client.user_id().map(|u| u.to_string()).unwrap_or_else(|| username.clone());
+                                    let user_id = client
+                                        .user_id()
+                                        .map(|u| u.to_string())
+                                        .unwrap_or_else(|| username.clone());
                                     let (tx, rx) = mpsc::unbounded_channel::<MatrixEvent>();
                                     bridge_matrix_events(rx, s.clone());
                                     client.start_sync(tx);
                                     s.input(AppInput::MatrixConnected { user_id });
                                 }
-                                Err(e) => s.input(AppInput::ReceiveServerMessage(format!("[Matrix Login Error]: {e}"))),
+                                Err(e) => s.input(AppInput::ReceiveServerMessage(format!(
+                                    "[Matrix Login Error]: {e}"
+                                ))),
                             }
                         }
-                        Err(e) => s.input(AppInput::ReceiveServerMessage(format!("[Matrix Error]: {e}"))),
+                        Err(e) => s.input(AppInput::ReceiveServerMessage(format!(
+                            "[Matrix Error]: {e}"
+                        ))),
                     }
                 });
             }

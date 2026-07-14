@@ -9,17 +9,62 @@ const CONFIG_FILE: &str = "settings.toml";
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ServerAccount {
     pub nick: String,
+    #[serde(default)]
     pub password: String,
+    #[serde(default = "default_service")]
     pub service: String,
+    #[serde(default = "default_auth")]
     pub auth_method: String,
 }
 
+fn default_service() -> String {
+    String::from("NickServ")
+}
+
+fn default_auth() -> String {
+    String::from("nickserv")
+}
+
 impl ServerAccount {
-    pub fn load_password(_server: &str, _nick: &str) -> String {
-        String::new()
+    /// Passwords live in settings.toml (mode 0600). Keyring hooks can replace these later.
+    pub fn load_password(server: &str, nick: &str) -> String {
+        let settings = Settings::load();
+        settings
+            .accounts
+            .get(server)
+            .filter(|a| a.nick == nick || nick.is_empty())
+            .map(|a| a.password.clone())
+            .unwrap_or_default()
     }
 
-    pub fn save_password(_server: &str, _nick: &str, _password: &str) {}
+    pub fn save_password(server: &str, nick: &str, password: &str) {
+        let mut settings = Settings::load();
+        let entry = settings
+            .accounts
+            .entry(server.to_string())
+            .or_insert_with(|| ServerAccount {
+                nick: nick.to_string(),
+                password: String::new(),
+                service: default_service(),
+                auth_method: default_auth(),
+            });
+        if !nick.is_empty() {
+            entry.nick = nick.to_string();
+        }
+        entry.password = password.to_string();
+        let _ = settings.save();
+    }
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MatrixAccount {
+    #[serde(default)]
+    pub homeserver: String,
+    #[serde(default)]
+    pub username: String,
+    /// Stored only when the user opts in; file mode is 0600.
+    #[serde(default)]
+    pub password: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -37,6 +82,8 @@ pub struct Settings {
     pub account_service: String,
     pub auth_method: String,
     pub accounts: HashMap<String, ServerAccount>,
+    #[serde(default)]
+    pub matrix: MatrixAccount,
 }
 
 impl Default for Settings {
@@ -55,6 +102,7 @@ impl Default for Settings {
             account_service: String::from("NickServ"),
             auth_method: String::from("nickserv"),
             accounts: HashMap::new(),
+            matrix: MatrixAccount::default(),
         }
     }
 }

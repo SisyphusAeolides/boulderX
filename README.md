@@ -34,13 +34,14 @@ Named for the Sisyphus myth — the conversation you keep pushing uphill.
 
 ## Quick Start
 
-1. Set your nick + optional NickServ password in the sidebar.
-2. Set server (default: `irc.libera.chat`).
-3. Click **IRC** to connect.
-4. Type `#channel` or nick in the join box and press Enter, or use `/join #chan`.
-5. Click **MX** to sign in to Matrix — enter your homeserver + credentials.
+1. Click **Accounts** (or **IRC**) and set nick + optional NickServ/SASL password + server.
+2. Click **Connect IRC** / **Connect** — TLS to port 6697 by default.
+3. Type `#channel` or nick in the join box and press Enter, or use `/join #chan`.
+4. Click **MX** (or Accounts → Matrix) to sign in — homeserver + credentials.
+5. Use **Register…** / **Verify…** in Accounts for NickServ registration flows.
 
-All joined channels, Matrix rooms, and favorites persist between sessions.
+All joined channels, Matrix rooms, favorites, and saved accounts persist between sessions
+(`~/.config/boulder-relay/settings.toml`, mode `0600`).
 
 ---
 
