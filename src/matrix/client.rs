@@ -8,7 +8,6 @@ use matrix_sdk::{
     },
 };
 use tokio::sync::mpsc;
-use crate::app::AppInput;
 
 #[derive(Debug, Clone)]
 pub enum MatrixEvent {

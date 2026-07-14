@@ -10,7 +10,7 @@ mod ui;
 use relm4::RelmApp;
 use relm4::gtk;
 use adw;
-use gtk4::prelude::ApplicationExt;
+use gtk::prelude::ApplicationExt;
 
 use app::AppModel;
 
