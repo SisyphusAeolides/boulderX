@@ -1,6 +1,6 @@
 Name:           boulderX
 Version:        0.6.2
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        GTK4 + libadwaita IRC/Matrix client in Rust — Element X-style UI
 
 License:        GPL-2.0-or-later
@@ -58,6 +58,9 @@ appstream-util validate-relax --nonet packaging/org.Sisyphus.BoulderX.metainfo.x
 %{_metainfodir}/org.Sisyphus.BoulderX.metainfo.xml
 
 %changelog
+* Wed Jul 15 2026 Kenny Glowner <sisyphuscode@fedoraproject.org> - 0.6.2-2
+- Fix COPR tarball: do not exclude vendor/**/target (broke cargo --offline)
+
 * Wed Jul 15 2026 Kenny Glowner <sisyphuscode@fedoraproject.org> - 0.6.2-1
 - Fix Matrix session: keep client for join/send; seed joined rooms on sync
 - Wire send button; welcome panel; prefs for notifications/background

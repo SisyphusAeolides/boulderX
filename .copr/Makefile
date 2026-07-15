@@ -5,11 +5,13 @@ TOPDIR   := $(shell pwd)
 
 .PHONY: srpm
 srpm:
-	# Create a clean source tarball from the current working tree (no git needed)
+	# Create a clean source tarball from the current working tree (no git needed).
+	# IMPORTANT: exclude only the Cargo build dir at repo root. A bare --exclude=target
+	# also drops vendor/**/src/target/** (e.g. cc crate) and breaks cargo --offline.
 	tar \
-	    --exclude='.git' \
-	    --exclude='.copr' \
-	    --exclude='target' \
+	    --exclude='./.git' \
+	    --exclude='./.copr' \
+	    --exclude='./target' \
 	    --transform "s|^\./|boulderX-$(VERSION)/|" \
 	    -czf $(outdir)/$(ARCHIVE) \
 	    -C $(TOPDIR) .
