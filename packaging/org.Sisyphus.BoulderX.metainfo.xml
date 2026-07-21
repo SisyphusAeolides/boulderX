@@ -20,7 +20,7 @@
   <releases>
     <release version="0.6.0" date="2026-07-14">
       <description>
-        <p>Rename to boulderX. Add Matrix support, Element X UI, Fedora/COPR packaging.</p>
+        <p>Rename to boulderX. Add Matrix support and an Element X-inspired UI.</p>
       </description>
     </release>
   </releases>

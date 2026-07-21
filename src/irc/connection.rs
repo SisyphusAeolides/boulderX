@@ -1,10 +1,10 @@
+use crate::app::AppModel;
+use crate::app::{AppInput, DEFAULT_PORT};
+use crate::channels;
 use base64::{engine::general_purpose::STANDARD as BASE64, Engine};
 use futures::prelude::*;
 use irc::client::prelude::*;
-use crate::channels;
-use crate::app::{AppInput, DEFAULT_PORT};
 use relm4::ComponentSender;
-use crate::app::AppModel;
 
 pub struct IrcConnection;
 
@@ -33,7 +33,11 @@ impl IrcConnection {
                     channels: vec![],
                     port: Some(port),
                     use_tls: Some(use_tls),
-                    nick_password: if needs_nickserv { Some(pwd.clone()) } else { None },
+                    nick_password: if needs_nickserv {
+                        Some(pwd.clone())
+                    } else {
+                        None
+                    },
                     ..Config::default()
                 };
                 let mut client = match Client::from_config(config).await {
@@ -80,13 +84,20 @@ impl IrcConnection {
                     let user = message.source_nickname().unwrap_or("Unknown").to_string();
                     match message.command {
                         Command::PRIVMSG(target, body) => {
-                            let display_target = if target == nickname { user.clone() } else { target };
-                            let (display_user, display_body) = if body.starts_with("\x01ACTION ") && body.ends_with('\x01') {
-                                let act = body.trim_start_matches("\x01ACTION ").trim_end_matches('\x01');
-                                (format!("* {}", user), act.to_string())
+                            let display_target = if target == nickname {
+                                user.clone()
                             } else {
-                                (user, body)
+                                target
                             };
+                            let (display_user, display_body) =
+                                if body.starts_with("\x01ACTION ") && body.ends_with('\x01') {
+                                    let act = body
+                                        .trim_start_matches("\x01ACTION ")
+                                        .trim_end_matches('\x01');
+                                    (format!("* {}", user), act.to_string())
+                                } else {
+                                    (user, body)
+                                };
                             sender.input(AppInput::ReceiveMessage {
                                 channel: display_target,
                                 user: display_user,
@@ -95,7 +106,10 @@ impl IrcConnection {
                             });
                         }
                         Command::JOIN(channel, _, _) => {
-                            sender.input(AppInput::UserJoined { channel: channel.clone(), user: user.clone() });
+                            sender.input(AppInput::UserJoined {
+                                channel: channel.clone(),
+                                user: user.clone(),
+                            });
                             sender.input(AppInput::ReceiveMessage {
                                 channel,
                                 user: "System".to_string(),
@@ -104,7 +118,10 @@ impl IrcConnection {
                             });
                         }
                         Command::PART(channel, _) => {
-                            sender.input(AppInput::UserLeft { channel: channel.clone(), user: user.clone() });
+                            sender.input(AppInput::UserLeft {
+                                channel: channel.clone(),
+                                user: user.clone(),
+                            });
                             sender.input(AppInput::ReceiveMessage {
                                 channel,
                                 user: "System".to_string(),
@@ -113,18 +130,24 @@ impl IrcConnection {
                             });
                         }
                         Command::NICK(new_nick) => {
-                            sender.input(AppInput::UserRenamed { old: user, new: new_nick });
+                            sender.input(AppInput::UserRenamed {
+                                old: user,
+                                new: new_nick,
+                            });
                         }
                         Command::QUIT(_) => {
                             sender.input(AppInput::UserQuit { user });
                         }
                         Command::NOTICE(_, body) => {
-                            sender.input(AppInput::ReceiveServerMessage(format!("[Notice]: {body}")));
+                            sender
+                                .input(AppInput::ReceiveServerMessage(format!("[Notice]: {body}")));
                             // NickServ wording varies by network — match common success phrases.
                             let identified = body.contains("You are now identified")
                                 || body.contains("Password accepted")
                                 || body.contains("you are now recognized")
-                                || body.to_ascii_lowercase().contains("successfully identified");
+                                || body
+                                    .to_ascii_lowercase()
+                                    .contains("successfully identified");
                             if needs_nickserv && !channels_joined && identified {
                                 channels_joined = true;
                                 join_channels(&irc_tx);
@@ -174,29 +197,52 @@ impl IrcConnection {
                                 }
                             }
                             if code == Response::RPL_NAMREPLY && args.len() >= 4 {
-                                let channel = args.iter().find(|a| channels::is_channel_target(a)).cloned().unwrap_or_else(|| args[2].clone());
-                                let users: Vec<String> = args.last().unwrap_or(&String::new()).split_whitespace().map(|s| s.to_string()).collect();
+                                let channel = args
+                                    .iter()
+                                    .find(|a| channels::is_channel_target(a))
+                                    .cloned()
+                                    .unwrap_or_else(|| args[2].clone());
+                                let users: Vec<String> = args
+                                    .last()
+                                    .unwrap_or(&String::new())
+                                    .split_whitespace()
+                                    .map(|s| s.to_string())
+                                    .collect();
                                 sender.input(AppInput::BatchAddUsers { channel, users });
                             } else if code == Response::RPL_LIST && args.len() >= 3 {
                                 let name = args.get(1).cloned().unwrap_or_default();
-                                let users: u32 = args.get(2).and_then(|s| s.parse().ok()).unwrap_or(0);
-                                let topic = if args.len() > 3 { args[3..].join(" ") } else { String::new() };
+                                let users: u32 =
+                                    args.get(2).and_then(|s| s.parse().ok()).unwrap_or(0);
+                                let topic = if args.len() > 3 {
+                                    args[3..].join(" ")
+                                } else {
+                                    String::new()
+                                };
                                 sender.input(AppInput::ChannelListEntry { name, users, topic });
                             } else if code == Response::RPL_LISTEND {
                                 sender.input(AppInput::ChannelListEnd);
                             } else if code == Response::RPL_TOPIC && args.len() >= 2 {
                                 let ch = args.get(1).cloned().unwrap_or_default();
-                                let topic = if args.len() > 2 { args[2..].join(" ") } else { String::new() };
+                                let topic = if args.len() > 2 {
+                                    args[2..].join(" ")
+                                } else {
+                                    String::new()
+                                };
                                 sender.input(AppInput::ChannelTopic { channel: ch, topic });
                             } else if args.len() > 1 {
-                                sender.input(AppInput::ReceiveServerMessage(format!("[{code:?}]: {}", args[1..].join(" "))));
+                                sender.input(AppInput::ReceiveServerMessage(format!(
+                                    "[{code:?}]: {}",
+                                    args[1..].join(" ")
+                                )));
                             }
                         }
                         _ => {}
                     }
                 }
                 sender.input(AppInput::NetworkStatus(String::from("Disconnected")));
-                sender.input(AppInput::ReceiveServerMessage(String::from("[System]: Connection closed.")));
+                sender.input(AppInput::ReceiveServerMessage(String::from(
+                    "[System]: Connection closed.",
+                )));
             });
         });
     }

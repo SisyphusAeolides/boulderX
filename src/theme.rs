@@ -1,7 +1,7 @@
+use adw;
+use adw::prelude::*;
 use gtk::prelude::*;
 use relm4::gtk;
-use adw::prelude::*;
-use adw;
 
 const CSS: &str = r#"
 /* boulderX — Element X-inspired theme: Gruvbox dark + Sisyphus Blue */
@@ -75,7 +75,8 @@ pub fn load_css() {
     provider.load_from_data(CSS);
     if let Some(display) = gtk::gdk::Display::default() {
         gtk::style_context_add_provider_for_display(
-            &display, &provider,
+            &display,
+            &provider,
             gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
         );
     }

@@ -1,6 +1,7 @@
 mod app;
 mod channels;
 mod config;
+mod discord;
 mod irc;
 mod matrix;
 mod notify;
@@ -8,10 +9,10 @@ mod runtime;
 mod theme;
 mod ui;
 
-use relm4::RelmApp;
-use relm4::gtk;
 use adw;
 use gtk::prelude::ApplicationExt;
+use relm4::gtk;
+use relm4::RelmApp;
 
 use app::AppModel;
 

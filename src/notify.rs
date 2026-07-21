@@ -39,12 +39,7 @@ pub enum NotifyKind {
     Activity,
 }
 
-pub fn send_message_notification(
-    channel: &str,
-    user: &str,
-    body: &str,
-    kind: NotifyKind,
-) {
+pub fn send_message_notification(channel: &str, user: &str, body: &str, kind: NotifyKind) {
     let preview = truncate_preview(body, 180);
 
     let title = match kind {
@@ -60,15 +55,16 @@ pub fn send_message_notification(
 
     // Priority: urgent for DM/mention, normal otherwise
     notification.set_priority(match kind {
-        NotifyKind::DirectMessage | NotifyKind::Mention => {
-            gtk::gio::NotificationPriority::High
-        }
+        NotifyKind::DirectMessage | NotifyKind::Mention => gtk::gio::NotificationPriority::High,
         NotifyKind::Activity => gtk::gio::NotificationPriority::Normal,
     });
 
     let id = format!(
         "boulderX-{}-{}",
-        channel.chars().filter(|c| c.is_alphanumeric()).collect::<String>(),
+        channel
+            .chars()
+            .filter(|c| c.is_alphanumeric())
+            .collect::<String>(),
         std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .map(|d| d.as_nanos())

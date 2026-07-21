@@ -1,8 +1,8 @@
-use tokio::sync::mpsc;
-use relm4::ComponentSender;
+use super::client::MatrixEvent;
 use crate::app::{AppInput, AppModel, Protocol};
 use crate::runtime;
-use super::client::MatrixEvent;
+use relm4::ComponentSender;
+use tokio::sync::mpsc;
 
 pub fn bridge_matrix_events(
     mut rx: mpsc::UnboundedReceiver<MatrixEvent>,
@@ -15,7 +15,12 @@ pub fn bridge_matrix_events(
                 MatrixEvent::Connected { user_id } => {
                     sender.input(AppInput::MatrixConnected { user_id });
                 }
-                MatrixEvent::RoomMessage { room_id, room_name, sender: msg_sender, body } => {
+                MatrixEvent::RoomMessage {
+                    room_id,
+                    room_name,
+                    sender: msg_sender,
+                    body,
+                } => {
                     sender.input(AppInput::ReceiveMessage {
                         channel: room_name,
                         user: msg_sender,
@@ -30,10 +35,14 @@ pub fn bridge_matrix_events(
                     sender.input(AppInput::MatrixRoomLeft { room_id });
                 }
                 MatrixEvent::SyncError(e) => {
-                    sender.input(AppInput::ReceiveServerMessage(format!("[Matrix Error]: {e}")));
+                    sender.input(AppInput::ReceiveServerMessage(format!(
+                        "[Matrix Error]: {e}"
+                    )));
                 }
                 MatrixEvent::Disconnected => {
-                    sender.input(AppInput::ReceiveServerMessage("[Matrix]: Disconnected.".to_string()));
+                    sender.input(AppInput::ReceiveServerMessage(
+                        "[Matrix]: Disconnected.".to_string(),
+                    ));
                 }
             }
         }

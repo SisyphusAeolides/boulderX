@@ -84,8 +84,11 @@ mod tests {
     #[test]
     fn normalizes_join_command_targets() {
         assert_eq!(parse_join_command("gentoo"), Some("#gentoo".into()));
-        assert_eq!(parse_join_command("#fedora"), Some("#fedora".into()));
-        assert_eq!(parse_join_command("##unofficial"), Some("##unofficial".into()));
+        assert_eq!(parse_join_command("#archlinux"), Some("#archlinux".into()));
+        assert_eq!(
+            parse_join_command("##unofficial"),
+            Some("##unofficial".into())
+        );
         assert_eq!(parse_join_command("&local"), Some("&local".into()));
         assert_eq!(parse_join_command("!service"), Some("!service".into()));
     }

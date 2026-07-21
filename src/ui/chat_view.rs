@@ -2,8 +2,7 @@ use gtk::prelude::*;
 use relm4::gtk;
 
 pub const NICK_COLORS: [&str; 8] = [
-    "#fabd2f", "#b8bb26", "#83a598", "#d3869b",
-    "#fe8019", "#8ec07c", "#fb4934", "#d79921",
+    "#fabd2f", "#b8bb26", "#83a598", "#d3869b", "#fe8019", "#8ec07c", "#fb4934", "#d79921",
 ];
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -16,7 +15,9 @@ pub enum LineStyle {
 
 pub fn nick_color_index(nick: &str) -> usize {
     let clean = nick.trim_start_matches(['@', '+', '%', '~', '&']);
-    let hash = clean.bytes().fold(0u32, |h, b| h.wrapping_mul(31).wrapping_add(b as u32));
+    let hash = clean
+        .bytes()
+        .fold(0u32, |h, b| h.wrapping_mul(31).wrapping_add(b as u32));
     (hash as usize) % NICK_COLORS.len()
 }
 
@@ -33,7 +34,9 @@ pub fn setup_tags(view: &gtk::TextView) {
     ] {
         let tag = gtk::TextTag::new(Some(name));
         tag.set_foreground(Some(fg));
-        if let Some(b) = bg { tag.set_background(Some(b)); }
+        if let Some(b) = bg {
+            tag.set_background(Some(b));
+        }
         table.add(&tag);
     }
     for (i, &color) in NICK_COLORS.iter().enumerate() {

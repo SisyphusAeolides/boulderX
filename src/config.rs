@@ -67,6 +67,21 @@ pub struct MatrixAccount {
     pub password: String,
 }
 
+#[derive(Clone, Default, Serialize, Deserialize)]
+pub struct DiscordAccount {
+    /// Bot token only. Stored in settings.toml, whose mode is kept at 0600.
+    #[serde(default)]
+    pub bot_token: String,
+}
+
+impl std::fmt::Debug for DiscordAccount {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("DiscordAccount")
+            .field("bot_token", &"[redacted]")
+            .finish()
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Settings {
     pub nickname: String,
@@ -91,6 +106,8 @@ pub struct Settings {
     pub accounts: HashMap<String, ServerAccount>,
     #[serde(default)]
     pub matrix: MatrixAccount,
+    #[serde(default)]
+    pub discord: DiscordAccount,
 }
 
 fn default_irc_port() -> u16 {
@@ -120,6 +137,7 @@ impl Default for Settings {
             auth_method: String::from("nickserv"),
             accounts: HashMap::new(),
             matrix: MatrixAccount::default(),
+            discord: DiscordAccount::default(),
         }
     }
 }
@@ -203,7 +221,10 @@ mod tests {
     fn config_path_uses_xdg_config_home() {
         // Structural: path ends with boulder-relay/settings.toml
         let p = config_path();
-        assert!(p.ends_with("boulder-relay/settings.toml") || p.ends_with("boulder-relay\\settings.toml"));
+        assert!(
+            p.ends_with("boulder-relay/settings.toml")
+                || p.ends_with("boulder-relay\\settings.toml")
+        );
     }
 
     #[test]
@@ -225,5 +246,19 @@ auth_method = "nickserv"
         let s: Settings = toml::from_str(toml).unwrap();
         assert_eq!(s.irc_port, 6697);
         assert!(s.irc_use_tls);
+    }
+
+    #[test]
+    fn discord_bot_token_round_trips_without_debug_exposure() {
+        let settings = Settings {
+            discord: DiscordAccount {
+                bot_token: "bot-token".to_string(),
+            },
+            ..Settings::default()
+        };
+        let serialized = toml::to_string_pretty(&settings).unwrap();
+        let parsed: Settings = toml::from_str(&serialized).unwrap();
+        assert_eq!(parsed.discord.bot_token, "bot-token");
+        assert!(!format!("{:?}", parsed.discord).contains("bot-token"));
     }
 }

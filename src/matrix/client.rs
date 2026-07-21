@@ -1,21 +1,33 @@
 use matrix_sdk::{
-    Client,
     config::SyncSettings,
     room::Room,
     ruma::{
-        events::room::message::{RoomMessageEventContent, MessageType, SyncRoomMessageEvent},
+        events::room::message::{MessageType, RoomMessageEventContent, SyncRoomMessageEvent},
         OwnedRoomId, OwnedUserId,
     },
+    Client,
 };
 use std::path::PathBuf;
 use tokio::sync::mpsc;
 
 #[derive(Debug, Clone)]
 pub enum MatrixEvent {
-    Connected { user_id: String },
-    RoomMessage { room_id: String, room_name: String, sender: String, body: String },
-    RoomJoined { room_id: String, room_name: String },
-    RoomLeft { room_id: String },
+    Connected {
+        user_id: String,
+    },
+    RoomMessage {
+        room_id: String,
+        room_name: String,
+        sender: String,
+        body: String,
+    },
+    RoomJoined {
+        room_id: String,
+        room_name: String,
+    },
+    RoomLeft {
+        room_id: String,
+    },
     SyncError(String),
     Disconnected,
 }
@@ -59,10 +71,7 @@ impl MatrixClient {
     }
 
     pub async fn login_token(&self, token: &str) -> anyhow::Result<()> {
-        self.inner
-            .matrix_auth()
-            .login_token(token)
-            .await?;
+        self.inner.matrix_auth().login_token(token).await?;
         Ok(())
     }
 

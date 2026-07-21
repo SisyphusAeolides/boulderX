@@ -3,12 +3,12 @@ name = "boulderX"
 version = "0.6.2"
 edition = "2021"
 authors = ["SisyphusAeolides"]
-description = "A fast, clean GTK4 + libadwaita IRC/Matrix client written in Rust"
+description = "A fast GTK4 + libadwaita IRC, Matrix, and Discord bot client written in Rust"
 homepage = "https://github.com/SisyphusAeolides/boulderX"
 repository = "https://github.com/SisyphusAeolides/boulderX"
 license = "GPL-2.0-or-later"
 readme = "README.md"
-keywords = ["irc", "matrix", "chat", "gtk4", "libadwaita"]
+keywords = ["irc", "matrix", "discord", "chat", "gtk4"]
 categories = ["network-programming", "gui"]
 
 [dependencies]
@@ -24,6 +24,10 @@ toml = "1.1"
 matrix-sdk = { version = "0.10", features = ["e2e-encryption", "sqlite"] }
 uuid = { version = "1", features = ["v4"] }
 anyhow = "1"
+serenity = { version = "0.12.5", default-features = false, features = ["client", "gateway", "model", "rustls_backend"] }
+
+[patch.crates-io]
+serenity = { path = "vendor/serenity-0.12.5" }
 
 [profile.release]
 opt-level = 3

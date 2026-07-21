@@ -3,22 +3,45 @@
 /// A parsed slash command (or plain chat text).
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SlashCommand {
-    Join { channels: Vec<String> },
-    Part { target: Option<String> },
-    Msg { target: String, body: String },
-    Nick { nick: String },
-    Me { action: String },
-    Whois { nick: String },
-    Away { message: String },
+    Join {
+        channels: Vec<String>,
+    },
+    Part {
+        target: Option<String>,
+    },
+    Msg {
+        target: String,
+        body: String,
+    },
+    Nick {
+        nick: String,
+    },
+    Me {
+        action: String,
+    },
+    Whois {
+        nick: String,
+    },
+    Away {
+        message: String,
+    },
     Back,
-    Topic { text: Option<String> },
-    Ignore { nick: String },
-    Unignore { nick: String },
+    Topic {
+        text: Option<String>,
+    },
+    Ignore {
+        nick: String,
+    },
+    Unignore {
+        nick: String,
+    },
     Clear,
     List,
     Help,
     /// Unknown command name (without leading slash).
-    Unknown { name: String },
+    Unknown {
+        name: String,
+    },
     /// Not a slash command — send as plain message body.
     Plain(String),
 }

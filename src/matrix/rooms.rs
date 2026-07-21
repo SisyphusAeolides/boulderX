@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use matrix_sdk::ruma::OwnedRoomId;
+use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
 pub struct MatrixRoom {
@@ -22,7 +22,11 @@ impl RoomRegistry {
     pub fn insert(&mut self, room_id: String, name: String) {
         if let Ok(id) = room_id.parse::<OwnedRoomId>() {
             // Preserve unread if re-inserting after sync seed.
-            let unread = self.rooms.get(&room_id).map(|r| r.unread_count).unwrap_or(0);
+            let unread = self
+                .rooms
+                .get(&room_id)
+                .map(|r| r.unread_count)
+                .unwrap_or(0);
             self.rooms.insert(
                 room_id,
                 MatrixRoom {

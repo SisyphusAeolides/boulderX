@@ -6,6 +6,77 @@ use relm4::RelmWidgetExt;
 
 use crate::app::{AppInput, AppModel};
 
+/// Discord bot-only login form. Discord user tokens and selfbots are not supported.
+pub fn show_discord_login_dialog(
+    parent: &gtk::Window,
+    sender: &ComponentSender<AppModel>,
+    bot_token: &str,
+) {
+    let dialog = gtk::Window::builder()
+        .transient_for(parent)
+        .modal(true)
+        .title("Connect Discord Bot")
+        .default_width(440)
+        .default_height(250)
+        .build();
+    dialog.add_css_class("boulder-relay");
+    let vbox = gtk::Box::new(gtk::Orientation::Vertical, 10);
+    vbox.set_margin_all(18);
+    vbox.append(
+        &gtk::Label::builder()
+            .label("Connect an authorized Discord bot")
+            .halign(gtk::Align::Start)
+            .css_classes(["dialog-title"])
+            .build(),
+    );
+    vbox.append(&gtk::Label::builder()
+        .label("Use a bot token from the Discord Developer Portal. Discord user tokens and selfbots are not supported.")
+        .wrap(true).halign(gtk::Align::Start).build());
+    let token_entry = gtk::Entry::builder()
+        .placeholder_text("Bot token")
+        .text(bot_token)
+        .visibility(false)
+        .build();
+    vbox.append(&gtk::Label::new(Some("Bot token:")));
+    vbox.append(&token_entry);
+    let remember = gtk::CheckButton::builder()
+        .label("Remember on this device")
+        .active(true)
+        .build();
+    vbox.append(&remember);
+    let status = gtk::Label::builder().halign(gtk::Align::Start).build();
+    vbox.append(&status);
+    let buttons = gtk::Box::new(gtk::Orientation::Horizontal, 8);
+    buttons.set_halign(gtk::Align::End);
+    let cancel = gtk::Button::with_label("Cancel");
+    let close = dialog.clone();
+    cancel.connect_clicked(move |_| close.close());
+    buttons.append(&cancel);
+    let connect = gtk::Button::with_label("Connect");
+    connect.add_css_class("suggested-action");
+    let s = sender.clone();
+    let close = dialog.clone();
+    let entry = token_entry.clone();
+    let remember_box = remember.clone();
+    let status_label = status.clone();
+    connect.connect_clicked(move |_| {
+        let bot_token = entry.text().trim().to_string();
+        if bot_token.is_empty() {
+            status_label.set_label("A bot token is required.");
+            return;
+        }
+        s.input(AppInput::DiscordLogin {
+            bot_token,
+            remember: remember_box.is_active(),
+        });
+        close.close();
+    });
+    buttons.append(&connect);
+    vbox.append(&buttons);
+    dialog.set_child(Some(&vbox));
+    dialog.present();
+}
+
 pub fn show_matrix_login_dialog(
     parent: &gtk::Window,
     sender: &ComponentSender<AppModel>,
@@ -199,7 +270,8 @@ pub fn show_irc_login_dialog(
 
     let auth_row = gtk::Box::new(gtk::Orientation::Horizontal, 8);
     auth_row.append(&gtk::Label::new(Some("Auth:")));
-    let auth_combo = gtk::DropDown::from_strings(&["nickserv", "sasl_plain", "sasl_external", "none"]);
+    let auth_combo =
+        gtk::DropDown::from_strings(&["nickserv", "sasl_plain", "sasl_external", "none"]);
     let auth_idx = match auth_method {
         "sasl_plain" => 1_u32,
         "sasl_external" => 2,
@@ -281,7 +353,10 @@ pub fn show_register_dialog(parent: &gtk::Window, sender: &ComponentSender<AppMo
     let nick_entry = gtk::Entry::builder().text(nick).build();
     vbox.append(&gtk::Label::new(Some("Nickname:")));
     vbox.append(&nick_entry);
-    let pass_entry = gtk::Entry::builder().visibility(false).placeholder_text("Password").build();
+    let pass_entry = gtk::Entry::builder()
+        .visibility(false)
+        .placeholder_text("Password")
+        .build();
     vbox.append(&gtk::Label::new(Some("Password:")));
     vbox.append(&pass_entry);
     let email_entry = gtk::Entry::builder()
@@ -379,6 +454,7 @@ pub fn show_account_manager(
     account_service: &str,
     matrix_homeserver: &str,
     matrix_user: &str,
+    discord_bot_token: &str,
 ) {
     let dialog = gtk::Window::builder()
         .transient_for(parent)
@@ -402,11 +478,13 @@ pub fn show_account_manager(
     // ── IRC page ──
     let irc_page = gtk::Box::new(gtk::Orientation::Vertical, 10);
     irc_page.set_margin_all(16);
-    irc_page.append(&gtk::Label::builder()
-        .label("IRC account (per-server)")
-        .halign(gtk::Align::Start)
-        .css_classes(["dialog-title"])
-        .build());
+    irc_page.append(
+        &gtk::Label::builder()
+            .label("IRC account (per-server)")
+            .halign(gtk::Align::Start)
+            .css_classes(["dialog-title"])
+            .build(),
+    );
 
     let srv_entry = gtk::Entry::builder().text(irc_server).build();
     irc_page.append(&gtk::Label::new(Some("Server:")));
@@ -425,10 +503,13 @@ pub fn show_account_manager(
     irc_page.append(&pass_entry);
 
     let svc_entry = gtk::Entry::builder().text(account_service).build();
-    irc_page.append(&gtk::Label::new(Some("Services bot (NickServ / AuthServ):")));
+    irc_page.append(&gtk::Label::new(Some(
+        "Services bot (NickServ / AuthServ):",
+    )));
     irc_page.append(&svc_entry);
 
-    let auth_combo = gtk::DropDown::from_strings(&["nickserv", "sasl_plain", "sasl_external", "none"]);
+    let auth_combo =
+        gtk::DropDown::from_strings(&["nickserv", "sasl_plain", "sasl_external", "none"]);
     auth_combo.set_selected(match irc_auth {
         "sasl_plain" => 1,
         "sasl_external" => 2,
@@ -459,7 +540,9 @@ pub fn show_account_manager(
         s.input(AppInput::UpdateServer(se.text().trim().to_string()));
         s.input(AppInput::UpdateNickname(ne.text().trim().to_string()));
         s.input(AppInput::UpdatePassword(pe.text().to_string()));
-        s.input(AppInput::UpdateAccountService(sve.text().trim().to_string()));
+        s.input(AppInput::UpdateAccountService(
+            sve.text().trim().to_string(),
+        ));
         s.input(AppInput::UpdateAuthMethod(auth));
         s.input(AppInput::SaveSettings);
     });
@@ -513,11 +596,13 @@ pub fn show_account_manager(
     // ── Matrix page ──
     let mx_page = gtk::Box::new(gtk::Orientation::Vertical, 10);
     mx_page.set_margin_all(16);
-    mx_page.append(&gtk::Label::builder()
-        .label("Matrix account")
-        .halign(gtk::Align::Start)
-        .css_classes(["dialog-title"])
-        .build());
+    mx_page.append(
+        &gtk::Label::builder()
+            .label("Matrix account")
+            .halign(gtk::Align::Start)
+            .css_classes(["dialog-title"])
+            .build(),
+    );
 
     let mx_hs = gtk::Entry::builder()
         .text(if matrix_homeserver.is_empty() {
@@ -577,6 +662,51 @@ pub fn show_account_manager(
     mx_btns.append(&sign_mx);
     mx_page.append(&mx_btns);
     stack.add_titled(&mx_page, Some("matrix"), "Matrix");
+
+    // ── Discord page ──
+    let discord_page = gtk::Box::new(gtk::Orientation::Vertical, 10);
+    discord_page.set_margin_all(16);
+    discord_page.append(
+        &gtk::Label::builder()
+            .label("Discord bot account")
+            .halign(gtk::Align::Start)
+            .css_classes(["dialog-title"])
+            .build(),
+    );
+    discord_page.append(&gtk::Label::builder()
+        .label("Only authorized Discord bot tokens are supported. User tokens and selfbots are not supported.")
+        .halign(gtk::Align::Start).wrap(true).build());
+    let discord_token = gtk::Entry::builder()
+        .text(discord_bot_token)
+        .visibility(false)
+        .placeholder_text("Bot token")
+        .build();
+    discord_page.append(&gtk::Label::new(Some("Bot token:")));
+    discord_page.append(&discord_token);
+    let discord_btns = gtk::Box::new(gtk::Orientation::Horizontal, 8);
+    discord_btns.set_halign(gtk::Align::End);
+    let clear_discord = gtk::Button::with_label("Clear saved");
+    let s_clear_discord = sender.clone();
+    clear_discord.connect_clicked(move |_| s_clear_discord.input(AppInput::ClearDiscordAccount));
+    discord_btns.append(&clear_discord);
+    let connect_discord = gtk::Button::with_label("Connect Discord");
+    connect_discord.add_css_class("suggested-action");
+    let s_discord = sender.clone();
+    let d_discord = dialog.clone();
+    let token = discord_token.clone();
+    connect_discord.connect_clicked(move |_| {
+        let bot_token = token.text().trim().to_string();
+        if !bot_token.is_empty() {
+            s_discord.input(AppInput::DiscordLogin {
+                bot_token,
+                remember: true,
+            });
+            d_discord.close();
+        }
+    });
+    discord_btns.append(&connect_discord);
+    discord_page.append(&discord_btns);
+    stack.add_titled(&discord_page, Some("discord"), "Discord");
 
     outer.append(&stack);
 

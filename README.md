@@ -1,6 +1,6 @@
 # boulderX
 
-GTK4 + libadwaita IRC/Matrix client in Rust (relm4).
+GTK4 + libadwaita IRC, Matrix, and Discord bot client in Rust (relm4).
 
 **v0.6.2** — dual protocol sidebar, slash commands, Gruvbox theme, Sisyphus Blue accents.
 
@@ -16,17 +16,19 @@ GTK4 + libadwaita IRC/Matrix client in Rust (relm4).
 | Matrix store | Yes — `~/.local/share/boulderX/matrix` (XDG data, not CWD) |
 | Matrix unread badges | Yes — room registry unread counters |
 | Matrix leave | Best-effort server leave + local remove |
+| Discord bot | Guild text channels, DMs, send/receive, and clean disconnect |
 | Multi-server concurrent IRC | **Deferred** — maps exist; no full UI switcher yet |
 | SASL EXTERNAL (client cert) | **Deferred** — PLAIN/NickServ work; EXTERNAL needs cert wiring |
 | SSO Matrix login UI | **Deferred** — password login only |
 
-Not a full Element/HexChat clone. No voice, no full IRCv3 cap suite, no CI against public homeservers as a hard gate.
+Not a full Element/HexChat/Discord client clone. Discord support uses authorized bot
+accounts only; user tokens and selfbots are not supported.
 
 ## Quick start
 
 ```bash
-# Fedora deps
-sudo dnf install rust cargo gtk4-devel libadwaita-devel openssl-devel
+# Arch Linux dependencies
+sudo pacman -S --needed base-devel rust cargo gtk4 libadwaita openssl sqlite
 
 cargo build --release
 ./target/release/boulderX
@@ -37,6 +39,8 @@ cargo build --release
 2. **Connect** — TLS on port 6697 by default (`irc_port` / `irc_use_tls` in settings.toml).
 3. Join with the join box or `/join #channel`.
 4. **MX** — homeserver + user/password for Matrix.
+5. **Discord** — connect an authorized bot token from the Accounts dialog. Enable
+   the Message Content intent for the bot in the Discord Developer Portal.
 
 ## Build / test
 
@@ -62,12 +66,13 @@ src/
     sync.rs        — MatrixEvent → AppInput bridge
   config.rs        — TOML load/save
   channels.rs      — channel/DM join helpers
+  discord/         — bot gateway, channel/DM discovery, message bridge
   ui/              — sidebar, chat view, dialogs, composer helpers
 ```
 
 ## Packaging
 
-- RPM: `packaging/boulderX.spec`, `packaging/build-rpm.sh`
+- Arch PKGBUILD: https://github.com/SisyphusAeolides/arch-pkgbuilds/tree/main/boulderx
 - Desktop + AppStream under `packaging/`
 - Icons in `assets/`
 
