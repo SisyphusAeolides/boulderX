@@ -1,7 +1,7 @@
 use gtk::gio::{Notification, ThemedIcon};
 use gtk::prelude::ApplicationExt;
 
-pub const APP_ID: &str = "org.Sisyphus.BoulderX";
+pub const APP_ID: &str = "io.github.sisyphusaeolides.boulderx";
 
 pub fn setup_application_icon() {
     gtk::Window::set_default_icon_name("boulderX");

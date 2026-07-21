@@ -1,22 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>org.Sisyphus.BoulderX</id>
+  <id>io.github.sisyphusaeolides.boulderx</id>
   <name>boulderX</name>
-  <summary>GTK4 + libadwaita IRC/Matrix client in Rust</summary>
+  <summary>GTK4 IRC, Matrix, and Discord bot client in Rust</summary>
+  <developer_name>SisyphusAeolides</developer_name>
   <metadata_license>MIT</metadata_license>
   <project_license>GPL-2.0-or-later</project_license>
   <description>
     <p>
-      boulderX is a fast, clean GTK4 + libadwaita IRC/Matrix client written
+      boulderX is a fast GTK4 + libadwaita IRC, Matrix, and Discord bot client written
       in 100% Rust using relm4. Features an Element X-inspired UI with a
       unified sidebar, bubble chat, per-nickname coloring, multi-server IRC
-      with SASL/NickServ auth, Matrix E2E encryption, channel discovery,
+      with SASL/NickServ auth, Matrix E2E encryption, Discord bot support, channel discovery,
       log viewer, desktop notifications, and persistent TOML settings.
     </p>
   </description>
   <url type="homepage">https://github.com/SisyphusAeolides/boulderX</url>
   <url type="bugtracker">https://github.com/SisyphusAeolides/boulderX/issues</url>
-  <launchable type="desktop-id">boulderX.desktop</launchable>
+  <launchable type="desktop-id">io.github.sisyphusaeolides.boulderx.desktop</launchable>
   <releases>
     <release version="0.6.0" date="2026-07-14">
       <description>

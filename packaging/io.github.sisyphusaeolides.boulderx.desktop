@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=boulderX
+Comment=GTK4 IRC, Matrix, and Discord bot client
+Exec=boulderX
+Icon=boulderX
+Terminal=false
+Type=Application
+Categories=Network;Chat;InstantMessaging;
+StartupWMClass=io.github.sisyphusaeolides.boulderx
+Keywords=IRC;Matrix;Discord;chat;messaging;
